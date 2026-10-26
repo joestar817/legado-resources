@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "0c936c0cdc722a589284a556d14f222ef672234c",
+  "sourceCommit": "cc2b82e5f0f1a2ab78f2da0f59fecbe4ae2ee2f4",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
-      "versionCode": 1,
-      "fingerprint": "ec83fdde5f4c7a34d94a8d4deca6cdb2dc9589942ba39acf757d8a8db5d4178d",
+      "versionCode": 2,
+      "fingerprint": "b9a855e4fcb90d788a58c82acba927c8b24c8c3817d033b0d68d6a8cb6d78e95",
       "active": true
     },
     "font.example.noto-sans": {

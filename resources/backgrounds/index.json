@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "0c936c0cdc722a589284a556d14f222ef672234c",
+  "sourceCommit": "cc2b82e5f0f1a2ab78f2da0f59fecbe4ae2ee2f4",
   "type": "background",
   "resources": [
     {
@@ -8,20 +8,21 @@
       "name": "暖纸阅读背景示例",
       "author": "阅读 NG 示例",
       "license": "CC0-1.0",
-      "versionCode": 1,
+      "versionCode": 2,
       "payload": {
         "path": "resources/backgrounds/warm-paper-example/warm-paper.png",
         "format": "png",
-        "size": 18617,
-        "sha256": "b49fa9a08e44009ce65c2d95081e14d19fd84661fdd651d1bb12ba1328bd1b74"
+        "size": 18619,
+        "sha256": "26234a6f4429a2f5ea4f0264e58916ae1709894e1446dedbc92627153720ecf0"
       },
-      "description": "1080×1440 原创暖色纸张背景，轻微纹理，无文字。",
-      "versionName": "1.0.0",
+      "description": "1080×1440 原创暖色纸张背景，纸色稍暖、细纹理轻微加深，无文字。",
+      "versionName": "1.0.1",
+      "changelog": "纸色稍微加暖，调整细纹理分布和深浅。保留原尺寸与资源身份，可从 1.0.0 更新。",
       "tags": [
         "示例"
       ],
       "verification": {
-        "checkedOn": "2026-10-26",
+        "checkedOn": "2026-10-27",
         "status": "file_validated",
         "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
       }
