@@ -1,5 +1,31 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "bf84aa9e1c6afaf20cfa701f45ca07654e3cdfe0",
-  "resources": {}
+  "sourceCommit": "0c936c0cdc722a589284a556d14f222ef672234c",
+  "resources": {
+    "background.example.warm-paper": {
+      "type": "background",
+      "versionCode": 1,
+      "fingerprint": "ec83fdde5f4c7a34d94a8d4deca6cdb2dc9589942ba39acf757d8a8db5d4178d",
+      "active": true
+    },
+    "font.example.noto-sans": {
+      "type": "font",
+      "versionCode": 1,
+      "fingerprint": "9151a9b88058f7531ddd0c96e4771d00eda0bb3273406e6bd92fa4ae866e7551",
+      "active": true
+    },
+    "theme.example.warm-paper": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "235d814fef6f6081dd09a64cbcb4aad2b4f93a30f40ae8b8565ea491cddfcd96",
+      "active": true
+    },
+    "tts.example.http-template": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "5d1ea5d4cf81ce048a8f29b6dcd67634b177c77289bee71f3ed576ba05e784d1",
+      "active": true,
+      "engineId": "ng_resource_example_http_template"
+    }
+  }
 }

@@ -1,6 +1,30 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "bf84aa9e1c6afaf20cfa701f45ca07654e3cdfe0",
+  "sourceCommit": "0c936c0cdc722a589284a556d14f222ef672234c",
   "type": "background",
-  "resources": []
+  "resources": [
+    {
+      "id": "background.example.warm-paper",
+      "name": "暖纸阅读背景示例",
+      "author": "阅读 NG 示例",
+      "license": "CC0-1.0",
+      "versionCode": 1,
+      "payload": {
+        "path": "resources/backgrounds/warm-paper-example/warm-paper.png",
+        "format": "png",
+        "size": 18617,
+        "sha256": "b49fa9a08e44009ce65c2d95081e14d19fd84661fdd651d1bb12ba1328bd1b74"
+      },
+      "description": "1080×1440 原创暖色纸张背景，轻微纹理，无文字。",
+      "versionName": "1.0.0",
+      "tags": [
+        "示例"
+      ],
+      "verification": {
+        "checkedOn": "2026-10-26",
+        "status": "file_validated",
+        "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
+      }
+    }
+  ]
 }
