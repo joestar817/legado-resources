@@ -7,6 +7,7 @@ import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { buildCatalog, writeCatalog, checkState, catalogTimestamp, initializeCatalogDates } from './catalog.mjs';
+import { attachFontPreviews } from './font-previews.mjs';
 
 const SHA = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
 const REF_NAME = /^[a-zA-Z0-9][a-zA-Z0-9._/-]*$/;
@@ -230,7 +231,7 @@ export async function publishCatalog({
     await materializeSource(git, root, sourceCommit, snapshotRoot);
     const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, sourceTime: sourceTimestamp(git, root, sourceCommit), previousState });
     const output = path.join(scratch, 'output');
-    await writeCatalog(generated, output);
+    await writeCatalog(await attachFontPreviews(generated, { root: snapshotRoot }), output);
     fs.cpSync(output, publishRoot, { recursive: true, errorOnExist: true, force: false });
     git(publishRoot, ['add', '--all']);
     const tree = git(publishRoot, ['write-tree']).output.trim();

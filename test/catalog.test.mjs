@@ -662,12 +662,12 @@ test('writeCatalog refuses source roots and directories containing unrelated use
 
 test('CLI generation failure preserves the previous published output', async (t) => {
   const { root, scratch } = await fixture(t);
-  const { metadata, metadataPath } = await addFont(root);
   const output = path.join(scratch, 'catalog');
   const args = [cliPath, 'generate', '--root', root, '--source-commit', SOURCE_A, '--source-time', '2026-10-26T10:00:00Z', '--out', output];
   const success = spawnSync(process.execPath, args, { encoding: 'utf8' });
   assert.equal(success.status, 0, success.stderr);
   const before = await filesSnapshot(output);
+  const { metadata, metadataPath } = await addFont(root);
   await putJson(root, metadataPath, { ...metadata, payload: { ...metadata.payload, path: '../outside.ttf' } });
   const failure = spawnSync(process.execPath, args, { encoding: 'utf8' });
   assert.notEqual(failure.status, 0);

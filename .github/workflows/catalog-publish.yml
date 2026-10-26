@@ -40,9 +40,16 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.10'
+      - name: 安装固定字体渲染环境
+        shell: bash
+        run: python3 -m pip install --only-binary=:all: -r tools/font-preview-requirements.txt
       - name: 验证已合并工具与资源
         shell: bash
         run: |
+          python3 -B test/font-preview.test.py
           node --test test/*.test.mjs
           node tools/catalog.mjs validate --root .
       - name: 原子更新 catalog 分支

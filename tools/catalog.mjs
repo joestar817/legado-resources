@@ -4,6 +4,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
+import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
 const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme' });
 const RESOURCE_ROOT = 'resources';
@@ -406,9 +407,11 @@ async function checkOutputDirectory(directory) {
   fields(oldCatalog, ['schemaVersion', 'sourceCommit', 'categories'], 'existing output catalog');
   if (oldCatalog.schemaVersion !== 1 || !Array.isArray(oldCatalog.categories)) fail('Existing output catalog is invalid');
   if (commit(oldCatalog.sourceCommit) !== commit(oldState.sourceCommit)) fail('Existing output has inconsistent commits');
+  const oldIndexes = Object.create(null);
   for (const name of names) {
     const item = path.join(directory, name);
     if (name === 'catalog.json' || name === 'state.json') { await ordinary(item, 'file'); continue; }
+    if (name === 'previews') { await ordinary(item, 'directory'); continue; }
     if (name !== RESOURCE_ROOT) fail(`Refusing to replace output containing ${name}`);
     await ordinary(item, 'directory');
     for (const category of await fs.readdir(item)) {
@@ -417,9 +420,14 @@ async function checkOutputDirectory(directory) {
       await ordinary(categoryDirectory, 'directory');
       const children = await fs.readdir(categoryDirectory);
       if (children.length !== 1 || children[0] !== 'index.json') fail('Refusing to replace output with non-generated category files');
-      await ordinary(path.join(categoryDirectory, 'index.json'), 'file');
+      const index = await readJson(path.join(categoryDirectory, 'index.json'), MAX_STATE_BYTES);
+      if (index.schemaVersion !== 1 || index.type !== TYPES[category] || index.sourceCommit !== oldCatalog.sourceCommit) fail('Existing output index is inconsistent');
+      oldIndexes[category] = index;
     }
   }
+  const expectedCategories = oldCatalog.categories.map(category => category.id).sort();
+  if (JSON.stringify(expectedCategories) !== JSON.stringify(Object.keys(oldIndexes).sort())) fail('Existing output categories are incomplete');
+  validatePreviewFiles(oldIndexes, await readPreviewFiles(path.join(directory, 'previews')));
 }
 
 /** Publish a complete generated directory locally; never delete arbitrary existing files. */
@@ -436,6 +444,7 @@ export async function writeCatalog(result, outDir) {
   for (const [category, index] of Object.entries(result.indexes)) {
     if (!Object.hasOwn(TYPES, category) || index?.type !== TYPES[category] || index.sourceCommit !== result.state.sourceCommit) fail('Invalid generated index');
   }
+  const previewFiles = validatePreviewFiles(result.indexes, result.previewFiles);
   await fs.mkdir(parent, { recursive: true });
   const parentReal = await fs.realpath(parent);
   if (path.resolve(parentReal) !== path.resolve(parent)) fail('Output parent must not contain symbolic links');
@@ -450,6 +459,12 @@ export async function writeCatalog(result, outDir) {
     for (const category of sorted(Object.keys(result.indexes))) {
       await fs.mkdir(path.join(stage, RESOURCE_ROOT, category));
       await fs.writeFile(path.join(stage, RESOURCE_ROOT, category, 'index.json'), json(result.indexes[category]), { flag: 'wx' });
+    }
+    if (Object.keys(previewFiles).length) {
+      await fs.mkdir(path.join(stage, 'previews'));
+      for (const filename of sorted(Object.keys(previewFiles))) {
+        await fs.writeFile(path.join(stage, filename), previewFiles[filename], { flag: 'wx' });
+      }
     }
     // Revalidate immediately before replacement, after all serialisation and writes succeeded.
     await checkOutputDirectory(target);
@@ -491,7 +506,7 @@ async function main(args) {
   const previousState = options['--state'] ? await readJson(path.resolve(options['--state']), MAX_STATE_BYTES) : null;
   if (options['--state']) object(previousState, 'Explicit state file');
   const result = await buildCatalog({ root: options['--root'], sourceCommit: options['--source-commit'] || EMPTY_COMMIT, sourceTime: options['--source-time'], previousState });
-  if (command === 'generate') await writeCatalog(result, options['--out']);
+  if (command === 'generate') await writeCatalog(await attachFontPreviews(result, { root: options['--root'] }), options['--out']);
   const count = result.catalog.categories.reduce((sum, category) => sum + category.count, 0);
   process.stdout.write(`${command === 'validate' ? 'Validated' : 'Generated'} ${count} resources in ${result.catalog.categories.length} categories.\n`);
 }
