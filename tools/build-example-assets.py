@@ -33,8 +33,8 @@ def build():
     for y in range(height):
         rows.append(0)
         for x in range(width):
-            shade = ((x * 17 + y * 31) % 23 == 0)
-            rows.extend((248 - shade, 244 - shade, 233 - shade))
+            shade = 2 if (x * 17 + y * 31) % 29 == 0 else 0
+            rows.extend((246 - shade, 240 - shade, 226 - shade))
     png = b"\x89PNG\r\n\x1a\n"
     png += png_chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
     png += png_chunk(b"IDAT", zlib.compress(rows, 9)) + png_chunk(b"IEND", b"")

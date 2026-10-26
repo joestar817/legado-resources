@@ -3,9 +3,10 @@
   "id": "background.example.warm-paper",
   "name": "暖纸阅读背景示例",
   "author": "阅读 NG 示例",
-  "description": "1080×1440 原创暖色纸张背景，轻微纹理，无文字。",
+  "description": "1080×1440 原创暖色纸张背景，纸色稍暖、细纹理轻微加深，无文字。",
   "license": "CC0-1.0",
-  "versionName": "1.0.0",
+  "versionName": "1.0.1",
+  "changelog": "纸色稍微加暖，调整细纹理分布和深浅。保留原尺寸与资源身份，可从 1.0.0 更新。",
   "payload": {
     "path": "resources/backgrounds/warm-paper-example/warm-paper.png",
     "format": "png"
@@ -14,7 +15,7 @@
     "示例"
   ],
   "verification": {
-    "checkedOn": "2026-10-26",
+    "checkedOn": "2026-10-27",
     "status": "file_validated",
     "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
   }
