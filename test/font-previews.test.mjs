@@ -58,7 +58,7 @@ async function fixture(t, count = 1) {
 }
 
 async function fakeRenderer({ fontPath, outDir }, alpha = 255) {
-  const manifest = { schemaVersion: 1, rendererVersion: 'font-sample-v1', fontSha256: digest(await fs.readFile(fontPath)) };
+  const manifest = { schemaVersion: 1, rendererVersion: 'font-sample-v2', fontSha256: digest(await fs.readFile(fontPath)) };
   for (const [kind, width, height] of [['thumbnail', 256, 256], ['detail', 960, 420]]) {
     const bytes = png(width, height, alpha), sha256 = digest(bytes), name = `${sha256}.png`;
     await fs.writeFile(path.join(outDir, name), bytes);

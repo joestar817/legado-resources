@@ -165,7 +165,7 @@ export async function attachFontPreviews(result, { root, pythonExecutable = proc
           const outDir = await fs.mkdtemp(path.join(scratch, 'font-'));
           const manifest = await render({ fontPath, outDir, pythonExecutable });
           fields(manifest, ['schemaVersion', 'rendererVersion', 'fontSha256', 'thumbnail', 'detail'], 'renderer manifest');
-          if (manifest.schemaVersion !== 1 || manifest.rendererVersion !== 'font-sample-v1' || manifest.fontSha256 !== item.payload.sha256) fail('Renderer source or version mismatch');
+          if (manifest.schemaVersion !== 1 || manifest.rendererVersion !== 'font-sample-v2' || manifest.fontSha256 !== item.payload.sha256) fail('Renderer source or version mismatch');
           await ordinary(outDir, true);
           const expectedNames = new Set(), images = Object.create(null);
           preview = {};

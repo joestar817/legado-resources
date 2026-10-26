@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render source-font glyphs without fallback; stdout is one machine manifest."""
+"""Render source-only thumbnails and controlled mixed-font detail samples."""
 from __future__ import annotations
 
 import argparse
@@ -17,7 +17,7 @@ from fontTools.pens.boundsPen import BoundsPen
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont, features
 
-RENDERER_VERSION = "font-sample-v1"
+RENDERER_VERSION = "font-sample-v2"
 MAX_FONT_BYTES = 64 * 1024 * 1024
 MAX_PNG_BYTES = 1024 * 1024
 THUMBNAIL_SIZE = (256, 256)
@@ -29,6 +29,9 @@ SAMPLE_CANDIDATES = (
     "こんにちは", "안녕하세요", "Καλημέρα", "Приветмир", "مرحبا", "नमस्ते",
 )
 DIGITS = "0123456789"
+DETAIL_SAMPLES = ("中国智造，慧及全球", "Innovation in China", "0123456789.:;'\"(!?)+-*/=")
+FALLBACK_PATH = Path(__file__).resolve().parent / "fonts/preview-fallback.ttf"
+FALLBACK_SHA256 = "16e044c9870f9e77dbff0aff69ba77e689c26902630822eaade8774d3bfb5c94"
 
 
 class PreviewError(ValueError):
@@ -75,6 +78,12 @@ class Sample:
     isolated: bool = False
 
 
+@dataclass(frozen=True)
+class FontRun:
+    text: str
+    source: bool
+
+
 class Coverage:
     def __init__(self, font: TTFont):
         self.cmap = font.getBestCmap() or {}
@@ -96,6 +105,13 @@ class Coverage:
 
     def contains(self, text: str) -> bool:
         return bool(text) and all(self.has(character) for character in text)
+
+    def supports_sample_character(self, character: str) -> bool:
+        if character == " ":
+            # A real space needs a mapping and advance, not a visible outline.
+            name = self.cmap.get(ord(character))
+            return bool(name and name != ".notdef" and self.glyphs[name].width > 0)
+        return self.has(character)
 
     def visible_characters(self, limit: int = 8) -> str:
         result = []
@@ -132,6 +148,32 @@ def choose_samples(coverage: Coverage) -> tuple[Sample, Sample, Sample]:
     return primary, number_sample, Sample(thumb_characters, isolated=True)
 
 
+def choose_runs(text: str, coverage: Coverage) -> tuple[FontRun, ...]:
+    runs: list[FontRun] = []
+    for character in text:
+        source = coverage.supports_sample_character(character)
+        if runs and runs[-1].source == source:
+            runs[-1] = FontRun(runs[-1].text + character, source)
+        else:
+            runs.append(FontRun(character, source))
+    return tuple(runs)
+
+
+def read_fallback() -> bytes:
+    try:
+        data = read_font(FALLBACK_PATH)
+        if hashlib.sha256(data).hexdigest() != FALLBACK_SHA256:
+            raise PreviewError("Bundled preview fallback checksum mismatch")
+        with TTFont(io.BytesIO(data), checkChecksums=2, lazy=False) as font:
+            coverage = Coverage(font)
+            if not all(coverage.supports_sample_character(character)
+                       for text in DETAIL_SAMPLES for character in text):
+                raise PreviewError("Bundled preview fallback does not cover the fixed samples")
+        return data
+    except Exception as error:
+        raise PreviewError(f"Bundled preview fallback is invalid: {error}") from error
+
+
 def _measure(draw: ImageDraw.ImageDraw, sample: Sample, font: ImageFont.FreeTypeFont):
     if sample.isolated:
         boxes = [draw.textbbox((0, 0), character, font=font) for character in sample.text]
@@ -166,6 +208,47 @@ def draw_sample(image: Image.Image, data: bytes, sample: Sample,
         draw.text((x - box[0], y - box[1]), sample.text, font=font, fill=(0, 0, 0, 255))
 
 
+def _run_metrics(runs: tuple[FontRun, ...], fonts: dict[bool, ImageFont.FreeTypeFont]):
+    x = 0.0
+    positions = []
+    ink = []
+    for run in runs:
+        font = fonts[run.source]
+        positions.append(x)
+        left, top, right, bottom = font.getbbox(run.text, anchor="ls")
+        if right > left and bottom > top:
+            ink.append((x + left, top, x + right, bottom))
+        x += font.getlength(run.text)
+    if not ink:
+        raise PreviewError("Mixed sample has no visible glyphs")
+    return (min(box[0] for box in ink), min(box[1] for box in ink),
+            max(box[2] for box in ink), max(box[3] for box in ink)), positions
+
+
+def draw_mixed_sample(image: Image.Image, data: bytes, fallback: bytes | None,
+                      runs: tuple[FontRun, ...], area: tuple[int, int, int, int],
+                      maximum_size: int) -> None:
+    draw = ImageDraw.Draw(image)
+    left, top, right, bottom = area
+    for size in range(maximum_size, 3, -1):
+        fonts = {True: ImageFont.truetype(io.BytesIO(data), size, layout_engine=ImageFont.Layout.RAQM)}
+        if any(not run.source for run in runs):
+            if fallback is None:
+                raise PreviewError("Mixed sample requires the bundled preview fallback")
+            fonts[False] = ImageFont.truetype(io.BytesIO(fallback), size, layout_engine=ImageFont.Layout.RAQM)
+        box, positions = _run_metrics(runs, fonts)
+        width, height = box[2] - box[0], box[3] - box[1]
+        if 0 < width <= right - left and 0 < height <= bottom - top:
+            break
+    else:
+        raise PreviewError("Mixed font samples cannot fit within the preview bounds")
+    x = left + (right - left - width) / 2 - box[0]
+    baseline = top + (bottom - top - height) / 2 - box[1]
+    for run, offset in zip(runs, positions):
+        draw.text((x + offset, baseline), run.text, font=fonts[run.source],
+                  anchor="ls", fill=(0, 0, 0, 255))
+
+
 def _png(image: Image.Image) -> bytes:
     bounds = image.getchannel("A").getbbox()
     if not bounds or bounds[0] <= 0 or bounds[1] <= 0 or bounds[2] >= image.width or bounds[3] >= image.height:
@@ -185,13 +268,16 @@ def render(data: bytes) -> dict[str, tuple[bytes, tuple[int, int]]]:
     if not features.check_feature("raqm"):
         raise PreviewError("The pinned preview renderer requires Pillow with RAQM")
     with TTFont(io.BytesIO(data), checkChecksums=2, lazy=False) as font:
-        primary, numbers, thumbnail_sample = choose_samples(Coverage(font))
+        coverage = Coverage(font)
+        _, _, thumbnail_sample = choose_samples(coverage)
+        detail_runs = tuple(choose_runs(text, coverage) for text in DETAIL_SAMPLES)
+    fallback = read_fallback() if any(not run.source for runs in detail_runs for run in runs) else None
     thumbnail = Image.new("RGBA", THUMBNAIL_SIZE, (0, 0, 0, 0))
     draw_sample(thumbnail, data, thumbnail_sample, (20, 24, 236, 232), 132)
     detail = Image.new("RGBA", DETAIL_SIZE, (0, 0, 0, 0))
-    draw_sample(detail, data, primary, (32, 24, 928, 148), 96)
-    draw_sample(detail, data, primary, (32, 158, 928, 278), 72)
-    draw_sample(detail, data, numbers, (32, 292, 928, 396), 60)
+    draw_mixed_sample(detail, data, fallback, detail_runs[0], (32, 24, 928, 148), 96)
+    draw_mixed_sample(detail, data, fallback, detail_runs[1], (32, 158, 928, 278), 64)
+    draw_mixed_sample(detail, data, fallback, detail_runs[2], (32, 292, 928, 396), 64)
     return {"thumbnail": (_png(thumbnail), THUMBNAIL_SIZE), "detail": (_png(detail), DETAIL_SIZE)}
 
 
