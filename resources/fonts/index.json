@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "c88f795db3b475433b43f0259eca49bebcceba5c",
+  "sourceCommit": "62ae43ff88070b70cc50260b9a38b3c1553d0741",
   "type": "font",
   "resources": [
     {
@@ -22,7 +22,23 @@
         "标题字体",
         "中文",
         "装饰字体"
-      ]
+      ],
+      "preview": {
+        "thumbnail": {
+          "path": "previews/02d38cf296ec57db4bf5d65c0566d2e4ee61e020b1ee057147884a699a72249c.png",
+          "size": 4834,
+          "sha256": "02d38cf296ec57db4bf5d65c0566d2e4ee61e020b1ee057147884a699a72249c",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/8efb390d8c2fb6bc594a94d87fd86a2d64b363719665e2082db61b5ab43cd326.png",
+          "size": 35089,
+          "sha256": "8efb390d8c2fb6bc594a94d87fd86a2d64b363719665e2082db61b5ab43cd326",
+          "width": 960,
+          "height": 420
+        }
+      }
     }
   ]
 }
