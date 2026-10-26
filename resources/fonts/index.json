@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "62ae43ff88070b70cc50260b9a38b3c1553d0741",
+  "sourceCommit": "ed62e825872f6d1899970cae2e655286aa1ad6a7",
   "type": "font",
   "resources": [
     {
@@ -32,9 +32,9 @@
           "height": 256
         },
         "detail": {
-          "path": "previews/8efb390d8c2fb6bc594a94d87fd86a2d64b363719665e2082db61b5ab43cd326.png",
-          "size": 35089,
-          "sha256": "8efb390d8c2fb6bc594a94d87fd86a2d64b363719665e2082db61b5ab43cd326",
+          "path": "previews/208f3298e47c9f61c8f8472bc2a77332388c735d8e86905761152a9b806a1641.png",
+          "size": 31784,
+          "sha256": "208f3298e47c9f61c8f8472bc2a77332388c735d8e86905761152a9b806a1641",
           "width": 960,
           "height": 420
         }
