@@ -1,0 +1,42 @@
+name: 检查资源投稿
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取得可信校验器
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          persist-credentials: false
+      - name: 取得投稿数据
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+          lfs: true
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: 校验资源（不执行投稿脚本）
+        env:
+          CATALOG_GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if [ ! -f trusted/tools/catalog.mjs ]; then
+            echo '可信 main 尚无生成器，请先完成仓库初始化；不会改用 PR 中的脚本。' >&2
+            exit 1
+          fi
+          node trusted/tools/publish-catalog.mjs read-state --root trusted --out "$RUNNER_TEMP/catalog-state.json"
+          node trusted/tools/catalog.mjs validate --root candidate --state "$RUNNER_TEMP/catalog-state.json"

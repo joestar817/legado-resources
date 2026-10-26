@@ -1,0 +1,53 @@
+name: 更新资源目录
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bootstrap:
+        description: '仅首次创建 catalog 分支；已有目录时保持关闭'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-resource-catalog
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          lfs: true
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: 验证已合并工具与资源
+        shell: bash
+        run: |
+          node --test test/*.test.mjs
+          node tools/catalog.mjs validate --root .
+      - name: 原子更新 catalog 分支
+        env:
+          CATALOG_GITHUB_TOKEN: ${{ github.token }}
+          CATALOG_BOOTSTRAP: ${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap }}
+        shell: bash
+        run: |
+          if [ "$CATALOG_BOOTSTRAP" = 'true' ]; then
+            node tools/publish-catalog.mjs --root . --bootstrap
+          else
+            node tools/publish-catalog.mjs --root .
+          fi

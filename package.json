@@ -1,0 +1,14 @@
+{
+  "name": "legado-resources",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "阅读 NG 资源目录与自动版本工具",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "validate": "node tools/catalog.mjs validate --root ."
+  }
+}

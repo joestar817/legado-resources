@@ -1,0 +1,7 @@
+# 本地预览和测试记录，不属于公开索引。
+.catalog-preview/
+.local/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

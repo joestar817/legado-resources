@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    { "id": "fonts", "name": "字体", "type": "font" },
+    { "id": "backgrounds", "name": "阅读背景", "type": "background" },
+    { "id": "tts", "name": "TTS", "type": "tts" },
+    { "id": "themes", "name": "主题", "type": "theme" }
+  ]
+}
