@@ -4,14 +4,14 @@
 
 ## 源与目录
 
-`main` 保存 `catalog.config.json`、资源文件、`*.resource.json` 和工具。`catalog` 分支只保存生成结果：
+`main` 将资源文件和 `*.resource.json` 统一放在 `resources/<分类>/`，根目录保留 `catalog.config.json`、文档和工具。`resources/` 必须存在且不能是链接；分类 ID 和资源 ID 不因增加这一层目录改变。`catalog` 分支同样将分类索引收在 `resources/` 下，只保存生成结果：
 
 ```text
 catalog.json
-fonts/index.json
-backgrounds/index.json
-tts/index.json
-themes/index.json
+resources/fonts/index.json
+resources/backgrounds/index.json
+resources/tts/index.json
+resources/themes/index.json
 state.json
 ```
 
@@ -28,8 +28,8 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
   "schemaVersion": 1,
   "sourceCommit": "0000000000000000000000000000000000000000",
   "categories": [
-    { "id": "fonts", "name": "字体", "type": "font", "index": "fonts/index.json", "count": 0 },
-    { "id": "tts", "name": "TTS", "type": "tts", "index": "tts/index.json", "count": 1 }
+    { "id": "fonts", "name": "字体", "type": "font", "index": "resources/fonts/index.json", "count": 0 },
+    { "id": "tts", "name": "TTS", "type": "tts", "index": "resources/tts/index.json", "count": 1 }
   ]
 }
 ```
@@ -46,7 +46,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
 | `name`、`author`、`license` | 名称、作者、授权声明 |
 | `versionCode` | 自动维护的正整数修订号 |
 | `versionName` | 可选的作者版本，仅展示 |
-| `payload.path`、`format` | 仓库相对路径、载荷格式 |
+| `payload.path`、`format` | 带 `resources/<分类>/` 前缀的仓库相对路径、载荷格式 |
 | `payload.size`、`sha256` | 实际内容字节数及 SHA-256 |
 | `payload.engineId` | TTS 从脚本 `@uuid` 提取的原生引擎身份 |
 | `requirements` | 可选的 `minAppVersionCode` 与 `capabilities` |

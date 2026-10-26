@@ -31,10 +31,10 @@ function fixture(t) {
   git(remote, ['init', '--bare', '--quiet']);
   git(root, ['init', '--initial-branch=main', '--quiet']);
   git(root, ['remote', 'add', 'origin', remote]);
-  fs.mkdirSync(path.join(root, 'tts'));
+  fs.mkdirSync(path.join(root, 'resources', 'tts'), { recursive: true });
   fs.writeFileSync(path.join(root, 'catalog.config.json'), JSON.stringify({ schemaVersion: 1, categories: [{ id: 'tts', name: 'TTS', type: 'tts' }] }));
-  fs.writeFileSync(path.join(root, 'tts/example.js'), script());
-  fs.writeFileSync(path.join(root, 'tts/example.resource.json'), JSON.stringify({ schemaVersion: 1, id: 'tts.example', license: 'NOASSERTION', payload: { path: 'tts/example.js', format: 'js' } }));
+  fs.writeFileSync(path.join(root, 'resources/tts/example.js'), script());
+  fs.writeFileSync(path.join(root, 'resources/tts/example.resource.json'), JSON.stringify({ schemaVersion: 1, id: 'tts.example', license: 'NOASSERTION', payload: { path: 'resources/tts/example.js', format: 'js' } }));
   const commit = (message = '更新测试资源') => {
     git(root, ['add', '--all']);
     git(root, ['commit', '--quiet', '-m', message]);
@@ -56,9 +56,9 @@ test('first publication creates a complete catalog and repeated publication is a
   assert.equal(published.sourceCommit, f.first);
   assert.equal(f.read().resources['tts.example'].versionCode, 1);
   assert.equal(f.read('catalog.json').sourceCommit, f.first);
-  assert.equal(f.read('tts/index.json').resources[0].payload.engineId, 'fixture_engine');
+  assert.equal(f.read('resources/tts/index.json').resources[0].payload.engineId, 'fixture_engine');
   const treeFiles = git(f.remote, ['ls-tree', '-r', '--name-only', f.head()]).split('\n');
-  assert.deepEqual(treeFiles.sort(), ['catalog.json', 'state.json', 'tts/index.json']);
+  assert.deepEqual(treeFiles.sort(), ['catalog.json', 'resources/tts/index.json', 'state.json']);
   const firstHead = f.head();
   assert.equal((await f.publish()).status, 'unchanged');
   assert.equal(f.head(), firstHead);
@@ -69,17 +69,17 @@ test('first publication creates a complete catalog and repeated publication is a
 test('publishes content revisions, deletion tombstones and re-addition without resetting versions', async t => {
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), script('v2'));
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('v2'));
   f.commit();
   await f.publish();
   assert.equal(f.read().resources['tts.example'].versionCode, 2);
-  fs.unlinkSync(path.join(f.root, 'tts/example.resource.json'));
+  fs.unlinkSync(path.join(f.root, 'resources/tts/example.resource.json'));
   f.commit('移除目录项');
   await f.publish();
   assert.equal(f.read().resources['tts.example'].active, false);
   assert.equal(f.read().resources['tts.example'].versionCode, 2);
-  assert.equal(f.read('tts/index.json').resources.length, 0);
-  fs.writeFileSync(path.join(f.root, 'tts/example.resource.json'), JSON.stringify({ schemaVersion: 1, id: 'tts.example', license: 'NOASSERTION', payload: { path: 'tts/example.js', format: 'js' } }));
+  assert.equal(f.read('resources/tts/index.json').resources.length, 0);
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.resource.json'), JSON.stringify({ schemaVersion: 1, id: 'tts.example', license: 'NOASSERTION', payload: { path: 'resources/tts/example.js', format: 'js' } }));
   f.commit('重新收录');
   await f.publish();
   assert.equal(f.read().resources['tts.example'].active, true);
@@ -89,7 +89,7 @@ test('publishes content revisions, deletion tombstones and re-addition without r
 test('an older queued source commit cannot overwrite a newer published catalog', async t => {
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), script('newer'));
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('newer'));
   f.commit();
   await f.publish();
   const latest = f.head();
@@ -125,7 +125,7 @@ test('invalid remote state fails closed and leaves the public commit intact', as
 test('a competing catalog writer is preserved; publisher never force pushes', async t => {
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), script('race'));
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('race'));
   f.commit();
   let competitor;
   await assert.rejects(f.publish({ beforePush: ({ priorHead }) => {
@@ -143,7 +143,7 @@ test('a remote push rejection leaves the last successful catalog available', asy
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });
   const previous = f.head();
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), script('rejected'));
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('rejected'));
   f.commit();
   const hook = path.join(f.remote, 'hooks/pre-receive');
   fs.writeFileSync(hook, '#!/bin/sh\nexit 1\n');
@@ -157,7 +157,7 @@ test('dirty or unapproved source snapshots are not published', async t => {
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });
   const previous = f.head();
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), script('dirty'));
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('dirty'));
   await assert.rejects(f.publish(), /must be clean/);
   git(f.root, ['add', '--all']);
   git(f.root, ['commit', '--quiet', '-m', 'not pushed']);
@@ -167,12 +167,12 @@ test('dirty or unapproved source snapshots are not published', async t => {
 
 test('uses exact committed bytes and ignores untracked files excluded by Git', async t => {
   const f = fixture(t);
-  fs.writeFileSync(path.join(f.root, '.gitignore'), 'tts/ignored.resource.json\n');
+  fs.writeFileSync(path.join(f.root, '.gitignore'), 'resources/tts/ignored.resource.json\n');
   f.commit('add ignore rule');
-  fs.writeFileSync(path.join(f.root, 'tts/ignored.resource.json'), '{broken json');
+  fs.writeFileSync(path.join(f.root, 'resources/tts/ignored.resource.json'), '{broken json');
   const result = await f.publish({ allowBootstrap: true });
   assert.equal(result.status, 'published');
-  assert.equal(f.read('tts/index.json').resources.length, 1);
+  assert.equal(f.read('resources/tts/index.json').resources.length, 1);
 });
 
 test('remote lookup failure is not treated as an absent catalog', async t => {
@@ -211,18 +211,18 @@ test('materialized LFS bytes are verified against the committed pointer without 
   fs.writeFileSync(cleanScript, `process.stdin.resume(); process.stdin.on('end', () => process.stdout.write(${JSON.stringify(pointer)}));\n`);
   git(f.root, ['config', 'filter.fixture-lfs.clean', `"${process.execPath.replaceAll('\\', '/')}" "${cleanScript.replaceAll('\\', '/')}"`]);
   git(f.root, ['config', 'filter.fixture-lfs.required', 'true']);
-  fs.writeFileSync(path.join(f.root, '.gitattributes'), 'tts/example.js filter=fixture-lfs -text\n');
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), bytes);
+  fs.writeFileSync(path.join(f.root, '.gitattributes'), 'resources/tts/example.js filter=fixture-lfs -text\n');
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), bytes);
   f.commit('track materialized LFS fixture');
-  assert.equal(git(f.root, ['show', 'HEAD:tts/example.js']), pointer.trim());
+  assert.equal(git(f.root, ['show', 'HEAD:resources/tts/example.js']), pointer.trim());
   await f.publish({ allowBootstrap: true });
-  assert.equal(f.read('tts/index.json').resources[0].payload.sha256, digest);
-  assert.equal(f.read('tts/index.json').resources[0].payload.size, bytes.length);
+  assert.equal(f.read('resources/tts/index.json').resources[0].payload.sha256, digest);
+  assert.equal(f.read('resources/tts/index.json').resources[0].payload.size, bytes.length);
   const published = f.head();
   // The clean filter deliberately still returns the old pointer. Git is clean,
   // so the publisher must independently reject mismatching materialized bytes.
   bytes[bytes.length - 1] ^= 1;
-  fs.writeFileSync(path.join(f.root, 'tts/example.js'), bytes);
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), bytes);
   assert.equal(git(f.root, ['status', '--porcelain=v1']), '');
   await assert.rejects(f.publish(), /LFS object.*does not match/);
   assert.equal(f.head(), published);

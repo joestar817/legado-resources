@@ -6,6 +6,7 @@ import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
 
 const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme' });
+const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
   tts: ['js'], theme: ['ngtheme', 'zip'],
@@ -84,7 +85,9 @@ function relativePath(value, category) {
     fail('payload.path must be a repository-relative POSIX path');
   }
   const parts = result.split('/');
-  if (parts[0] !== category || parts.length < 2) fail(`payload.path must stay inside ${category}/`);
+  if (parts[0] !== RESOURCE_ROOT || parts[1] !== category || parts.length < 3) {
+    fail(`payload.path must stay inside ${RESOURCE_ROOT}/${category}/`);
+  }
   for (const part of parts) {
     if (!part || part === '.' || part === '..' || /[\x00-\x1F\x7F<>:"|?*]/.test(part)
       || /[. ]$/.test(part) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part)) {
@@ -261,8 +264,10 @@ export async function buildCatalog({ root, sourceCommit, previousState = null })
   const engineOwners = new Map(Object.entries(previous || {}).filter(([, record]) => record.type === 'tts').map(([id, record]) => [record.engineId, id]));
   const indexes = Object.create(null);
   const catalogCategories = [];
+  const resourceRoot = path.join(root, RESOURCE_ROOT);
+  await ordinary(resourceRoot, 'directory');
   for (const category of categories) {
-    const directory = path.join(root, category.id);
+    const directory = path.join(resourceRoot, category.id);
     const present = await lstatOrNull(directory);
     const resources = [];
     for (const metadataFile of present ? await metadataFiles(directory) : []) {
@@ -322,7 +327,7 @@ export async function buildCatalog({ root, sourceCommit, previousState = null })
     }
     resources.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
     indexes[category.id] = { schemaVersion: 1, sourceCommit, type: category.type, resources };
-    catalogCategories.push({ ...category, index: `${category.id}/index.json`, count: resources.length });
+    catalogCategories.push({ ...category, index: `${RESOURCE_ROOT}/${category.id}/index.json`, count: resources.length });
   }
   const orderedState = Object.create(null);
   for (const id of sorted(Object.keys(stateResources))) orderedState[id] = stateResources[id];
@@ -349,11 +354,16 @@ async function checkOutputDirectory(directory) {
   for (const name of names) {
     const item = path.join(directory, name);
     if (name === 'catalog.json' || name === 'state.json') { await ordinary(item, 'file'); continue; }
-    if (!Object.hasOwn(TYPES, name)) fail(`Refusing to replace output containing ${name}`);
+    if (name !== RESOURCE_ROOT) fail(`Refusing to replace output containing ${name}`);
     await ordinary(item, 'directory');
-    const children = await fs.readdir(item);
-    if (children.length !== 1 || children[0] !== 'index.json') fail('Refusing to replace output with non-generated category files');
-    await ordinary(path.join(item, 'index.json'), 'file');
+    for (const category of await fs.readdir(item)) {
+      if (!Object.hasOwn(TYPES, category)) fail(`Refusing to replace output containing ${name}/${category}`);
+      const categoryDirectory = path.join(item, category);
+      await ordinary(categoryDirectory, 'directory');
+      const children = await fs.readdir(categoryDirectory);
+      if (children.length !== 1 || children[0] !== 'index.json') fail('Refusing to replace output with non-generated category files');
+      await ordinary(path.join(categoryDirectory, 'index.json'), 'file');
+    }
   }
 }
 
@@ -381,9 +391,10 @@ export async function writeCatalog(result, outDir) {
   try {
     await fs.writeFile(path.join(stage, 'catalog.json'), json(result.catalog), { flag: 'wx' });
     await fs.writeFile(path.join(stage, 'state.json'), json(result.state), { flag: 'wx' });
+    await fs.mkdir(path.join(stage, RESOURCE_ROOT));
     for (const category of sorted(Object.keys(result.indexes))) {
-      await fs.mkdir(path.join(stage, category));
-      await fs.writeFile(path.join(stage, category, 'index.json'), json(result.indexes[category]), { flag: 'wx' });
+      await fs.mkdir(path.join(stage, RESOURCE_ROOT, category));
+      await fs.writeFile(path.join(stage, RESOURCE_ROOT, category, 'index.json'), json(result.indexes[category]), { flag: 'wx' });
     }
     // Revalidate immediately before replacement, after all serialisation and writes succeeded.
     await checkOutputDirectory(target);

@@ -2,16 +2,26 @@
 
 为阅读 NG 集中维护字体、阅读背景、TTS 脚本和主题。开发者提交资源文件及说明，工具自动生成分类索引、文件校验信息和更新版本。
 
+所有资源统一放在 `resources/` 下，根目录只保留仓库配置、文档、工具和测试：
+
+```text
+resources/
+├── fonts/
+├── backgrounds/
+├── tts/
+└── themes/
+```
+
 当前提交包含目录工具、回归测试、GitHub Actions 定义和四类目录框架，尚未收录实际资源。本机已有的 TTS 脚本及资料不在本次提交中。工作流尚未在 GitHub 实际运行，NG 内资源中心也尚未接入。
 
 ## 目录
 
 | 目录 | 内容 |
 |---|---|
-| `fonts/` | TTF / OTF 字体 |
-| `backgrounds/` | PNG / JPEG / WebP 阅读背景 |
-| `tts/` | NG JS 朗读引擎分类，目前仅占位 |
-| `themes/` | NG 主题包或对应导入器支持的 ZIP |
+| `resources/fonts/` | TTF / OTF 字体 |
+| `resources/backgrounds/` | PNG / JPEG / WebP 阅读背景 |
+| `resources/tts/` | NG JS 朗读引擎分类，目前仅占位 |
+| `resources/themes/` | NG 主题包或对应导入器支持的 ZIP |
 | `tools/` | 索引生成与发布工具 |
 | `test/` | 使用临时目录和本地 Git 远端的回归测试 |
 
@@ -28,7 +38,7 @@ node tools/catalog.mjs validate --root .
 node --test test/*.test.mjs
 ```
 
-本地已验证目录和 Git 发布流程，当前测试共 70 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。
+本地已验证目录和 Git 发布流程，当前测试共 74 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。
 
 ## 自动维护方式
 
@@ -51,4 +61,4 @@ node --test test/*.test.mjs
 
 本地测试覆盖目录、版本和 Git 发布行为，不代表实际 GitHub Actions、分支规则、访问凭据、网络分发或 NG 客户端已经验证。工作流推送后，还需要在真实 GitHub 仓库完成首次目录初始化、PR 检查和自动发布验证。
 
-根目录的 `catalog.config.json` 描述四个受支持分类。新增任意目录不会自动赋予 NG 一种新安装能力；NG 仍需要对应的类型适配器。
+根目录的 `catalog.config.json` 描述 `resources/` 下四个受支持分类，分类 ID 保持不变。生成器只读取该目录中的资源说明；新增任意目录不会自动赋予 NG 一种新安装能力，NG 仍需要对应的类型适配器。

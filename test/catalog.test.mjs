@@ -23,6 +23,7 @@ async function fixture(t) {
   const scratch = await fs.mkdtemp(path.join(os.tmpdir(), 'ng-resource-test-'));
   const root = path.join(scratch, 'repo');
   await fs.mkdir(root);
+  await fs.mkdir(path.join(root, 'resources'));
   t.after(async () => {
     const relative = path.relative(path.resolve(os.tmpdir()), path.resolve(scratch));
     assert.ok(relative && !relative.startsWith('..') && !path.isAbsolute(relative));
@@ -46,7 +47,7 @@ async function putJson(root, relative, value) {
   return put(root, relative, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function fontMeta(id = 'font.example.serif', payloadPath = 'fonts/serif.ttf') {
+function fontMeta(id = 'font.example.serif', payloadPath = 'resources/fonts/serif.ttf') {
   return {
     schemaVersion: 1,
     id,
@@ -57,7 +58,7 @@ function fontMeta(id = 'font.example.serif', payloadPath = 'fonts/serif.ttf') {
   };
 }
 
-async function addFont(root, { id, payloadPath, content = 'font content v1', metadataPath = 'fonts/serif.resource.json', extra = {} } = {}) {
+async function addFont(root, { id, payloadPath, content = 'font content v1', metadataPath = 'resources/fonts/serif.resource.json', extra = {} } = {}) {
   const metadata = { ...fontMeta(id, payloadPath), ...extra };
   await put(root, metadata.payload.path, content);
   await putJson(root, metadataPath, metadata);
@@ -80,11 +81,11 @@ async function addTts(root, { content = ttsSource(), extra = {} } = {}) {
     schemaVersion: 1,
     id: 'tts.example.engine',
     license: 'NOASSERTION',
-    payload: { path: 'tts/engine.js', format: 'js' },
+    payload: { path: 'resources/tts/engine.js', format: 'js' },
     ...extra,
   };
   await put(root, metadata.payload.path, content);
-  await putJson(root, 'tts/engine.resource.json', metadata);
+  await putJson(root, 'resources/tts/engine.resource.json', metadata);
   return metadata;
 }
 
@@ -138,7 +139,7 @@ test('empty configured categories are valid and retain category routing', async 
   for (const category of categories) {
     const published = result.catalog.categories.find((entry) => entry.id === category.id);
     assert.equal(published.type, category.type);
-    assert.equal(published.index, `${category.id}/index.json`);
+    assert.equal(published.index, `resources/${category.id}/index.json`);
     assert.equal(published.count, 0);
     assert.equal(result.indexes[category.id].sourceCommit, SOURCE_A);
     assert.deepEqual(result.indexes[category.id].resources, []);
@@ -146,19 +147,44 @@ test('empty configured categories are valid and retain category routing', async 
   assert.equal(Object.keys(result.state.resources).length, 0);
 });
 
+test('resources root is required instead of silently publishing an empty inventory', async (t) => {
+  const { root } = await fixture(t);
+  await fs.rmdir(path.join(root, 'resources'));
+  await assert.rejects(build(root));
+});
+
+test('metadata outside resources is not treated as a resource', async (t) => {
+  const { root } = await fixture(t);
+  await addFont(root);
+  await put(root, 'fonts/legacy.resource.json', '{invalid root-level metadata');
+  await put(root, 'tools/example.resource.json', '{invalid tool fixture');
+  const result = await build(root);
+  assert.equal(result.indexes.fonts.resources.length, 1);
+  assert.equal(resource(result).payload.path, 'resources/fonts/serif.ttf');
+});
+
+test('a linked resources root cannot bypass the repository boundary', async (t) => {
+  const { root, scratch } = await fixture(t);
+  await fs.rmdir(path.join(root, 'resources'));
+  const outside = path.join(scratch, 'linked-resources');
+  await fs.mkdir(outside);
+  if (!await makeSymlink(t, outside, path.join(root, 'resources'), process.platform === 'win32' ? 'junction' : 'dir')) return;
+  await assert.rejects(build(root));
+});
+
 test('each supported resource type is routed and hashes actual bytes', async (t) => {
   const { root } = await fixture(t);
   await addFont(root, { content: Buffer.from([0, 1, 0, 0, 255, 10]) });
-  await put(root, 'backgrounds/paper.webp', Buffer.from('RIFFfixtureWEBP'));
-  await putJson(root, 'backgrounds/paper.resource.json', {
+  await put(root, 'resources/backgrounds/paper.webp', Buffer.from('RIFFfixtureWEBP'));
+  await putJson(root, 'resources/backgrounds/paper.resource.json', {
     schemaVersion: 1, id: 'background.example.paper', name: '纸张', author: 'A', license: 'CC0-1.0',
-    payload: { path: 'backgrounds/paper.webp', format: 'webp' },
+    payload: { path: 'resources/backgrounds/paper.webp', format: 'webp' },
   });
   await addTts(root);
-  await put(root, 'themes/theme.ngtheme', Buffer.from([80, 75, 3, 4, 1, 2, 3]));
-  await putJson(root, 'themes/theme.resource.json', {
+  await put(root, 'resources/themes/theme.ngtheme', Buffer.from([80, 75, 3, 4, 1, 2, 3]));
+  await putJson(root, 'resources/themes/theme.resource.json', {
     schemaVersion: 1, id: 'theme.example.paper', name: '纸张主题', author: 'A', license: 'CC0-1.0',
-    payload: { path: 'themes/theme.ngtheme', format: 'ngtheme' },
+    payload: { path: 'resources/themes/theme.ngtheme', format: 'ngtheme' },
   });
   const result = await build(root);
   for (const category of categories) {
@@ -199,9 +225,9 @@ test('explicit display metadata overrides TTS header defaults', async (t) => {
 test('payload revision advances only the changed resource', async (t) => {
   const { root } = await fixture(t);
   await addFont(root);
-  await addFont(root, { id: 'font.example.other', payloadPath: 'fonts/other.ttf', metadataPath: 'fonts/other.resource.json' });
+  await addFont(root, { id: 'font.example.other', payloadPath: 'resources/fonts/other.ttf', metadataPath: 'resources/fonts/other.resource.json' });
   const first = await build(root);
-  await put(root, 'fonts/serif.ttf', 'font content v2');
+  await put(root, 'resources/fonts/serif.ttf', 'font content v2');
   const second = await build(root, first.state, SOURCE_B);
   assert.equal(resource(second).versionCode, 2);
   assert.equal(resource(second, 'fonts', 'font.example.other').versionCode, 1);
@@ -242,13 +268,13 @@ test('moving payload and metadata while keeping ID and bytes does not create a r
   const { root } = await fixture(t);
   const { metadata, metadataPath } = await addFont(root);
   const first = await build(root);
-  await fs.mkdir(path.join(root, 'fonts', 'renamed'));
-  await fs.rename(path.join(root, metadata.payload.path), path.join(root, 'fonts', 'renamed', 'book.ttf'));
+  await fs.mkdir(path.join(root, 'resources', 'fonts', 'renamed'));
+  await fs.rename(path.join(root, metadata.payload.path), path.join(root, 'resources', 'fonts', 'renamed', 'book.ttf'));
   await fs.unlink(path.join(root, metadataPath));
-  await putJson(root, 'fonts/renamed/book.resource.json', { ...metadata, payload: { path: 'fonts/renamed/book.ttf', format: 'ttf' } });
+  await putJson(root, 'resources/fonts/renamed/book.resource.json', { ...metadata, payload: { path: 'resources/fonts/renamed/book.ttf', format: 'ttf' } });
   const second = await build(root, first.state, SOURCE_B);
   assert.equal(resource(second).versionCode, 1);
-  assert.equal(resource(second).payload.path, 'fonts/renamed/book.ttf');
+  assert.equal(resource(second).payload.path, 'resources/fonts/renamed/book.ttf');
 });
 
 test('deletion retains version history and reintroduction does not reset it', async (t) => {
@@ -277,9 +303,9 @@ test('restoring older payload bytes is a new published revision', async (t) => {
   const { root } = await fixture(t);
   await addFont(root, { content: 'old' });
   const first = await build(root);
-  await put(root, 'fonts/serif.ttf', 'new');
+  await put(root, 'resources/fonts/serif.ttf', 'new');
   const second = await build(root, first.state, SOURCE_B);
-  await put(root, 'fonts/serif.ttf', 'old');
+  await put(root, 'resources/fonts/serif.ttf', 'old');
   const rollback = await build(root, second.state, SOURCE_C);
   assert.equal(resource(rollback).versionCode, 3);
   assert.equal(resource(rollback).payload.sha256, resource(first).payload.sha256);
@@ -290,31 +316,31 @@ test('one resource ID cannot change its installation type', async (t) => {
   const { metadata, metadataPath } = await addFont(root);
   const first = await build(root);
   await fs.unlink(path.join(root, metadataPath));
-  await put(root, 'backgrounds/same.png', 'png bytes');
-  await putJson(root, 'backgrounds/same.resource.json', { ...metadata, payload: { path: 'backgrounds/same.png', format: 'png' } });
+  await put(root, 'resources/backgrounds/same.png', 'png bytes');
+  await putJson(root, 'resources/backgrounds/same.resource.json', { ...metadata, payload: { path: 'resources/backgrounds/same.png', format: 'png' } });
   await assert.rejects(build(root, first.state, SOURCE_B));
 });
 
 test('duplicate IDs are rejected across resources', async (t) => {
   const { root } = await fixture(t);
   await addFont(root);
-  await addFont(root, { payloadPath: 'fonts/other.ttf', metadataPath: 'fonts/other.resource.json' });
+  await addFont(root, { payloadPath: 'resources/fonts/other.ttf', metadataPath: 'resources/fonts/other.resource.json' });
   await assert.rejects(build(root));
 });
 
 test('two IDs cannot claim the same payload', async (t) => {
   const { root } = await fixture(t);
   const { metadata } = await addFont(root);
-  await putJson(root, 'fonts/other.resource.json', { ...metadata, id: 'font.example.other' });
+  await putJson(root, 'resources/fonts/other.resource.json', { ...metadata, id: 'font.example.other' });
   await assert.rejects(build(root));
 });
 
 test('two TTS resources cannot claim the same native engine identity', async (t) => {
   const { root } = await fixture(t);
   const metadata = await addTts(root);
-  await put(root, 'tts/other.js', ttsSource('function synthesize() {}'));
-  await putJson(root, 'tts/other.resource.json', {
-    ...metadata, id: 'tts.example.other', payload: { path: 'tts/other.js', format: 'js' },
+  await put(root, 'resources/tts/other.js', ttsSource('function synthesize() {}'));
+  await putJson(root, 'resources/tts/other.resource.json', {
+    ...metadata, id: 'tts.example.other', payload: { path: 'resources/tts/other.js', format: 'js' },
   });
   await assert.rejects(build(root));
 });
@@ -324,7 +350,7 @@ test('an existing TTS resource cannot change its native engine identity', async 
   await addTts(root);
   const first = await build(root);
   assert.equal(first.state.resources['tts.example.engine'].engineId, 'fixture_engine');
-  await put(root, 'tts/engine.js', ttsSource().replace('@uuid fixture_engine', '@uuid different_engine'));
+  await put(root, 'resources/tts/engine.js', ttsSource().replace('@uuid fixture_engine', '@uuid different_engine'));
   await assert.rejects(build(root, first.state, SOURCE_B));
 });
 
@@ -332,21 +358,21 @@ test('deleted TTS resources retain ownership of their native engine identity', a
   const { root } = await fixture(t);
   const metadata = await addTts(root);
   const first = await build(root);
-  await fs.unlink(path.join(root, 'tts', 'engine.resource.json'));
+  await fs.unlink(path.join(root, 'resources', 'tts', 'engine.resource.json'));
   const deleted = await build(root, first.state, SOURCE_B);
   assert.equal(deleted.state.resources[metadata.id].active, false);
   assert.equal(deleted.state.resources[metadata.id].engineId, 'fixture_engine');
-  await putJson(root, 'tts/engine.resource.json', { ...metadata, id: 'tts.example.replacement' });
+  await putJson(root, 'resources/tts/engine.resource.json', { ...metadata, id: 'tts.example.replacement' });
   await assert.rejects(build(root, deleted.state, SOURCE_C));
 });
 
 test('case-only resource IDs collide across current categories', async (t) => {
   const { root } = await fixture(t);
   await addFont(root, { id: 'Example.Resource' });
-  await put(root, 'backgrounds/paper.png', 'image bytes');
-  await putJson(root, 'backgrounds/paper.resource.json', {
+  await put(root, 'resources/backgrounds/paper.png', 'image bytes');
+  await putJson(root, 'resources/backgrounds/paper.resource.json', {
     schemaVersion: 1, id: 'example.resource', name: '纸张', author: 'A', license: 'NOASSERTION',
-    payload: { path: 'backgrounds/paper.png', format: 'png' },
+    payload: { path: 'resources/backgrounds/paper.png', format: 'png' },
   });
   await assert.rejects(build(root));
 });
@@ -357,10 +383,10 @@ test('case-only identity changes cannot bypass published history', async (t) => 
   const first = await build(root);
   await fs.unlink(path.join(root, metadataPath));
   const deleted = await build(root, first.state, SOURCE_B);
-  await put(root, 'backgrounds/paper.png', 'image bytes');
-  await putJson(root, 'backgrounds/paper.resource.json', {
+  await put(root, 'resources/backgrounds/paper.png', 'image bytes');
+  await putJson(root, 'resources/backgrounds/paper.resource.json', {
     schemaVersion: 1, id: 'example.resource', name: '纸张', author: 'A', license: 'NOASSERTION',
-    payload: { path: 'backgrounds/paper.png', format: 'png' },
+    payload: { path: 'resources/backgrounds/paper.png', format: 'png' },
   });
   await assert.rejects(build(root, deleted.state, SOURCE_C));
   assert.equal(deleted.state.resources[metadata.id].active, false);
@@ -414,18 +440,19 @@ test('unrecognized or mismatched categories are rejected', async (t) => {
 });
 
 for (const [label, badPath] of [
+  ['legacy root category path', 'fonts/serif.ttf'],
   ['parent traversal', '../outside.ttf'],
   ['absolute POSIX path', '/outside.ttf'],
   ['Windows drive path', 'C:/outside.ttf'],
   ['backslash path', 'fonts\\serif.ttf'],
-  ['embedded traversal', 'fonts/../fonts/serif.ttf'],
-  ['different category', 'backgrounds/serif.ttf'],
+  ['embedded traversal', 'resources/fonts/../fonts/serif.ttf'],
+  ['different category', 'resources/backgrounds/serif.ttf'],
 ]) {
   test(`rejects payload ${label}`, async (t) => {
     const { root, scratch } = await fixture(t);
     const { metadata, metadataPath } = await addFont(root);
     await fs.writeFile(path.join(scratch, 'outside.ttf'), 'outside');
-    await put(root, 'backgrounds/serif.ttf', 'other category');
+    await put(root, 'resources/backgrounds/serif.ttf', 'other category');
     await putJson(root, metadataPath, { ...metadata, payload: { path: badPath, format: 'ttf' } });
     await assert.rejects(build(root));
   });
@@ -469,12 +496,12 @@ test('metadata symlinks are rejected', async (t) => {
 
 test('symlinked resource subdirectories cannot bypass category boundaries', async (t) => {
   const { root, scratch } = await fixture(t);
-  await fs.mkdir(path.join(root, 'fonts'));
+  await fs.mkdir(path.join(root, 'resources', 'fonts'));
   const outside = path.join(scratch, 'outside');
   await fs.mkdir(outside);
   await fs.writeFile(path.join(outside, 'font.ttf'), 'outside');
-  await fs.writeFile(path.join(outside, 'font.resource.json'), JSON.stringify(fontMeta(undefined, 'fonts/link/font.ttf')));
-  if (!await makeSymlink(t, outside, path.join(root, 'fonts', 'link'), process.platform === 'win32' ? 'junction' : 'dir')) return;
+  await fs.writeFile(path.join(outside, 'font.resource.json'), JSON.stringify(fontMeta(undefined, 'resources/fonts/link/font.ttf')));
+  if (!await makeSymlink(t, outside, path.join(root, 'resources', 'fonts', 'link'), process.platform === 'win32' ? 'junction' : 'dir')) return;
   await assert.rejects(build(root));
 });
 
@@ -531,7 +558,7 @@ test('version counter overflow is rejected', async (t) => {
   const first = await build(root);
   const state = structuredClone(first.state);
   state.resources['font.example.serif'].versionCode = Number.MAX_SAFE_INTEGER;
-  await put(root, 'fonts/serif.ttf', 'changed bytes');
+  await put(root, 'resources/fonts/serif.ttf', 'changed bytes');
   await assert.rejects(build(root, state, SOURCE_B));
 });
 
@@ -574,9 +601,9 @@ test('invalid metadata and missing TTS native identity are rejected', async (t) 
 test('arbitrary JSON and data files are not silently treated as resource metadata', async (t) => {
   const { root } = await fixture(t);
   await addFont(root);
-  await put(root, 'fonts/manifest.json', '{ old unrelated format');
-  await put(root, 'fonts/source-catalogs/sample.json', '{ unrelated');
-  await put(root, 'fonts/unregistered.ttf', 'not listed');
+  await put(root, 'resources/fonts/manifest.json', '{ old unrelated format');
+  await put(root, 'resources/fonts/source-catalogs/sample.json', '{ unrelated');
+  await put(root, 'resources/fonts/unregistered.ttf', 'not listed');
   assert.equal((await build(root)).indexes.fonts.resources.length, 1);
 });
 
@@ -585,7 +612,7 @@ test('catalog output is stable regardless of metadata file creation order', asyn
   const secondFixture = await fixture(t);
   for (const [target, names] of [[firstFixture, ['z', 'a']], [secondFixture, ['a', 'z']]]) {
     for (const name of names) {
-      await addFont(target.root, { id: `font.example.${name}`, payloadPath: `fonts/${name}.ttf`, metadataPath: `fonts/${name}.resource.json`, content: name });
+      await addFont(target.root, { id: `font.example.${name}`, payloadPath: `resources/fonts/${name}.ttf`, metadataPath: `resources/fonts/${name}.resource.json`, content: name });
     }
   }
   const first = await build(firstFixture.root);
@@ -603,12 +630,12 @@ test('writeCatalog writes a coherent snapshot and can replace its own generated 
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'catalog.json'), 'utf8')), first.catalog);
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'state.json'), 'utf8')), JSON.parse(JSON.stringify(first.state)));
   for (const category of categories) {
-    assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, category.id, 'index.json'), 'utf8')), first.indexes[category.id]);
+    assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'resources', category.id, 'index.json'), 'utf8')), first.indexes[category.id]);
   }
-  await put(root, 'fonts/serif.ttf', 'second content');
+  await put(root, 'resources/fonts/serif.ttf', 'second content');
   const second = await build(root, first.state, SOURCE_B);
   await writeCatalog(second, output);
-  assert.equal(JSON.parse(await fs.readFile(path.join(output, 'fonts', 'index.json'), 'utf8')).resources[0].versionCode, 2);
+  assert.equal(JSON.parse(await fs.readFile(path.join(output, 'resources', 'fonts', 'index.json'), 'utf8')).resources[0].versionCode, 2);
 });
 
 test('writeCatalog refuses source roots and directories containing unrelated user files', async (t) => {
@@ -623,6 +650,12 @@ test('writeCatalog refuses source roots and directories containing unrelated use
   await fs.writeFile(path.join(output, 'keep.txt'), 'existing user data');
   await assert.rejects(writeCatalog(built, output));
   assert.deepEqual(await filesSnapshot(output), { 'keep.txt': digest('existing user data') });
+  const generated = path.join(scratch, 'generated-output');
+  await writeCatalog(built, generated);
+  await put(generated, 'resources/fonts/keep.txt', 'unrelated nested file');
+  const before = await filesSnapshot(generated);
+  await assert.rejects(writeCatalog(built, generated));
+  assert.deepEqual(await filesSnapshot(generated), before);
 });
 
 test('CLI generation failure preserves the previous published output', async (t) => {
@@ -643,7 +676,7 @@ test('CLI rejects an explicitly null state file without resetting published vers
   const { root, scratch } = await fixture(t);
   await addFont(root);
   const first = await build(root);
-  await put(root, 'fonts/serif.ttf', 'second content');
+  await put(root, 'resources/fonts/serif.ttf', 'second content');
   const second = await build(root, first.state, SOURCE_B);
   const output = path.join(scratch, 'catalog');
   await writeCatalog(second, output);
@@ -667,7 +700,7 @@ test('CLI validate uses published history to reject native identity changes', as
   const args = [cliPath, 'validate', '--root', root, '--state', stateFile];
   const firstCheck = spawnSync(process.execPath, args, { encoding: 'utf8' });
   assert.equal(firstCheck.status, 0, firstCheck.stderr);
-  await put(root, 'tts/engine.js', ttsSource().replace('@uuid fixture_engine', '@uuid replacement_engine'));
+  await put(root, 'resources/tts/engine.js', ttsSource().replace('@uuid fixture_engine', '@uuid replacement_engine'));
   const before = await filesSnapshot(root);
   const secondCheck = spawnSync(process.execPath, args, { encoding: 'utf8' });
   assert.notEqual(secondCheck.status, 0);
