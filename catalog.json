@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "bf84aa9e1c6afaf20cfa701f45ca07654e3cdfe0",
+  "categories": [
+    {
+      "id": "fonts",
+      "name": "字体",
+      "type": "font",
+      "index": "resources/fonts/index.json",
+      "count": 0
+    },
+    {
+      "id": "backgrounds",
+      "name": "阅读背景",
+      "type": "background",
+      "index": "resources/backgrounds/index.json",
+      "count": 0
+    },
+    {
+      "id": "tts",
+      "name": "TTS",
+      "type": "tts",
+      "index": "resources/tts/index.json",
+      "count": 0
+    },
+    {
+      "id": "themes",
+      "name": "主题",
+      "type": "theme",
+      "index": "resources/themes/index.json",
+      "count": 0
+    }
+  ]
+}
