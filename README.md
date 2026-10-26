@@ -12,7 +12,7 @@ resources/
 └── themes/
 ```
 
-当前提交包含目录工具、回归测试、GitHub Actions 定义和四类目录框架，尚未收录实际资源。本机已有的 TTS 脚本及资料不在本次提交中。工作流尚未在 GitHub 实际运行，NG 内资源中心也尚未接入。
+当前提供四类最小示例，以及目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心尚未接入；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
 
 ## 目录
 
@@ -20,12 +20,19 @@ resources/
 |---|---|
 | `resources/fonts/` | TTF / OTF 字体 |
 | `resources/backgrounds/` | PNG / JPEG / WebP 阅读背景 |
-| `resources/tts/` | NG JS 朗读引擎分类，目前仅占位 |
+| `resources/tts/` | NG JS 朗读引擎分类，当前为接口模板示例 |
 | `resources/themes/` | NG 主题包或对应导入器支持的 ZIP |
 | `tools/` | 索引生成与发布工具 |
 | `test/` | 使用临时目录和本地 Git 远端的回归测试 |
 
-四类目录目前只包含占位或说明文件。测试自行创建临时资源，不依赖未提交的本地 TTS 文件；以后投稿的资源也不会因为索引检查通过就被视为实际功能已经验证。
+四个示例：
+
+- [Noto Sans 字体](resources/fonts/noto-sans-example/README.md)：保留上游原始字节与 OFL 许可；不包含中文字形。
+- [暖纸阅读背景](resources/backgrounds/warm-paper-example/README.md)：1080×1440 原创 PNG。
+- [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
+- [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
+
+工具回归使用隔离临时夹具，示例检查只读取上述公开示例，不依赖未提交的本地 TTS 文件。目录检查通过不代表资源已经在 NG 实机验收。
 
 ## 本地验证
 
@@ -38,7 +45,7 @@ node tools/catalog.mjs validate --root .
 node --test test/*.test.mjs
 ```
 
-本地已验证目录和 Git 发布流程，当前测试共 74 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。
+当前测试共 78 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。背景与主题可使用 Python 3 标准库命令 `python3 tools/build-example-assets.py` 确定性重建，无需第三方图像库。
 
 ## 自动维护方式
 

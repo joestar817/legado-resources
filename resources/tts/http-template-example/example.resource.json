@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.example.http-template",
+  "name": "HTTP TTS 接口模板",
+  "author": "阅读 NG 示例",
+  "description": "默认禁用；需自行配置兼容服务，仅演示脚本接口，不代表已有可用服务。",
+  "license": "CC0-1.0",
+  "versionName": "1.0.0",
+  "payload": {
+    "path": "resources/tts/http-template-example/engine.js",
+    "format": "js"
+  },
+  "tags": [
+    "示例"
+  ],
+  "verification": {
+    "checkedOn": "2026-10-26",
+    "status": "template_only",
+    "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
+  }
+}

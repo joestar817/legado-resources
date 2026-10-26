@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "background.example.warm-paper",
+  "name": "暖纸阅读背景示例",
+  "author": "阅读 NG 示例",
+  "description": "1080×1440 原创暖色纸张背景，轻微纹理，无文字。",
+  "license": "CC0-1.0",
+  "versionName": "1.0.0",
+  "payload": {
+    "path": "resources/backgrounds/warm-paper-example/warm-paper.png",
+    "format": "png"
+  },
+  "tags": [
+    "示例"
+  ],
+  "verification": {
+    "checkedOn": "2026-10-26",
+    "status": "file_validated",
+    "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
+  }
+}
