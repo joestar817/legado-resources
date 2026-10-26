@@ -45,7 +45,8 @@ jobs:
           python-version: '3.10'
       - name: 安装固定字体渲染环境
         shell: bash
-        run: python3 -m pip install --only-binary=:all: -r tools/font-preview-requirements.txt
+        run: |
+          python3 -m pip install --only-binary=:all: -r tools/font-preview-requirements.txt
       - name: 验证已合并工具与资源
         shell: bash
         run: |
