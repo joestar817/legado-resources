@@ -1,0 +1,55 @@
+{
+  "format": "reading-ng-theme",
+  "version": 1,
+  "theme": {
+    "schemaVersion": 1,
+    "id": "example.warm-paper",
+    "name": "暖纸示例",
+    "colors": {
+      "mode": "MANUAL",
+      "lightSeed": -9217226,
+      "darkSeed": -2243430,
+      "paletteStyle": "TONAL_SPOT",
+      "contrast": "DEFAULT",
+      "colorSpec": "MATERIAL_3_2021",
+      "manualLight": {
+        "primary": -9217226,
+        "secondary": -8096675,
+        "primaryText": -14146530,
+        "secondaryText": -9278623,
+        "background": -461591,
+        "labelContainer": -1186865
+      },
+      "manualDark": {
+        "primary": -2243430,
+        "secondary": -3622753,
+        "primaryText": -1120036,
+        "secondaryText": -3686478,
+        "background": -14606823,
+        "labelContainer": -12963289
+      },
+      "lightTopBarTextMode": "AUTO",
+      "darkTopBarTextMode": "AUTO"
+    },
+    "lightBackground": {
+      "path": null,
+      "blur": 0
+    },
+    "darkBackground": {
+      "path": null,
+      "blur": 0
+    },
+    "transparentAppBars": true,
+    "barProfile": null,
+    "packageRootPath": null,
+    "resourceProfile": null,
+    "coverProfile": null,
+    "ownedCoverAlbumIds": null,
+    "sceneProfile": null,
+    "drawerProfile": null
+  },
+  "lightBackgroundAsset": null,
+  "darkBackgroundAsset": null,
+  "lightDrawerImageAsset": null,
+  "darkDrawerImageAsset": null
+}
