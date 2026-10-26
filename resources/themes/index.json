@@ -1,20 +1,22 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "cc2b82e5f0f1a2ab78f2da0f59fecbe4ae2ee2f4",
+  "sourceCommit": "c88f795db3b475433b43f0259eca49bebcceba5c",
   "type": "theme",
   "resources": [
     {
       "id": "theme.example.warm-paper",
       "name": "暖纸主题示例",
       "author": "阅读 NG 示例",
-      "license": "CC0-1.0",
       "versionCode": 1,
+      "publishedAt": "2026-10-26T10:52:23.000Z",
+      "updatedAt": "2026-10-26T10:52:23.000Z",
       "payload": {
         "path": "resources/themes/warm-paper-example/warm-paper.ngtheme",
         "format": "ngtheme",
         "size": 1498,
         "sha256": "cd0d8b474275b22bf2118639b1072dab75f49ccac2b679c79e584fd843b00061"
       },
+      "license": "CC0-1.0",
       "description": "NG 原生纯配色主题，包含日间/夜间颜色；不绑定本地图片、字体或账号数据。",
       "versionName": "1.0.0",
       "tags": [
