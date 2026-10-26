@@ -13,7 +13,6 @@
   "name": "示例宋体",
   "author": "实际作者",
   "description": "简短说明适合的阅读场景。",
-  "license": "填写该字体真实的许可名称或标识",
   "payload": {
     "path": "resources/fonts/example/font.ttf",
     "format": "ttf"
@@ -21,7 +20,7 @@
 }
 ```
 
-这只是说明格式，不是可以直接发布的真实字体。请填写真实署名与授权信息，不要把贡献者自动写成原作者。
+这只是说明格式，不是可以直接发布的真实字体。请填写真实署名，不要把贡献者自动写成原作者。`license` 改为可选；已有授权声明可以保留，没有信息时省略，不猜测许可名称。
 
 ## TTS 例子
 
@@ -29,7 +28,6 @@
 {
   "schemaVersion": 1,
   "id": "tts.example.reader",
-  "license": "填写脚本真实的许可名称或标识",
   "payload": {
     "path": "resources/tts/example.js",
     "format": "js"
@@ -44,13 +42,14 @@
 - `id` 一经收录保持稳定；修改显示名称或移动文件都不改 ID。
 - 直接修改资源文件，机器会计算摘要并增加 `versionCode`，不手填机器版本。
 - TTS 的 `@uuid` 是实际引擎身份，同一资源应保持不变；另一个引擎应作为新资源提交。
-- 更正介绍、署名或标签不会单独增加安装版本。
+- 更正介绍、署名或标签不会单独增加安装版本或改变更新时间。
+- `publishedAt`、`updatedAt` 由发布器按受信源提交时间生成，分别表示首次收录和最近一次内容升版；不要手填。
 - 删除资源时删除对应说明和不再使用的载荷；内部历史由发布器保留，作者不编辑台账。
 - 不提交 `catalog.json`、分类 `index.json`、`state.json`、密钥、Cookie、账号配置或测试音频。
 
-支持的可选说明字段为 `description`、`versionName`、`changelog`、`tags`、`requirements`、`verification`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`；`verification` 可填写 `checkedOn`（YYYY-MM-DD）、`status`、`note`，说明实际证据及未覆盖范围。
+投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。
 
-例如服务只通过本机短句测试时，应明确 Android 和长时间使用是否验证；不要把文件格式检查当作服务可用性验证。
+元数据只保留资源展示、识别、版本和安装所需的信息。校验日期、测试状态与验证过程放在投稿说明或本地记录中，不填写 `verification`，避免增加后续手动维护负担。
 
 ## 提交前
 

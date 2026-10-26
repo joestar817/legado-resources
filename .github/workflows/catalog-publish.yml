@@ -10,6 +10,11 @@ on:
         required: true
         type: boolean
         default: false
+      initialize_dates:
+        description: '仅旧目录缺少日期时，按完整发布历史补齐；不重置版本'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -44,10 +49,10 @@ jobs:
         env:
           CATALOG_GITHUB_TOKEN: ${{ github.token }}
           CATALOG_BOOTSTRAP: ${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap }}
+          CATALOG_INITIALIZE_DATES: ${{ github.event_name == 'workflow_dispatch' && inputs.initialize_dates }}
         shell: bash
         run: |
-          if [ "$CATALOG_BOOTSTRAP" = 'true' ]; then
-            node tools/publish-catalog.mjs --root . --bootstrap
-          else
-            node tools/publish-catalog.mjs --root .
-          fi
+          args=()
+          if [ "$CATALOG_BOOTSTRAP" = 'true' ]; then args+=(--bootstrap); fi
+          if [ "$CATALOG_INITIALIZE_DATES" = 'true' ]; then args+=(--initialize-dates); fi
+          node tools/publish-catalog.mjs --root . "${args[@]}"

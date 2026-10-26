@@ -12,7 +12,7 @@ resources/
 └── themes/
 ```
 
-当前提供四类最小示例，以及目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心尚未接入；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
+当前包含一款标题字体，以及背景、TTS 和主题示例，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心已接入目录、下载与更新提示；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
 
 ## 目录
 
@@ -25,14 +25,14 @@ resources/
 | `tools/` | 索引生成与发布工具 |
 | `test/` | 使用临时目录和本地 Git 远端的回归测试 |
 
-四个示例：
+资源与示例：
 
-- [Noto Sans 字体](resources/fonts/noto-sans-example/README.md)：保留上游原始字节与 OFL 许可；不包含中文字形。
+- [风云体（标题字形版）](resources/fonts/ss-fengyun-title/font.resource.json)：用于章节标题，保留所提供字体的原始字节；仅含部分字形，不是完整正文字库。每款字体一个目录，仅放字体文件与资源元数据，投稿格式见 [贡献说明](CONTRIBUTING.md)。
 - [暖纸阅读背景](resources/backgrounds/warm-paper-example/README.md)：1080×1440 原创 PNG。
 - [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
 
-工具回归使用隔离临时夹具，示例检查只读取上述公开示例，不依赖未提交的本地 TTS 文件。目录检查通过不代表资源已经在 NG 实机验收。
+工具回归使用隔离临时夹具，资产检查只读取上述资源与示例，不依赖未提交的本地 TTS 文件。目录检查通过不代表资源已经在 NG 实机验收。
 
 ## 本地验证
 
@@ -45,14 +45,18 @@ node tools/catalog.mjs validate --root .
 node --test test/*.test.mjs
 ```
 
-当前测试共 78 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。背景与主题可使用 Python 3 标准库命令 `python3 tools/build-example-assets.py` 确定性重建，无需第三方图像库。
+当前测试共 91 项。Windows 上无法创建文件符号链接时，相关两项会明确跳过；其它平台应以实际测试输出为准。背景与主题可使用 Python 3 标准库命令 `python3 tools/build-example-assets.py` 确定性重建，无需第三方图像库。
 
 ## 自动维护方式
 
 1. 作者在资源目录提交文件和对应的 `*.resource.json`；TTS 名称、作者及作者版本可从已有脚本头部提取。
 2. PR 检查使用目标分支中的可信生成器读取候选资源，只做检查，不执行投稿脚本或发布索引。
 3. 首次建立云端仓库时，手动运行一次“更新资源目录”，勾选 `bootstrap` 初始化目录；之后 `main` 接收获准提交时，Actions 自动测试、生成索引并更新 `catalog` 分支。
-4. NG 客户端将来固定一次 `catalog` 提交读取索引，再按 `sourceCommit` 下载源文件。客户端无需遍历仓库，也不依赖 Releases。
+4. NG 客户端固定一次 `catalog` 提交读取索引，再按 `sourceCommit` 下载源文件。客户端无需遍历仓库，也不依赖 Releases。
+
+目录同时自动记录每项资源的 `publishedAt`（首次收录）和 `updatedAt`（最近一次安装内容变更），统一保存为 UTC 时间。取值来自对应受信源提交的提交时间，不使用文件修改时间或任务运行时间。只改说明、移动文件或重复发布不会刷新日期。
+
+已有目录若缺日期，普通发布会明确停止。仓库维护者需在“更新资源目录”的手动运行中勾选 `initialize_dates` 一次（不要同时勾选 `bootstrap`），或使用 `node tools/publish-catalog.mjs --root . --initialize-dates`。工具按完整 catalog 历史恢复日期并保留版本与指纹；历史缺失、分叉、时间倒退或日期不一致时拒绝猜测。首次新建目录会直接记录日期，无需初始化日期。
 
 生成目录包括总目录 `catalog.json`、各分类的 `index.json` 和内部版本台账 `state.json`。开发者不手改这些文件，不把它们提交到 `main`。
 
@@ -62,7 +66,7 @@ node --test test/*.test.mjs
 
 投稿步骤、字段与例子见 [贡献说明](CONTRIBUTING.md)。源文件存储在普通 Git 中；需要 LFS 时再单独配置。工具遇到尚未展开的 LFS 指针会拒绝生成，正式索引必须描述真实文件。
 
-资源作者、授权和服务状态应填写真实来源信息。工具接受 `NOASSERTION` 以表示尚未声明许可；该值不代表已经确认再分发许可，也不授予第三方服务账号或声音的使用权限。
+资源作者和服务状态应填写真实来源信息。`license` 为可选信息；已知时可以保留，不知道时省略。原有上游授权文件不由索引工具删除。
 
 ## 发布与验收范围
 

@@ -10,13 +10,17 @@ import { spawnSync } from 'node:child_process';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = p => fs.readFileSync(path.join(root, p));
 
-test('font example preserves the upstream font and its license', () => {
-  const font = read('resources/fonts/noto-sans-example/NotoSans.ttf');
-  assert.equal(createHash('sha256').update(font).digest('hex'), 'bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d');
+test('title font preserves the supplied bytes and has its own two-file resource directory', () => {
+  const directory = 'resources/fonts/ss-fengyun-title';
+  const font = read(`${directory}/font.ttf`);
+  assert.equal(createHash('sha256').update(font).digest('hex'), '4b3cb885a37565825b925c48cbcaaea108b672f1994d0cad664ebd6e4958056f');
   assert.equal(font.readUInt32BE(0), 0x00010000);
-  const license = read('resources/fonts/noto-sans-example/OFL.txt');
-  assert.equal(createHash('sha256').update(license).digest('hex'), 'cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a');
-  assert.match(license.toString(), /SIL OPEN FONT LICENSE Version 1\.1/);
+  const metadata = JSON.parse(read(`${directory}/font.resource.json`));
+  assert.equal(metadata.id, 'font.ss-fengyun-title');
+  assert.equal(metadata.payload.path, `${directory}/font.ttf`);
+  assert.equal(metadata.payload.format, 'ttf');
+  assert.deepEqual(fs.readdirSync(path.join(root, directory)).sort(), ['font.resource.json', 'font.ttf']);
+  assert.equal(fs.existsSync(path.join(root, 'resources/fonts/noto-sans-example')), false);
 });
 
 test('background example contains complete RGB pixels at the documented size', () => {

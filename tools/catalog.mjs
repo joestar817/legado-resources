@@ -205,7 +205,21 @@ function verification(value) {
   if (value.note !== undefined) result.note = text(value.note, 'verification.note', 5000);
   return result;
 }
-function checkState(value) {
+export function catalogTimestamp(value, label = 'sourceTime') {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) fail(`${label} must be an ISO UTC timestamp`);
+  const parsed = new Date(value);
+  const canonical = value.includes('.') ? value : value.replace('Z', '.000Z');
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString() !== canonical) fail(`${label} must be a valid ISO UTC timestamp`);
+  return canonical;
+}
+function recordDates(record, label) {
+  if (record.publishedAt === undefined && record.updatedAt === undefined) return {};
+  const publishedAt = catalogTimestamp(record.publishedAt, `${label}.publishedAt`);
+  const updatedAt = catalogTimestamp(record.updatedAt, `${label}.updatedAt`);
+  if (updatedAt < publishedAt) fail(`${label}.updatedAt precedes publishedAt`);
+  return { publishedAt, updatedAt };
+}
+export function checkState(value) {
   if (value === null || value === undefined) return null;
   fields(value, ['schemaVersion', 'sourceCommit', 'resources'], 'state');
   if (value.schemaVersion !== 1) fail('Unsupported state.schemaVersion');
@@ -220,11 +234,11 @@ function checkState(value) {
     if (foldedIds.has(id.toLowerCase())) fail('Case-only resource ID collision in state');
     foldedIds.add(id.toLowerCase());
     const record = value.resources[id];
-    fields(record, ['type', 'versionCode', 'fingerprint', 'active', 'engineId'], `state.resources.${id}`);
+    fields(record, ['type', 'versionCode', 'fingerprint', 'active', 'engineId', 'publishedAt', 'updatedAt'], `state.resources.${id}`);
     if (!Object.values(TYPES).includes(record.type)) fail(`Invalid historical type for ${id}`);
     if (!Number.isSafeInteger(record.versionCode) || record.versionCode < 1) fail(`Invalid historical version for ${id}`);
     if (typeof record.active !== 'boolean') fail(`Invalid historical active state for ${id}`);
-    result[id] = { type: record.type, versionCode: record.versionCode, fingerprint: hash(record.fingerprint, `${id} fingerprint`), active: record.active };
+    result[id] = { type: record.type, versionCode: record.versionCode, fingerprint: hash(record.fingerprint, `${id} fingerprint`), active: record.active, ...recordDates(record, id) };
     if (record.type === 'tts') {
       const engineId = identifier(record.engineId, `${id} historical engine ID`);
       if (engineIds.has(engineId)) fail(`Duplicate historical TTS engine ID ${engineId}`);
@@ -236,13 +250,47 @@ function checkState(value) {
   return result;
 }
 
-/** Read resources without evaluating their code and compare them with the last published state. */
-export async function buildCatalog({ root, sourceCommit, previousState = null }) {
+/** Explicitly recover dates from the complete, oldest-first published state history. No files or refs are changed. */
+export function initializeCatalogDates(history) {
+  if (!Array.isArray(history) || !history.length || history.length > 100000) fail('A complete catalog history is required to initialize dates');
+  let previous = Object.create(null);
+  let lastState;
+  for (const entry of history) {
+    const sourceTime = catalogTimestamp(entry.sourceTime);
+    const current = checkState(entry.state);
+    if (!current) fail('Historical catalog state is missing');
+    for (const id of Object.keys(previous)) if (!Object.hasOwn(current, id)) fail(`Catalog history lost resource ${id}`);
+    for (const [id, record] of Object.entries(current)) {
+      const prior = previous[id];
+      const changed = prior && prior.fingerprint !== record.fingerprint;
+      if (!prior) {
+        if (record.versionCode !== 1 || !record.active) fail(`Catalog history is incomplete for ${id}`);
+      } else {
+        if (prior.type !== record.type || prior.engineId !== record.engineId) fail(`Catalog history changed identity for ${id}`);
+        if (record.versionCode !== prior.versionCode + (changed ? 1 : 0) || (changed && !record.active)) fail(`Catalog history has inconsistent versions for ${id}`);
+        if (changed && sourceTime < prior.updatedAt) fail(`Source time moved backwards for ${id}`);
+      }
+      const dates = { publishedAt: prior?.publishedAt ?? sourceTime, updatedAt: !prior || changed ? sourceTime : prior.updatedAt };
+      if (record.publishedAt !== undefined && (record.publishedAt !== dates.publishedAt || record.updatedAt !== dates.updatedAt)) fail(`Catalog history has inconsistent dates for ${id}`);
+      current[id] = { ...record, ...dates };
+    }
+    previous = current;
+    lastState = entry.state;
+  }
+  return { ...lastState, resources: previous };
+}
+
+/** Read resources without evaluating code. Omit sourceTime only for validation, never publication. */
+export async function buildCatalog({ root, sourceCommit, sourceTime, previousState = null }) {
   if (typeof root !== 'string' || !root) fail('root is required');
   await ordinary(path.resolve(root), 'directory');
   root = await fs.realpath(path.resolve(root));
   sourceCommit = commit(sourceCommit);
   const previous = checkState(previousState);
+  if (sourceTime !== undefined) {
+    sourceTime = catalogTimestamp(sourceTime);
+    if (Object.values(previous || {}).some(record => record.publishedAt === undefined)) fail('Catalog dates are missing; publish with explicit --initialize-dates first');
+  }
   const config = await readJson(path.join(root, 'catalog.config.json'));
   fields(config, ['schemaVersion', 'categories'], 'catalog.config');
   if (config.schemaVersion !== 1) fail('Unsupported catalog.config.schemaVersion');
@@ -304,15 +352,22 @@ export async function buildCatalog({ root, sourceCommit, previousState = null })
       if (prior?.type === 'tts' && prior.engineId !== header.uuid) fail(`Resource ${id} cannot change its TTS engine ID`);
       const versionCode = prior ? prior.versionCode + (prior.fingerprint === fingerprint ? 0 : 1) : 1;
       if (!Number.isSafeInteger(versionCode)) fail(`Version overflow for ${id}`);
+      let dates = {};
+      if (prior?.publishedAt !== undefined && prior.fingerprint === fingerprint) dates = recordDates(prior, id);
+      else if (sourceTime !== undefined) {
+        if (prior && sourceTime < prior.updatedAt) fail(`Source time moved backwards for ${id}`);
+        dates = { publishedAt: prior?.publishedAt ?? sourceTime, updatedAt: sourceTime };
+      }
       const resource = {
         id,
         name: text(meta.name ?? header?.name, `${id}.name`, 256),
         author: text(meta.author ?? header?.author, `${id}.author`, 256),
-        license: text(meta.license, `${id}.license`, 256),
         versionCode,
+        ...dates,
         payload,
       };
       const optionals = {
+        license: optionalText(meta.license, `${id}.license`, 256),
         description: optionalText(meta.description ?? header?.description, `${id}.description`, 5000),
         versionName: optionalText(meta.versionName ?? header?.version, `${id}.versionName`, 128),
         requirements: requirements(meta.requirements),
@@ -322,7 +377,7 @@ export async function buildCatalog({ root, sourceCommit, previousState = null })
       };
       for (const [key, value] of Object.entries(optionals)) if (value !== undefined) resource[key] = value;
       resources.push(resource);
-      stateResources[id] = { type: category.type, versionCode, fingerprint, active: true };
+      stateResources[id] = { type: category.type, versionCode, fingerprint, active: true, ...dates };
       if (header) stateResources[id].engineId = header.uuid;
     }
     resources.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
@@ -423,19 +478,19 @@ export async function writeCatalog(result, outDir) {
 
 async function main(args) {
   const command = args.shift();
-  if (!['validate', 'generate'].includes(command)) fail('Usage: catalog.mjs validate --root PATH [--state FILE] | generate --root PATH --source-commit SHA [--state FILE] --out PATH');
+  if (!['validate', 'generate'].includes(command)) fail('Usage: catalog.mjs validate --root PATH [--state FILE] | generate --root PATH --source-commit SHA --source-time ISO_UTC [--state FILE] --out PATH');
   const options = Object.create(null);
-  const allowed = command === 'validate' ? ['--root', '--state'] : ['--root', '--source-commit', '--state', '--out'];
+  const allowed = command === 'validate' ? ['--root', '--state'] : ['--root', '--source-commit', '--source-time', '--state', '--out'];
   while (args.length) {
     const option = args.shift();
     if (!allowed.includes(option) || Object.hasOwn(options, option) || !args.length || args[0].startsWith('--')) fail(`Invalid CLI option: ${option}`);
     options[option] = args.shift();
   }
   if (!options['--root']) fail('--root is required');
-  if (command === 'generate' && (!options['--source-commit'] || !options['--out'])) fail('generate requires --source-commit and --out');
+  if (command === 'generate' && (!options['--source-commit'] || !options['--source-time'] || !options['--out'])) fail('generate requires --source-commit, --source-time and --out');
   const previousState = options['--state'] ? await readJson(path.resolve(options['--state']), MAX_STATE_BYTES) : null;
   if (options['--state']) object(previousState, 'Explicit state file');
-  const result = await buildCatalog({ root: options['--root'], sourceCommit: options['--source-commit'] || EMPTY_COMMIT, previousState });
+  const result = await buildCatalog({ root: options['--root'], sourceCommit: options['--source-commit'] || EMPTY_COMMIT, sourceTime: options['--source-time'], previousState });
   if (command === 'generate') await writeCatalog(result, options['--out']);
   const count = result.catalog.categories.reduce((sum, category) => sum + category.count, 0);
   process.stdout.write(`${command === 'validate' ? 'Validated' : 'Generated'} ${count} resources in ${result.catalog.categories.length} categories.\n`);

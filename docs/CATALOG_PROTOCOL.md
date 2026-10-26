@@ -43,7 +43,9 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
 | 字段 | 说明 |
 |---|---|
 | `id` | 稳定身份，全目录唯一；大小写变体也不得重复 |
-| `name`、`author`、`license` | 名称、作者、授权声明 |
+| `name`、`author` | 名称、作者 |
+| `license` | 可选的授权声明；缺省时不推断 |
+| `publishedAt`、`updatedAt` | 自动维护的 UTC ISO8601 时间，首次收录与最近一次安装内容变更 |
 | `versionCode` | 自动维护的正整数修订号 |
 | `versionName` | 可选的作者版本，仅展示 |
 | `payload.path`、`format` | 带 `resources/<分类>/` 前缀的仓库相对路径、载荷格式 |
@@ -51,9 +53,18 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
 | `payload.engineId` | TTS 从脚本 `@uuid` 提取的原生引擎身份 |
 | `requirements` | 可选的 `minAppVersionCode` 与 `capabilities` |
 | `description`、`changelog`、`tags` | 可选展示信息 |
-| `verification` | 可选的验证日期、状态和说明，不代表生成器执行过服务验证 |
 
 同 ID 的类型及 TTS 引擎身份不得变化。文件名／路径仅定位载荷，不能当作资源身份。索引格式版本、机器修订、作者版本和 App 版本分别有自己的语义。
+
+资源元数据不维护校验日期、测试状态或验证过程；这些记录放在投稿说明或本地诊断中，不作为资源内容维护。
+
+## 自动时间
+
+时间由发布器从受信 `sourceCommit` 的 Git committer time 生成并规范成 `YYYY-MM-DDTHH:mm:ss.sssZ`，禁止在资源说明中手填。首次收录时 `publishedAt = updatedAt = sourceTime`；指纹改变时仅更新 `updatedAt`；说明、路径、重复发布、删除或同内容重新加入都保持原日期。日期不参与安装指纹或版本比较。内容升版的源时间如果早于已记录更新时间，发布会失败，不回拨或改写时间。
+
+旧目录缺日期不会由运行时自动修复。维护者显式调用 `--initialize-dates`（或手动工作流的 `initialize_dates`）后，发布器读取完整、非浅、单亲 catalog 历史，按每次台账的受信来源提交时间恢复首次出现/指纹变化时间；保持原版本、指纹和删除记录。缺失历史、身份变化、版本跳跃、时间倒退或既有日期与历史不一致时失败，不猜时间或重置版本。初始化后重复运行保持同一结果。
+
+投稿 `validate` 仍可读取无日期旧台账，且不会补造时间。独立 `generate` 必须显式提供来自源提交的 `--source-time` UTC 时间；内部 `buildCatalog` 省略 `sourceTime` 仅供校验，不用于发布。
 
 ## 自动版本
 
@@ -68,7 +79,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
 
 兼容条件变化仍会更新目录，NG 每次安装或更新都应重新判断兼容性，不能仅比较 `versionCode`。将来如果增加会改变安装结果的参数，必须同步修改指纹协议及测试。
 
-台账至少包含 `schemaVersion`、`sourceCommit` 和 `resources` 映射。每条记录为 `type`、`versionCode`、`fingerprint`、`active`，TTS 另有必需 `engineId`。已有台账损坏、缺失或来源历史分叉时停止发布，不能静默初始化成版本 1。
+台账至少包含 `schemaVersion`、`sourceCommit` 和 `resources` 映射。每条记录为 `type`、`versionCode`、`fingerprint`、`active`、`publishedAt`、`updatedAt`，TTS 另有必需 `engineId`。已有台账损坏、缺失或来源历史分叉时停止发布，不能静默初始化成版本 1。
 
 ## 安全与一致性边界
 
@@ -80,8 +91,8 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录和分类索
 
 ## 本地安装记录
 
-NG 后续应独立保存来源仓库、资源 ID、已安装版本、载荷摘要、来源提交和实际本地文件／业务对象 ID。安装记录只有在对应模块成功安装后才更新。
+NG 独立保存来源仓库、资源 ID、已安装版本、载荷摘要、来源提交和实际本地文件／业务对象 ID。安装记录只有在对应模块成功安装后才更新。
 
 自动归类表示加入资源库，不自动切换字体、背景、主题或启用 TTS。下载失败、更新不兼容、远端删除均保留现有安装。用户编辑的内容与个人配置不能直接被云端版本覆盖。
 
-当前仓库仅实现生成与发布协议，尚未修改 NG 的安装器或资源中心 UI。
+NG 资源中心已实现目录与单文件安装消费；日期在详情页按设备时区显示，缺失或非法日期显示“—”，不会以当前时间兜底。

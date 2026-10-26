@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { buildCatalog, writeCatalog } from '../tools/catalog.mjs';
+import { buildCatalog, writeCatalog, initializeCatalogDates } from '../tools/catalog.mjs';
 
 const SOURCE_A = 'a'.repeat(40);
 const SOURCE_B = 'b'.repeat(40);
@@ -565,6 +565,8 @@ test('version counter overflow is rejected', async (t) => {
 for (const [label, change] of [
   ['versionCode', (meta) => { meta.versionCode = 100; }],
   ['sourceCommit', (meta) => { meta.sourceCommit = SOURCE_A; }],
+  ['publishedAt', (meta) => { meta.publishedAt = '2026-10-26T10:00:00Z'; }],
+  ['updatedAt', (meta) => { meta.updatedAt = '2026-10-26T11:00:00Z'; }],
   ['root sha256', (meta) => { meta.sha256 = '1'.repeat(64); }],
   ['payload sha256', (meta) => { meta.payload.sha256 = '1'.repeat(64); }],
   ['payload size', (meta) => { meta.payload.size = 1; }],
@@ -582,7 +584,7 @@ test('invalid metadata and missing TTS native identity are rejected', async (t) 
   const { root } = await fixture(t);
   const { metadata, metadataPath } = await addFont(root);
   for (const change of [
-    (meta) => { delete meta.license; },
+    (meta) => { meta.license = ''; },
     (meta) => { delete meta.name; },
     (meta) => { meta.name = 5; },
     (meta) => { meta.requirements = { minAppVersionCode: -1 }; },
@@ -662,7 +664,7 @@ test('CLI generation failure preserves the previous published output', async (t)
   const { root, scratch } = await fixture(t);
   const { metadata, metadataPath } = await addFont(root);
   const output = path.join(scratch, 'catalog');
-  const args = [cliPath, 'generate', '--root', root, '--source-commit', SOURCE_A, '--out', output];
+  const args = [cliPath, 'generate', '--root', root, '--source-commit', SOURCE_A, '--source-time', '2026-10-26T10:00:00Z', '--out', output];
   const success = spawnSync(process.execPath, args, { encoding: 'utf8' });
   assert.equal(success.status, 0, success.stderr);
   const before = await filesSnapshot(output);
@@ -684,7 +686,7 @@ test('CLI rejects an explicitly null state file without resetting published vers
   const nullState = path.join(scratch, 'broken-state.json');
   await fs.writeFile(nullState, 'null\n');
   const result = spawnSync(process.execPath, [
-    cliPath, 'generate', '--root', root, '--source-commit', SOURCE_C,
+    cliPath, 'generate', '--root', root, '--source-commit', SOURCE_C, '--source-time', '2026-10-27T10:00:00Z',
     '--state', nullState, '--out', output,
   ], { encoding: 'utf8' });
   assert.notEqual(result.status, 0);
@@ -714,4 +716,107 @@ test('CLI validate rejects an explicitly null history', async (t) => {
   await fs.writeFile(stateFile, 'null\n');
   const result = spawnSync(process.execPath, [cliPath, 'validate', '--root', root, '--state', stateFile], { encoding: 'utf8' });
   assert.notEqual(result.status, 0);
+});
+
+const TIME_A = '2026-10-26T10:00:00.000Z';
+const TIME_B = '2026-10-26T11:00:00.000Z';
+const TIME_C = '2026-10-27T10:00:00.000Z';
+
+test('license is optional without inventing a permission declaration', async t => {
+  const { root } = await fixture(t);
+  const { metadata, metadataPath } = await addFont(root);
+  delete metadata.license;
+  await putJson(root, metadataPath, metadata);
+  const result = await build(root);
+  assert.equal(Object.hasOwn(result.indexes.fonts.resources[0], 'license'), false);
+});
+
+test('dates follow content versions and survive metadata moves deletion and readdition', async t => {
+  const { root } = await fixture(t);
+  const { metadata, metadataPath } = await addFont(root);
+  const first = await buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime: TIME_A });
+  const firstItem = first.indexes.fonts.resources[0];
+  assert.equal(firstItem.publishedAt, TIME_A);
+  assert.equal(firstItem.updatedAt, TIME_A);
+  assert.deepEqual(await buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime: TIME_A, previousState: first.state }), first);
+  metadata.description = '更正说明';
+  metadata.payload.path = 'resources/fonts/moved.ttf';
+  await put(root, metadata.payload.path, 'font content v1');
+  await putJson(root, metadataPath, metadata);
+  const moved = await buildCatalog({ root, sourceCommit: SOURCE_B, sourceTime: TIME_B, previousState: first.state });
+  assert.equal(moved.indexes.fonts.resources[0].updatedAt, TIME_A);
+  await put(root, metadata.payload.path, 'font content v2');
+  const changed = await buildCatalog({ root, sourceCommit: SOURCE_B, sourceTime: TIME_B, previousState: moved.state });
+  assert.equal(changed.indexes.fonts.resources[0].publishedAt, TIME_A);
+  assert.equal(changed.indexes.fonts.resources[0].updatedAt, TIME_B);
+  assert.equal(changed.indexes.fonts.resources[0].versionCode, 2);
+  await fs.unlink(path.join(root, metadataPath));
+  const removed = await buildCatalog({ root, sourceCommit: SOURCE_C, sourceTime: TIME_C, previousState: changed.state });
+  assert.equal(removed.state.resources[metadata.id].updatedAt, TIME_B);
+  await putJson(root, metadataPath, metadata);
+  const restored = await buildCatalog({ root, sourceCommit: SOURCE_C, sourceTime: TIME_C, previousState: removed.state });
+  assert.equal(restored.indexes.fonts.resources[0].publishedAt, TIME_A);
+  assert.equal(restored.indexes.fonts.resources[0].updatedAt, TIME_B);
+  assert.equal(restored.indexes.fonts.resources[0].versionCode, 2);
+});
+
+test('invalid dates and backwards content times are rejected without repairing state', async t => {
+  const { root } = await fixture(t);
+  await addFont(root);
+  for (const sourceTime of ['2026-02-30T10:00:00Z', '2026-10-26', 'not a date', '2026-10-26T10:00:00+08:00']) {
+    await assert.rejects(buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime }), /timestamp/);
+  }
+  const first = await buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime: TIME_B });
+  for (const mutate of [
+    record => { delete record.updatedAt; },
+    record => { record.publishedAt = '2026-02-30T10:00:00Z'; },
+    record => { record.updatedAt = TIME_A; },
+  ]) {
+    const state = structuredClone(first.state);
+    mutate(state.resources['font.example.serif']);
+    await assert.rejects(buildCatalog({ root, sourceCommit: SOURCE_B, sourceTime: TIME_C, previousState: state }));
+  }
+  await put(root, 'resources/fonts/serif.ttf', 'later content');
+  await assert.rejects(buildCatalog({ root, sourceCommit: SOURCE_B, sourceTime: TIME_A, previousState: first.state }), /backwards/);
+});
+
+test('legacy dates require explicit complete history while validation remains read only', async t => {
+  const { root } = await fixture(t);
+  const { metadata, metadataPath } = await addFont(root);
+  const first = await build(root);
+  await build(root, first.state);
+  await assert.rejects(buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime: TIME_A, previousState: first.state }), /--initialize-dates/);
+  await put(root, metadata.payload.path, 'font content v2');
+  const changed = await build(root, first.state, SOURCE_B);
+  await fs.unlink(path.join(root, metadataPath));
+  const removed = await build(root, changed.state, SOURCE_C);
+  const history = [{ state: first.state, sourceTime: TIME_A }, { state: changed.state, sourceTime: TIME_B }, { state: removed.state, sourceTime: TIME_C }];
+  const initialized = initializeCatalogDates(history);
+  assert.equal(initialized.resources[metadata.id].publishedAt, TIME_A);
+  assert.equal(initialized.resources[metadata.id].updatedAt, TIME_B);
+  assert.equal(initialized.resources[metadata.id].active, false);
+  assert.equal(initialized.resources[metadata.id].versionCode, 2);
+  assert.equal(initialized.resources[metadata.id].fingerprint, removed.state.resources[metadata.id].fingerprint);
+  assert.deepEqual(initializeCatalogDates([...history, { state: initialized, sourceTime: TIME_C }]), initialized);
+  assert.equal(first.state.resources[metadata.id].publishedAt, undefined);
+  assert.throws(() => initializeCatalogDates(history.slice(1)), /incomplete/);
+  for (const mutate of [
+    h => { h[1].state.resources[metadata.id].versionCode = 7; },
+    h => { h[1].state.resources[metadata.id].type = 'background'; },
+    h => { delete h[1].state.resources[metadata.id]; },
+    h => { h[1].sourceTime = '2026-10-25T10:00:00.000Z'; },
+    h => { h[1].state.resources[metadata.id].publishedAt = TIME_B; h[1].state.resources[metadata.id].updatedAt = TIME_B; },
+  ]) {
+    const malformed = structuredClone(history);
+    mutate(malformed);
+    assert.throws(() => initializeCatalogDates(malformed));
+  }
+});
+
+test('CLI generation requires an explicit source timestamp', async t => {
+  const { root, scratch } = await fixture(t);
+  await addFont(root);
+  const result = spawnSync(process.execPath, [cliPath, 'generate', '--root', root, '--source-commit', SOURCE_A, '--out', path.join(scratch, 'output')], { encoding: 'utf8' });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /--source-time/);
 });

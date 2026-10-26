@@ -3,15 +3,17 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { publishCatalog, readCatalogState } from '../tools/publish-catalog.mjs';
+import { buildCatalog, writeCatalog } from '../tools/catalog.mjs';
 
 const gitExecutable = process.env.GIT || (process.platform === 'win32' ? 'C:/Program Files/Git/cmd/git.exe' : 'git');
 
-function git(cwd, args, input) {
+function git(cwd, args, input, environment = {}) {
   const result = spawnSync(gitExecutable, ['-c', 'core.autocrlf=false', '-c', 'user.name=Catalog Test', '-c', 'user.email=catalog-test@example.invalid', '-C', cwd, ...args], {
-    encoding: 'utf8', input, windowsHide: true, env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+    encoding: 'utf8', input, windowsHide: true, env: { ...process.env, ...environment, GIT_TERMINAL_PROMPT: '0' },
   });
   if (result.error || result.status !== 0) throw new Error(result.error?.message || result.stderr);
   return result.stdout.trim();
@@ -21,7 +23,7 @@ function script(text = 'v1') {
   return `// @uuid fixture_engine\n// @name 示例引擎\n// @author 测试作者\n// @version 1.0.0\nfunction voices() { throw new Error('must not execute ${text}'); }\n`;
 }
 
-function fixture(t) {
+function fixture(t, firstDate) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ng-catalog-publish-test-'));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, 'source');
@@ -35,13 +37,13 @@ function fixture(t) {
   fs.writeFileSync(path.join(root, 'catalog.config.json'), JSON.stringify({ schemaVersion: 1, categories: [{ id: 'tts', name: 'TTS', type: 'tts' }] }));
   fs.writeFileSync(path.join(root, 'resources/tts/example.js'), script());
   fs.writeFileSync(path.join(root, 'resources/tts/example.resource.json'), JSON.stringify({ schemaVersion: 1, id: 'tts.example', license: 'NOASSERTION', payload: { path: 'resources/tts/example.js', format: 'js' } }));
-  const commit = (message = '更新测试资源') => {
+  const commit = (message = '更新测试资源', date) => {
     git(root, ['add', '--all']);
-    git(root, ['commit', '--quiet', '-m', message]);
+    git(root, ['commit', '--quiet', '-m', message], undefined, date ? { GIT_AUTHOR_DATE: date, GIT_COMMITTER_DATE: date } : {});
     git(root, ['push', '--quiet', 'origin', 'main']);
     return git(root, ['rev-parse', 'HEAD']);
   };
-  const first = commit('初始化测试资源');
+  const first = commit('初始化测试资源', firstDate);
   const publish = options => publishCatalog({ root, gitExecutable, token: '', ...options });
   const head = () => git(remote, ['rev-parse', 'refs/heads/catalog']);
   const read = (filename = 'state.json') => JSON.parse(git(remote, ['show', `refs/heads/catalog:${filename}`]));
@@ -226,4 +228,128 @@ test('materialized LFS bytes are verified against the committed pointer without 
   assert.equal(git(f.root, ['status', '--porcelain=v1']), '');
   await assert.rejects(f.publish(), /LFS object.*does not match/);
   assert.equal(f.head(), published);
+});
+
+async function legacyPublication(f, previousState = null) {
+  const sourceCommit = git(f.root, ['rev-parse', 'HEAD']);
+  const generated = await buildCatalog({ root: f.root, sourceCommit, previousState });
+  const scratch = fs.mkdtempSync(path.join(f.directory, 'legacy-'));
+  const output = path.join(scratch, 'output');
+  const checkout = path.join(scratch, 'catalog');
+  await writeCatalog(generated, output);
+  fs.mkdirSync(checkout);
+  git(checkout, ['init', '--initial-branch=catalog', '--quiet']);
+  git(checkout, ['remote', 'add', 'origin', f.remote]);
+  if (previousState) {
+    git(checkout, ['fetch', '--quiet', 'origin', 'catalog']);
+    git(checkout, ['reset', '--quiet', '--hard', 'FETCH_HEAD']);
+  }
+  fs.cpSync(output, checkout, { recursive: true });
+  git(checkout, ['add', '--all']);
+  git(checkout, ['commit', '--quiet', '-m', '旧版目录夹具']);
+  git(checkout, ['push', '--quiet', 'origin', 'catalog']);
+  return generated.state;
+}
+
+test('publisher uses source committer time and preserves dates on metadata-only commits', async t => {
+  const f = fixture(t, '2026-10-26T10:00:00Z');
+  await f.publish({ allowBootstrap: true });
+  const first = f.read().resources['tts.example'];
+  assert.equal(first.publishedAt, '2026-10-26T10:00:00.000Z');
+  assert.equal(first.updatedAt, first.publishedAt);
+  const metaPath = path.join(f.root, 'resources/tts/example.resource.json');
+  const metadata = JSON.parse(fs.readFileSync(metaPath));
+  delete metadata.license;
+  metadata.description = '仅改说明';
+  fs.writeFileSync(metaPath, JSON.stringify(metadata));
+  f.commit('更正说明', '2026-10-26T11:00:00Z');
+  await f.publish();
+  assert.deepEqual(f.read().resources['tts.example'], first);
+  assert.equal(Object.hasOwn(f.read('resources/tts/index.json').resources[0], 'license'), false);
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('v2'));
+  f.commit('更新载荷', '2026-10-26T12:00:00Z');
+  await f.publish();
+  assert.equal(f.read().resources['tts.example'].publishedAt, first.publishedAt);
+  assert.equal(f.read().resources['tts.example'].updatedAt, '2026-10-26T12:00:00.000Z');
+});
+
+test('legacy catalog dates are initialized only explicitly without changing resource versions', async t => {
+  const f = fixture(t, '2026-10-26T10:00:00Z');
+  const first = await legacyPublication(f);
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('v2'));
+  f.commit('更新载荷', '2026-10-26T12:00:00Z');
+  const second = await legacyPublication(f, first);
+  const previousHead = f.head();
+  await assert.rejects(f.publish(), /--initialize-dates/);
+  assert.equal(f.head(), previousHead);
+  assert.equal((await f.publish({ initializeDates: true })).status, 'published');
+  const current = f.read().resources['tts.example'];
+  assert.equal(current.publishedAt, '2026-10-26T10:00:00.000Z');
+  assert.equal(current.updatedAt, '2026-10-26T12:00:00.000Z');
+  assert.equal(current.versionCode, second.resources['tts.example'].versionCode);
+  assert.equal(current.fingerprint, second.resources['tts.example'].fingerprint);
+  const initializedHead = f.head();
+  assert.equal((await f.publish()).status, 'unchanged');
+  assert.equal((await f.publish({ initializeDates: true })).status, 'unchanged');
+  assert.equal(f.head(), initializedHead);
+});
+
+test('incomplete legacy version history fails before any catalog ref moves', async t => {
+  const f = fixture(t, '2026-10-26T10:00:00Z');
+  const first = await buildCatalog({ root: f.root, sourceCommit: f.first });
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('v2'));
+  f.commit('更新载荷', '2026-10-26T12:00:00Z');
+  // Publish v2 as an orphan catalog: there is no evidence for the first publication.
+  const changed = await buildCatalog({ root: f.root, sourceCommit: git(f.root, ['rev-parse', 'HEAD']), previousState: first.state });
+  const scratch = path.join(f.directory, 'incomplete');
+  await writeCatalog(changed, scratch);
+  git(scratch, ['init', '--initial-branch=catalog', '--quiet']);
+  git(scratch, ['remote', 'add', 'origin', f.remote]);
+  git(scratch, ['add', '--all']);
+  git(scratch, ['commit', '--quiet', '-m', '不完整历史']);
+  git(scratch, ['push', '--quiet', 'origin', 'catalog']);
+  const before = f.head();
+  await assert.rejects(f.publish({ initializeDates: true }), /incomplete/);
+  assert.equal(f.head(), before);
+});
+
+test('backdated content commit cannot move the recorded update time backwards', async t => {
+  const f = fixture(t, '2026-10-26T12:00:00Z');
+  await f.publish({ allowBootstrap: true });
+  const before = f.head();
+  fs.writeFileSync(path.join(f.root, 'resources/tts/example.js'), script('v2'));
+  f.commit('时间倒退的提交', '2026-10-26T11:00:00Z');
+  await assert.rejects(f.publish(), /backwards/);
+  assert.equal(f.head(), before);
+});
+
+test('shallow history at metadata-only version one cannot invent a later publication date', async t => {
+  const f = fixture(t, '2026-10-26T10:00:00Z');
+  const first = await legacyPublication(f);
+  const metadataPath = path.join(f.root, 'resources/tts/example.resource.json');
+  const metadata = JSON.parse(fs.readFileSync(metadataPath));
+  metadata.description = '稍后的说明更正';
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata));
+  f.commit('只改说明', '2026-10-26T12:00:00Z');
+  await legacyPublication(f, first);
+  const truncatedRemote = path.join(f.directory, 'shallow.git');
+  git(f.directory, ['clone', '--quiet', '--bare', '--depth=1', '--branch=catalog', pathToFileURL(f.remote).href, truncatedRemote]);
+  assert.equal(git(truncatedRemote, ['rev-parse', '--is-shallow-repository']), 'true');
+  git(f.root, ['push', '--quiet', truncatedRemote, 'main']);
+  git(f.root, ['remote', 'set-url', 'origin', truncatedRemote]);
+  const before = git(truncatedRemote, ['rev-parse', 'refs/heads/catalog']);
+  await assert.rejects(f.publish({ initializeDates: true }), /non-shallow|shallow|FETCH_HEAD/);
+  assert.equal(git(truncatedRemote, ['rev-parse', 'refs/heads/catalog']), before);
+});
+
+test('catalog merge history is rejected by explicit date initialization', async t => {
+  const f = fixture(t, '2026-10-26T10:00:00Z');
+  await legacyPublication(f);
+  const first = f.head();
+  const tree = git(f.remote, ['rev-parse', `${first}^{tree}`]);
+  const other = git(f.remote, ['commit-tree', tree, '-m', '平行目录历史']);
+  const merged = git(f.remote, ['commit-tree', tree, '-p', first, '-p', other, '-m', '不支持的目录合并']);
+  git(f.remote, ['update-ref', 'refs/heads/catalog', merged]);
+  await assert.rejects(f.publish({ initializeDates: true }), /Complete linear catalog history/);
+  assert.equal(f.head(), merged);
 });

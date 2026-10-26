@@ -6,7 +6,7 @@ import path from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
-import { buildCatalog, writeCatalog } from './catalog.mjs';
+import { buildCatalog, writeCatalog, checkState, catalogTimestamp, initializeCatalogDates } from './catalog.mjs';
 
 const SHA = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
 const REF_NAME = /^[a-zA-Z0-9][a-zA-Z0-9._/-]*$/;
@@ -144,7 +144,7 @@ export async function readCatalogState({ root = '.', remote = 'origin', branch =
 export async function publishCatalog({
   root = '.', remote = 'origin', sourceBranch = 'main', branch = 'catalog',
   gitExecutable = process.env.GIT || 'git', token = process.env.CATALOG_GITHUB_TOKEN,
-  allowBootstrap = false, beforePush,
+  allowBootstrap = false, initializeDates = false, beforePush,
 } = {}) {
   root = fs.realpathSync(root);
   const initialGit = gitRunner(gitExecutable, { ...process.env, GIT_TERMINAL_PROMPT: '0' });
@@ -170,6 +170,7 @@ export async function publishCatalog({
   const priorHead = remoteHead(git, root, remoteUrl, branch);
   if (!priorHead && !allowBootstrap) throw new Error('Catalog branch is absent; first publication requires explicit --bootstrap');
   if (priorHead && allowBootstrap) throw new Error('Catalog already exists; bootstrap cannot overwrite its history');
+  if (initializeDates && !priorHead) throw new Error('--initialize-dates requires an existing catalog');
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'ng-catalog-publish-'));
   try {
     const publishRoot = path.join(scratch, 'catalog');
@@ -195,9 +196,39 @@ export async function publishCatalog({
         }
       }
     }
+    if (previousState) {
+      const records = checkState(previousState);
+      if (initializeDates) {
+        if (git(publishRoot, ['rev-parse', '--is-shallow-repository']).output.trim() !== 'false') throw new Error('Complete non-shallow catalog history is required to initialize dates');
+        const revisions = git(publishRoot, ['rev-list', '--reverse', '--first-parent', priorHead]).output.trim().split(/\r?\n/);
+        if (revisions.length > 100000) throw new Error('Catalog history is too large');
+        const history = [];
+        let lastSource;
+        let lastRevision;
+        for (const revision of revisions) {
+          if (!SHA.test(revision)) throw new Error('Invalid catalog history revision');
+          const headers = git(publishRoot, ['cat-file', '-p', revision]).output.split('\n\n', 1)[0];
+          const parents = [...headers.matchAll(/^parent ([a-f0-9]+)$/gm)].map(match => match[1]);
+          if (parents.length !== (lastRevision ? 1 : 0) || (lastRevision && parents[0] !== lastRevision)) {
+            throw new Error('Complete linear catalog history is required to initialize dates');
+          }
+          const state = JSON.parse(git(publishRoot, ['show', `${revision}:state.json`]).output);
+          checkState(state);
+          if (!isAncestor(git, root, state.sourceCommit, sourceCommit) || (lastSource && !isAncestor(git, root, lastSource, state.sourceCommit))) {
+            throw new Error('Catalog source history diverged; cannot initialize dates');
+          }
+          history.push({ state, sourceTime: sourceTimestamp(git, root, state.sourceCommit) });
+          lastSource = state.sourceCommit;
+          lastRevision = revision;
+        }
+        previousState = initializeCatalogDates(history);
+      } else if (Object.values(records).some(record => record.publishedAt === undefined)) {
+        throw new Error('Catalog dates are missing; use explicit --initialize-dates to recover them from history');
+      }
+    }
     const snapshotRoot = path.join(scratch, 'source');
     await materializeSource(git, root, sourceCommit, snapshotRoot);
-    const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, previousState });
+    const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, sourceTime: sourceTimestamp(git, root, sourceCommit), previousState });
     const output = path.join(scratch, 'output');
     await writeCatalog(generated, output);
     fs.cpSync(output, publishRoot, { recursive: true, errorOnExist: true, force: false });
@@ -222,12 +253,25 @@ export async function publishCatalog({
   }
 }
 
+function sourceTimestamp(git, root, sourceCommit) {
+  const value = git(root, ['show', '-s', '--format=%cI', sourceCommit]).output.trim();
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) throw new Error('Source commit has no valid committer timestamp');
+  return catalogTimestamp(parsed.toISOString());
+}
+
 function parseArguments(args, readOnly = false) {
   const options = {};
   const names = readOnly
     ? { '--root': 'root', '--remote': 'remote', '--branch': 'branch', '--out': 'out' }
     : { '--root': 'root', '--remote': 'remote', '--source-branch': 'sourceBranch', '--branch': 'branch' };
   for (let i = 0; i < args.length;) {
+    if (!readOnly && args[i] === '--initialize-dates') {
+      if (options.initializeDates) throw new Error('Duplicate --initialize-dates');
+      options.initializeDates = true;
+      i++;
+      continue;
+    }
     if (!readOnly && args[i] === '--bootstrap') {
       if (options.allowBootstrap) throw new Error('Duplicate --bootstrap');
       options.allowBootstrap = true;

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "font.ss-fengyun-title",
+  "name": "风云体（标题字形版）",
+  "author": "Sichuan SounSo Brand Poanning Co.,Ltd",
+  "description": "用于章节标题的装饰字体。当前文件仅包含部分字形，适合标题展示，不是完整正文字库。",
+  "versionName": "4.00",
+  "payload": {
+    "path": "resources/fonts/ss-fengyun-title/font.ttf",
+    "format": "ttf"
+  },
+  "tags": [
+    "标题字体",
+    "中文",
+    "装饰字体"
+  ]
+}
