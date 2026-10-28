@@ -122,8 +122,8 @@ export function rendererEnvironment(environment = process.env) {
   return { ...result, PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1', TZ: 'UTC' };
 }
 
-function runRenderer({ fontPath, outDir, pythonExecutable }) {
-  const child = spawnSync(pythonExecutable, ['-B', rendererScript, '--font', fontPath, '--out', outDir], {
+function runRenderer({ fontPath, fontName, outDir, pythonExecutable }) {
+  const child = spawnSync(pythonExecutable, ['-B', rendererScript, '--font', fontPath, `--name=${fontName}`, '--out', outDir], {
     encoding: 'utf8', windowsHide: true, timeout: 30_000, killSignal: 'SIGKILL', maxBuffer: MAX_IMAGE_BYTES,
     env: rendererEnvironment(),
   });
@@ -160,12 +160,13 @@ export async function attachFontPreviews(result, { root, pythonExecutable = proc
       for (const item of index.resources) {
         if (index.type !== 'font') { resources.push(item); continue; }
         const fontPath = await sourceFont(root, item.payload);
-        let preview = reused.get(item.payload.sha256);
+        const renderKey = JSON.stringify([item.payload.sha256, item.name]);
+        let preview = reused.get(renderKey);
         if (!preview) {
           const outDir = await fs.mkdtemp(path.join(scratch, 'font-'));
-          const manifest = await render({ fontPath, outDir, pythonExecutable });
+          const manifest = await render({ fontPath, fontName: item.name, outDir, pythonExecutable });
           fields(manifest, ['schemaVersion', 'rendererVersion', 'fontSha256', 'thumbnail', 'detail'], 'renderer manifest');
-          if (manifest.schemaVersion !== 1 || manifest.rendererVersion !== 'font-sample-v2' || manifest.fontSha256 !== item.payload.sha256) fail('Renderer source or version mismatch');
+          if (manifest.schemaVersion !== 1 || manifest.rendererVersion !== 'font-name-thumbnail-v3' || manifest.fontSha256 !== item.payload.sha256) fail('Renderer source or version mismatch');
           await ordinary(outDir, true);
           const expectedNames = new Set(), images = Object.create(null);
           preview = {};
@@ -189,7 +190,7 @@ export async function attachFontPreviews(result, { root, pythonExecutable = proc
             if (files[name] && !files[name].equals(bytes)) fail('Preview output collision');
             files[name] = bytes;
           }
-          reused.set(item.payload.sha256, preview);
+          reused.set(renderKey, preview);
         }
         resources.push({ ...item, preview });
       }

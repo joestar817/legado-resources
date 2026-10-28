@@ -58,7 +58,7 @@ async function fixture(t, count = 1) {
 }
 
 async function fakeRenderer({ fontPath, outDir }, alpha = 255) {
-  const manifest = { schemaVersion: 1, rendererVersion: 'font-sample-v2', fontSha256: digest(await fs.readFile(fontPath)) };
+  const manifest = { schemaVersion: 1, rendererVersion: 'font-name-thumbnail-v3', fontSha256: digest(await fs.readFile(fontPath)) };
   for (const [kind, width, height] of [['thumbnail', 256, 256], ['detail', 960, 420]]) {
     const bytes = png(width, height, alpha), sha256 = digest(bytes), name = `${sha256}.png`;
     await fs.writeFile(path.join(outDir, name), bytes);
@@ -71,7 +71,7 @@ test('font previews are machine-only output and do not change versions or dates'
   const f = await fixture(t, 2), built = await f.build(), before = JSON.stringify(built);
   let calls = 0;
   const enriched = await attachFontPreviews(built, { root: f.root, render: async args => { calls++; return fakeRenderer(args); } });
-  assert.equal(calls, 1, 'identical font payloads share one rendering');
+  assert.equal(calls, 1, 'identical font payloads and names share one rendering');
   assert.equal(JSON.stringify(built), before, 'validation result is not mutated');
   assert.deepEqual(enriched.state, built.state);
   assert.equal(Object.keys(enriched.previewFiles).length, 2);
@@ -85,6 +85,26 @@ test('font previews are machine-only output and do not change versions or dates'
   const otherLayout = await attachFontPreviews(built, { root: f.root, render: args => fakeRenderer(args, 128) });
   assert.notEqual(enriched.indexes.fonts.resources[0].preview.detail.sha256, otherLayout.indexes.fonts.resources[0].preview.detail.sha256);
   assert.deepEqual(enriched.state, otherLayout.state);
+});
+
+test('same font bytes with different names render separate thumbnails', async t => {
+  const f = await fixture(t, 2), built = await f.build();
+  built.indexes.fonts.resources[0].name = '风云体';
+  built.indexes.fonts.resources[1].name = '山川体';
+  const names = [];
+  const enriched = await attachFontPreviews(built, { root: f.root, render: async args => {
+    names.push(args.fontName);
+    return fakeRenderer(args, args.fontName === '风云体' ? 255 : 128);
+  } });
+  assert.deepEqual(names, ['风云体', '山川体']);
+  const [first, second] = enriched.indexes.fonts.resources;
+  assert.notEqual(first.preview.thumbnail.sha256, second.preview.thumbnail.sha256);
+  assert.deepEqual(enriched.state, built.state);
+  for (const item of [first, second]) {
+    assert.equal(item.versionCode, 1);
+    assert.equal(item.publishedAt, '2026-10-27T00:00:00.000Z');
+    assert.equal(item.updatedAt, item.publishedAt);
+  }
 });
 
 test('source metadata cannot author preview fields', async t => {

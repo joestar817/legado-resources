@@ -17,7 +17,7 @@ from fontTools.pens.boundsPen import BoundsPen
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont, features
 
-RENDERER_VERSION = "font-sample-v2"
+RENDERER_VERSION = "font-name-thumbnail-v3"
 MAX_FONT_BYTES = 64 * 1024 * 1024
 MAX_PNG_BYTES = 1024 * 1024
 THUMBNAIL_SIZE = (256, 256)
@@ -129,7 +129,7 @@ class Coverage:
         return "".join(result)
 
 
-def choose_samples(coverage: Coverage) -> tuple[Sample, Sample, Sample]:
+def choose_samples(coverage: Coverage, font_name: str = "") -> tuple[Sample, Sample, Sample]:
     phrase = next((text for text in SAMPLE_CANDIDATES if coverage.contains(text)), None)
     if phrase is not None:
         primary = Sample(phrase)
@@ -143,6 +143,10 @@ def choose_samples(coverage: Coverage) -> tuple[Sample, Sample, Sample]:
     number_sample = Sample(digits) if digits else primary
     thumb_characters = "".join(character for character in primary.text
                                if unicodedata.category(character)[0] in "LNPS")[:2]
+    name_characters = "".join(character for character in unicodedata.normalize("NFC", font_name)
+                              if unicodedata.category(character)[0] in "LNPS")[:2]
+    if name_characters and coverage.contains(name_characters):
+        thumb_characters = name_characters
     if not thumb_characters:
         thumb_characters = coverage.visible_characters(2)
     return primary, number_sample, Sample(thumb_characters, isolated=True)
@@ -261,7 +265,7 @@ def _png(image: Image.Image) -> bytes:
     return data
 
 
-def render(data: bytes) -> dict[str, tuple[bytes, tuple[int, int]]]:
+def render(data: bytes, font_name: str = "") -> dict[str, tuple[bytes, tuple[int, int]]]:
     if not 0 < len(data) <= MAX_FONT_BYTES:
         raise PreviewError("Font must contain at most 64 MiB")
     _sfnt(data)
@@ -269,7 +273,7 @@ def render(data: bytes) -> dict[str, tuple[bytes, tuple[int, int]]]:
         raise PreviewError("The pinned preview renderer requires Pillow with RAQM")
     with TTFont(io.BytesIO(data), checkChecksums=2, lazy=False) as font:
         coverage = Coverage(font)
-        _, _, thumbnail_sample = choose_samples(coverage)
+        _, _, thumbnail_sample = choose_samples(coverage, font_name)
         detail_runs = tuple(choose_runs(text, coverage) for text in DETAIL_SAMPLES)
     fallback = read_fallback() if any(not run.source for runs in detail_runs for run in runs) else None
     thumbnail = Image.new("RGBA", THUMBNAIL_SIZE, (0, 0, 0, 0))
@@ -292,10 +296,10 @@ def _empty_directory(directory: Path) -> None:
         directory.mkdir()
 
 
-def create_previews(font_path: Path, directory: Path) -> dict:
+def create_previews(font_path: Path, directory: Path, font_name: str = "") -> dict:
     _empty_directory(directory)
     data = read_font(font_path)
-    images = render(data)
+    images = render(data, font_name)
     _empty_directory(directory)
     manifest = {"schemaVersion": 1, "rendererVersion": RENDERER_VERSION,
                 "fontSha256": hashlib.sha256(data).hexdigest()}
@@ -331,11 +335,14 @@ def _process_limits() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--font", type=Path, required=True)
+    parser.add_argument("--name", required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     try:
         _process_limits()
-        result = create_previews(args.font, args.out)
+        if not args.name.strip() or len(args.name) > 256:
+            raise PreviewError("Font name must contain between 1 and 256 characters")
+        result = create_previews(args.font, args.out, args.name)
     except Exception as error:
         print(f"Font preview error: {error}", file=sys.stderr)
         return 1

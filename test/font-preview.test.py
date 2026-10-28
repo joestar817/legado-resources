@@ -63,7 +63,7 @@ class FontPreviewTest(unittest.TestCase):
 
     def assert_images(self, manifest, output):
         self.assertEqual(manifest["schemaVersion"], 1)
-        self.assertEqual(manifest["rendererVersion"], "font-sample-v2")
+        self.assertEqual(manifest["rendererVersion"], "font-name-thumbnail-v3")
         self.assertEqual(set(manifest), {"schemaVersion", "rendererVersion", "fontSha256", "thumbnail", "detail"})
         for kind, expected in (("thumbnail", (256, 256)), ("detail", (960, 420))):
             item = manifest[kind]
@@ -110,6 +110,46 @@ class FontPreviewTest(unittest.TestCase):
         self.assertEqual(a["thumbnail"]["sha256"],
                          "02d38cf296ec57db4bf5d65c0566d2e4ee61e020b1ee057147884a699a72249c")
         self.assertEqual(sorted(p.name for p in first.iterdir()), sorted(p.name for p in second.iterdir()))
+
+    def test_resource_name_prefix_uses_source_glyphs_and_keeps_detail_unchanged(self):
+        original = SOURCE_FONT.read_bytes()
+        with TTFont(SOURCE_FONT) as font:
+            coverage = renderer.Coverage(font)
+            thumbnail = renderer.choose_samples(coverage, "风云体（标题字形版）")[2]
+            self.assertEqual(thumbnail, renderer.Sample("风云", isolated=True))
+            self.assertTrue(coverage.contains(thumbnail.text))
+        first, second = self.output("name-first"), self.output("name-second")
+        manifest = renderer.create_previews(SOURCE_FONT, first, "风云体（标题字形版）")
+        self.assertEqual(manifest, renderer.create_previews(SOURCE_FONT, second, "风云体（标题字形版）"))
+        self.assert_images(manifest, first)
+        self.assertNotEqual(manifest["thumbnail"]["sha256"],
+                            "02d38cf296ec57db4bf5d65c0566d2e4ee61e020b1ee057147884a699a72249c")
+        self.assertEqual(manifest["detail"]["sha256"],
+                         "208f3298e47c9f61c8f8472bc2a77332388c735d8e86905761152a9b806a1641")
+        self.assertEqual(SOURCE_FONT.read_bytes(), original)
+
+    def test_name_prefix_skips_spacing_and_handles_a_single_character(self):
+        with TTFont(SOURCE_FONT) as font:
+            coverage = renderer.Coverage(font)
+            self.assertEqual(renderer.choose_samples(coverage, "\u200b 风 云体")[2].text, "风云")
+            self.assertEqual(renderer.choose_samples(coverage, "风")[2].text, "风")
+
+    def test_missing_name_glyphs_use_real_supported_samples(self):
+        with TTFont(SOURCE_FONT) as font:
+            coverage = renderer.Coverage(font)
+            for name in ("AB风云", "风A字体", "", " \u200b "):
+                with self.subTest(name=name):
+                    thumbnail = renderer.choose_samples(coverage, name)[2]
+                    self.assertEqual(thumbnail.text, "天地")
+                    self.assertTrue(coverage.contains(thumbnail.text))
+
+    def test_name_prefix_uses_unicode_characters_and_normalizes_accents(self):
+        font_path = self.directory / "unicode.ttf"
+        minimal_font(font_path, characters="𝔸𝔹éA")
+        with TTFont(font_path) as font:
+            coverage = renderer.Coverage(font)
+            self.assertEqual(renderer.choose_samples(coverage, "𝔹𝔸 Font")[2].text, "𝔹𝔸")
+            self.assertEqual(renderer.choose_samples(coverage, "e\u0301A Font")[2].text, "éA")
 
     def test_fixed_windows_samples_use_source_before_bundled_fallback(self):
         self.assertEqual(renderer.DETAIL_SAMPLES,
@@ -164,7 +204,7 @@ class FontPreviewTest(unittest.TestCase):
             self.assertTrue(coverage.supports_sample_character(" "))
         with mock.patch.object(renderer, "read_fallback", side_effect=AssertionError("unneeded dependency read")):
             manifest = renderer.create_previews(font_path, self.output())
-        self.assertEqual(manifest["rendererVersion"], "font-sample-v2")
+        self.assertEqual(manifest["rendererVersion"], "font-name-thumbnail-v3")
 
     def test_invalid_fallback_fails_without_output(self):
         fallback_path = self.directory / "fallback.ttf"
@@ -226,7 +266,7 @@ class FontPreviewTest(unittest.TestCase):
         font_path = self.directory / "corrupt.ttf"
         font_path.write_bytes(b"This is not a font")
         output = self.output()
-        result = subprocess.run([sys.executable, str(SCRIPT), "--font", str(font_path), "--out", str(output)],
+        result = subprocess.run([sys.executable, str(SCRIPT), "--font", str(font_path), "--name=测试字体", "--out", str(output)],
                                 capture_output=True, text=True, timeout=30)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(result.stdout, "")
@@ -280,7 +320,7 @@ class FontPreviewTest(unittest.TestCase):
 
     def test_cli_prints_only_json_and_accepts_existing_empty_output(self):
         output = self.output()
-        result = subprocess.run([sys.executable, str(SCRIPT), "--font", str(SOURCE_FONT), "--out", str(output)],
+        result = subprocess.run([sys.executable, str(SCRIPT), "--font", str(SOURCE_FONT), "--name=风云体", "--out", str(output)],
                                 capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stderr)
         manifest = json.loads(result.stdout)
