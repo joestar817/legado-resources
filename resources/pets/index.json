@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "685d493aafd91f7d3413ed0630acaabfa08a573c",
+  "type": "pet",
+  "resources": [
+    {
+      "id": "pet.blue_fish",
+      "name": "蓝色大肥鱼",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "payload": {
+        "path": "resources/pets/blue_fish-1.ngpet",
+        "format": "ngpet",
+        "size": 7180754,
+        "sha256": "5dd32ef02704fb078735bbf66e01673bf8788f1b12e209bfc25d028760c0a582",
+        "pluginId": "blue_fish"
+      },
+      "license": "NOASSERTION",
+      "description": "蓝色大肥鱼独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+      "versionName": "1.0",
+      "tags": [
+        "宠物",
+        "代码插件"
+      ]
+    },
+    {
+      "id": "pet.gugugaga",
+      "name": "咕嘎",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "payload": {
+        "path": "resources/pets/gugugaga-1.ngpet",
+        "format": "ngpet",
+        "size": 864976,
+        "sha256": "166f1bad52ce42e5f27b0fbf99777222ed23d6f61c87aff3ddb00ac3b0044c4f",
+        "pluginId": "gugugaga"
+      },
+      "license": "NOASSERTION",
+      "description": "咕嘎独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+      "versionName": "1.0",
+      "tags": [
+        "宠物",
+        "代码插件"
+      ]
+    }
+  ]
+}
