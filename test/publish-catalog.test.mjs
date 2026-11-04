@@ -68,6 +68,20 @@ test('first publication creates a complete catalog and repeated publication is a
   assert.equal(git(f.root, ['status', '--porcelain=v1']), '');
 });
 
+test('generated entries target absent paths inside the publication checkout', async t => {
+  const f = fixture(t);
+  const copy = fs.cpSync;
+  let calls = 0;
+  t.mock.method(fs, 'cpSync', (source, destination, options) => {
+    assert.equal(fs.existsSync(destination), false, 'copy must not merge into an existing checkout directory');
+    calls++;
+    return copy(source, destination, options);
+  });
+  assert.equal((await f.publish({ allowBootstrap: true })).status, 'published');
+  assert.ok(calls >= 3, 'catalog, state and resource indexes are copied independently');
+  assert.equal(f.read('catalog.json').sourceCommit, f.first);
+});
+
 test('publishes content revisions, deletion tombstones and re-addition without resetting versions', async t => {
   const f = fixture(t);
   await f.publish({ allowBootstrap: true });

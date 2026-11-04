@@ -232,7 +232,13 @@ export async function publishCatalog({
     const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, sourceTime: sourceTimestamp(git, root, sourceCommit), previousState });
     const output = path.join(scratch, 'output');
     await writeCatalog(await attachFontPreviews(generated, { root: snapshotRoot }), output);
-    fs.cpSync(output, publishRoot, { recursive: true, errorOnExist: true, force: false });
+    // publishRoot already contains .git. Copy each generated entry to an absent
+    // destination instead of relying on version-specific directory merge rules.
+    for (const name of fs.readdirSync(output)) {
+      fs.cpSync(path.join(output, name), path.join(publishRoot, name), {
+        recursive: true, errorOnExist: true, force: false,
+      });
+    }
     git(publishRoot, ['add', '--all']);
     const tree = git(publishRoot, ['write-tree']).output.trim();
     if (priorHead && tree === git(publishRoot, ['rev-parse', `${priorHead}^{tree}`]).output.trim()) {
