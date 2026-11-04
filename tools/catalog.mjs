@@ -4,15 +4,16 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
+import { readPetPlugin } from './pet-plugins.mjs';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
-const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme' });
-const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', theme: 'appearance', tts: 'listening' });
+const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme', pets: 'pet' });
+const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', theme: 'appearance', tts: 'listening', pet: 'pets' });
 const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  tts: ['js'], theme: ['ngtheme', 'zip'],
+  tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -252,12 +253,13 @@ export function checkState(value) {
   const result = Object.create(null);
   const foldedIds = new Set();
   const engineIds = new Set();
+  const pluginIds = new Set();
   for (const id of sorted(Object.keys(value.resources))) {
     if (identifier(id, 'state resource ID') !== id) fail('Historical resource IDs must not contain surrounding whitespace');
     if (foldedIds.has(id.toLowerCase())) fail('Case-only resource ID collision in state');
     foldedIds.add(id.toLowerCase());
     const record = value.resources[id];
-    fields(record, ['type', 'versionCode', 'fingerprint', 'active', 'engineId', 'publishedAt', 'updatedAt'], `state.resources.${id}`);
+    fields(record, ['type', 'versionCode', 'fingerprint', 'active', 'engineId', 'pluginId', 'publishedAt', 'updatedAt'], `state.resources.${id}`);
     if (!Object.values(TYPES).includes(record.type)) fail(`Invalid historical type for ${id}`);
     if (!Number.isSafeInteger(record.versionCode) || record.versionCode < 1) fail(`Invalid historical version for ${id}`);
     if (typeof record.active !== 'boolean') fail(`Invalid historical active state for ${id}`);
@@ -269,6 +271,12 @@ export function checkState(value) {
       result[id].engineId = engineId;
     }
     else if (record.engineId !== undefined) fail(`Unexpected engineId on ${id}`);
+    if (record.type === 'pet') {
+      if (!/^[a-z][a-z0-9_]{0,63}$/.test(record.pluginId)) fail(`Invalid pluginId on ${id}`);
+      if (pluginIds.has(record.pluginId)) fail('Duplicate historical pet plugin identity');
+      pluginIds.add(record.pluginId);
+      result[id].pluginId = record.pluginId;
+    } else if (record.pluginId !== undefined) fail(`Unexpected pluginId on ${id}`);
   }
   return result;
 }
@@ -289,7 +297,7 @@ export function initializeCatalogDates(history) {
       if (!prior) {
         if (record.versionCode !== 1 || !record.active) fail(`Catalog history is incomplete for ${id}`);
       } else {
-        if (prior.type !== record.type || prior.engineId !== record.engineId) fail(`Catalog history changed identity for ${id}`);
+        if (prior.type !== record.type || prior.engineId !== record.engineId || prior.pluginId !== record.pluginId) fail(`Catalog history changed identity for ${id}`);
         if (record.versionCode !== prior.versionCode + (changed ? 1 : 0) || (changed && !record.active)) fail(`Catalog history has inconsistent versions for ${id}`);
         if (changed && sourceTime < prior.updatedAt) fail(`Source time moved backwards for ${id}`);
       }
@@ -317,7 +325,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
   const config = await readJson(path.join(root, 'catalog.config.json'));
   fields(config, ['schemaVersion', 'purposes', 'categories'], 'catalog.config');
   if (config.schemaVersion !== 1) fail('Unsupported catalog.config.schemaVersion');
-  if (!Array.isArray(config.categories) || !config.categories.length || config.categories.length > 4) fail('categories must list one to four supported categories');
+  if (!Array.isArray(config.categories) || !config.categories.length || config.categories.length > Object.keys(TYPES).length) fail('categories must list supported categories');
   const categoryIds = new Set();
   const purposes = catalogPurposes(config.purposes);
   const categories = config.categories.map(category => {
@@ -334,6 +342,8 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
   const foldedIds = new Map(Object.keys(previous || {}).map(id => [id.toLowerCase(), id]));
   const seenPayloads = new Set();
   const seenEngineIds = new Set();
+  const seenPluginIds = new Set();
+  const pluginOwners = new Map(Object.entries(previous || {}).filter(([, record]) => record.type === 'pet').map(([id, record]) => [record.pluginId, id]));
   const engineOwners = new Map(Object.entries(previous || {}).filter(([, record]) => record.type === 'tts').map(([id, record]) => [record.engineId, id]));
   const indexes = Object.create(null);
   const catalogCategories = [];
@@ -354,7 +364,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       foldedIds.set(id.toLowerCase(), id);
       seenIds.add(id);
       if (seenIds.size > MAX_RESOURCES) fail('Too many resources');
-      fields(meta.payload, ['path', 'format'], `${id}.payload`);
+      fields(meta.payload, ['path', 'format', 'pluginId'], `${id}.payload`);
       const relative = relativePath(meta.payload.path, category.id);
       const collisionKey = relative.toLowerCase();
       if (seenPayloads.has(collisionKey)) fail(`Payload path used by multiple resources: ${relative}`);
@@ -363,6 +373,12 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       if (!FORMATS[category.type].includes(format) || path.posix.extname(relative).toLowerCase() !== `.${format}`) fail(`Payload format/extension mismatch for ${id}`);
       const filename = await safePayload(root, relative);
       const file = await payloadDigest(filename, category.type === 'tts');
+      const pet = category.type === 'pet' ? await readPetPlugin(filename) : null;
+      if (pet && meta.payload.pluginId !== pet.id) fail('Pet plugin identity mismatch');
+      if (!pet && meta.payload.pluginId !== undefined) fail('Unexpected pluginId');
+      if (pet && seenPluginIds.has(pet.id)) fail('Duplicate pet plugin identity');
+      if (pet && pluginOwners.has(pet.id) && pluginOwners.get(pet.id) !== id) fail('Pet plugin identity belongs to another resource');
+      if (pet) seenPluginIds.add(pet.id);
       const header = file.metadata;
       if (header) {
         if (seenEngineIds.has(header.uuid)) fail(`Duplicate TTS engine ID ${header.uuid}`);
@@ -371,11 +387,14 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       }
       const payload = { path: relative, format, size: file.size, sha256: file.sha256 };
       if (header) payload.engineId = header.uuid;
-      const fingerprint = digest(JSON.stringify({ type: category.type, format, sha256: file.sha256, ...(header ? { engineId: header.uuid } : {}) }));
+      if (pet) payload.pluginId = pet.id;
+      const fingerprint = digest(JSON.stringify({ type: category.type, format, sha256: file.sha256, ...(header ? { engineId: header.uuid } : {}), ...(pet ? { pluginId: pet.id } : {}) }));
       const prior = previous?.[id];
       if (prior && prior.type !== category.type) fail(`Resource ${id} cannot change type`);
       if (prior?.type === 'tts' && prior.engineId !== header.uuid) fail(`Resource ${id} cannot change its TTS engine ID`);
       const versionCode = prior ? prior.versionCode + (prior.fingerprint === fingerprint ? 0 : 1) : 1;
+      if (pet && prior && prior.pluginId !== pet.id) fail('Pet plugin cannot change identity');
+      if (pet && pet.versionCode !== versionCode) fail('Pet plugin version must match catalog version');
       if (!Number.isSafeInteger(versionCode)) fail(`Version overflow for ${id}`);
       let dates = {};
       if (prior?.publishedAt !== undefined && prior.fingerprint === fingerprint) dates = recordDates(prior, id);
@@ -404,6 +423,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       resources.push(resource);
       stateResources[id] = { type: category.type, versionCode, fingerprint, active: true, ...dates };
       if (header) stateResources[id].engineId = header.uuid;
+      if (pet) stateResources[id].pluginId = pet.id;
     }
     resources.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
     indexes[category.id] = { schemaVersion: 1, sourceCommit, type: category.type, resources };

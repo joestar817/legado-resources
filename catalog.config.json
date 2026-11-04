@@ -1,15 +1,53 @@
 {
   "schemaVersion": 1,
   "purposes": [
-    { "id": "reading", "name": "阅读" },
-    { "id": "appearance", "name": "外观" },
-    { "id": "listening", "name": "听书" },
-    { "id": "pets", "name": "宠物" }
+    {
+      "id": "reading",
+      "name": "阅读"
+    },
+    {
+      "id": "appearance",
+      "name": "外观"
+    },
+    {
+      "id": "listening",
+      "name": "听书"
+    },
+    {
+      "id": "pets",
+      "name": "宠物"
+    }
   ],
   "categories": [
-    { "id": "fonts", "name": "字体", "type": "font", "purpose": "reading" },
-    { "id": "backgrounds", "name": "背景", "type": "background", "purpose": "reading" },
-    { "id": "themes", "name": "主题包", "type": "theme", "purpose": "appearance" },
-    { "id": "tts", "name": "TTS 脚本", "type": "tts", "purpose": "listening" }
+    {
+      "id": "fonts",
+      "name": "字体",
+      "type": "font",
+      "purpose": "reading"
+    },
+    {
+      "id": "backgrounds",
+      "name": "背景",
+      "type": "background",
+      "purpose": "reading"
+    },
+    {
+      "id": "themes",
+      "name": "主题包",
+      "type": "theme",
+      "purpose": "appearance"
+    },
+    {
+      "id": "tts",
+      "name": "TTS 脚本",
+      "type": "tts",
+      "purpose": "listening"
+    },
+    {
+      "id": "pets",
+      "name": "宠物插件",
+      "type": "pet",
+      "purpose": "pets"
+    }
   ]
 }

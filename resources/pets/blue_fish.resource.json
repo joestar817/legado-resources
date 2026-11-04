@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "pet.blue_fish",
+  "name": "蓝色大肥鱼",
+  "author": "阅读 NG",
+  "license": "NOASSERTION",
+  "versionName": "1.0",
+  "description": "蓝色大肥鱼独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+  "tags": [
+    "宠物",
+    "代码插件"
+  ],
+  "payload": {
+    "path": "resources/pets/blue_fish-1.ngpet",
+    "format": "ngpet",
+    "pluginId": "blue_fish"
+  }
+}
