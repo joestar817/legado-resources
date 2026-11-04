@@ -24,13 +24,23 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 ## 总目录
 
+目录保持 `schemaVersion: 1`，增加可选的用途展示信息：根级 `purposes` 是按展示顺序排列的 `{ id, name }` 列表；声明用途时，各分类必须通过 `purpose` 引用其中一项。当前用途为 `reading`（阅读）、`appearance`（外观）、`listening`（听书）与 `pets`（宠物）。同一用途可包含多个资源类型，没有已接入类型的用途只保留入口，不生成虚假分类或资源。
+
+当前映射固定为 `font/background → reading`、`theme → appearance`、`tts → listening`，与客户端已接入的类型对应。生成器拒绝未知、重复、缺失或与类型不符的用途。未声明用途的既有配置不自动补造字段；不消费用途信息的客户端继续按原有类型读取，安装协议不变。
+
+用途、显示名称与分类顺序只影响浏览，不改变目录分类 ID、资源 ID、TTS 引擎身份、载荷路径、内容版本或发布时间。资源目录仍由可安装类型划分；用途不是一种新的安装器或代码插件协议。
+
 ```json
 {
   "schemaVersion": 1,
   "sourceCommit": "0000000000000000000000000000000000000000",
+  "purposes": [
+    { "id": "reading", "name": "阅读" },
+    { "id": "listening", "name": "听书" }
+  ],
   "categories": [
-    { "id": "fonts", "name": "字体", "type": "font", "index": "resources/fonts/index.json", "count": 0 },
-    { "id": "tts", "name": "TTS", "type": "tts", "index": "resources/tts/index.json", "count": 1 }
+    { "id": "fonts", "name": "字体", "type": "font", "purpose": "reading", "index": "resources/fonts/index.json", "count": 0 },
+    { "id": "tts", "name": "TTS 脚本", "type": "tts", "purpose": "listening", "index": "resources/tts/index.json", "count": 1 }
   ]
 }
 ```

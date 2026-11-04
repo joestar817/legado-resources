@@ -439,6 +439,59 @@ test('unrecognized or mismatched categories are rejected', async (t) => {
   }
 });
 
+const purposes = [
+  { id: 'reading', name: '阅读' }, { id: 'appearance', name: '外观' },
+  { id: 'listening', name: '听书' }, { id: 'pets', name: '宠物' },
+];
+const purposeByType = { font: 'reading', background: 'reading', theme: 'appearance', tts: 'listening' };
+const classifiedCategories = categories.map(category => ({ ...category, purpose: purposeByType[category.type] }));
+
+test('catalog publishes purpose hierarchy and retains an empty purpose without fake resources', async t => {
+  const { root, scratch } = await fixture(t);
+  await addTts(root);
+  await putJson(root, 'catalog.config.json', { schemaVersion: 1, purposes, categories: classifiedCategories });
+  const result = await build(root);
+  assert.deepEqual(result.catalog.purposes, purposes);
+  assert.equal(result.catalog.categories.find(category => category.id === 'tts').purpose, 'listening');
+  assert.equal(result.catalog.categories.some(category => category.purpose === 'pets'), false);
+  const output = path.join(scratch, 'published');
+  await writeCatalog(result, output);
+  await writeCatalog(result, output);
+  assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'catalog.json'), 'utf8')), result.catalog);
+});
+
+test('classification labels and order never bump installation versions or dates', async t => {
+  const { root } = await fixture(t);
+  await addFont(root);
+  await addTts(root);
+  const initial = await buildCatalog({ root, sourceCommit: SOURCE_A, sourceTime: '2026-10-26T00:00:00Z' });
+  const renamed = [...classifiedCategories].reverse().map(category => ({ ...category, name: `新${category.name}` }));
+  await putJson(root, 'catalog.config.json', { schemaVersion: 1, purposes, categories: renamed });
+  const changed = await buildCatalog({ root, sourceCommit: SOURCE_B, sourceTime: '2026-11-05T00:00:00Z', previousState: initial.state });
+  assert.deepEqual(changed.state.resources, initial.state.resources);
+  for (const category of categories) assert.deepEqual(changed.indexes[category.id].resources, initial.indexes[category.id].resources);
+  assert.deepEqual(changed.catalog.categories.map(category => category.id), renamed.map(category => category.id));
+});
+
+test('invalid purposes and unresolved category purpose references are rejected', async t => {
+  const { root } = await fixture(t);
+  const invalid = [
+    { purposes: [] },
+    { purposes: [{ id: 'unknown', name: '未知' }] },
+    { purposes: [purposes[0], purposes[0]] },
+    { purposes: [{ ...purposes[0], extra: true }] },
+    { categories },
+    { categories: classifiedCategories.map(category => ({ ...category, purpose: 'missing' })) },
+    { categories: classifiedCategories.map(category => ({ ...category, purpose: 'pets' })) },
+  ];
+  for (const changes of invalid) {
+    await putJson(root, 'catalog.config.json', { schemaVersion: 1, purposes, categories: classifiedCategories, ...changes });
+    await assert.rejects(build(root));
+  }
+  await putJson(root, 'catalog.config.json', { schemaVersion: 1, categories: classifiedCategories });
+  await assert.rejects(build(root));
+});
+
 for (const [label, badPath] of [
   ['legacy root category path', 'fonts/serif.ttf'],
   ['parent traversal', '../outside.ttf'],

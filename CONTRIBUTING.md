@@ -2,6 +2,8 @@
 
 将资源放入 `resources/` 下的对应分类，并在旁边添加以 `.resource.json` 结尾的 UTF-8 JSON 说明。一个说明对应一个载荷文件；资源可放分类子目录，不需要修改总索引。`payload.path` 从仓库根目录计算，必须带 `resources/<分类>/` 前缀。
 
+资源中心按用途浏览，投稿仍放稳定的资源类型目录：阅读的字体与背景放 `fonts`、`backgrounds`，外观的主题包放 `themes`，听书的 TTS 脚本放 `tts`。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物入口当前没有可安装资源，暂不提交空壳占位包。
+
 ## 字体例子
 
 假设文件位于 `resources/fonts/example/font.ttf`，说明文件可以是 `resources/fonts/example/font.resource.json`：

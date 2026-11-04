@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
 const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme' });
+const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', theme: 'appearance', tts: 'listening' });
+const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
@@ -37,6 +39,26 @@ function text(value, label, max = 256) {
 }
 function optionalText(value, label, max) {
   return value === undefined ? undefined : text(value, label, max);
+}
+function catalogPurposes(value) {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || !value.length || value.length > PURPOSE_IDS.size) fail('purposes must list one to four supported purposes');
+  const seen = new Set();
+  return value.map(purpose => {
+    fields(purpose, ['id', 'name'], 'purpose');
+    if (!PURPOSE_IDS.has(purpose.id) || seen.has(purpose.id)) fail('Unsupported or duplicate purpose');
+    seen.add(purpose.id);
+    return { id: purpose.id, name: text(purpose.name, 'purpose.name', 64) };
+  });
+}
+function categoryPurpose(category, purposes) {
+  if (purposes === undefined) {
+    if (category.purpose !== undefined) fail('category.purpose requires catalog purposes');
+    return {};
+  }
+  if (!purposes.some(purpose => purpose.id === category.purpose)) fail('category.purpose must reference a declared purpose');
+  if (PURPOSE_BY_TYPE[category.type] !== category.purpose) fail('category.purpose does not match the supported type mapping');
+  return { purpose: category.purpose };
 }
 function identifier(value, label) {
   const result = text(value, label, 160);
@@ -293,16 +315,18 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
     if (Object.values(previous || {}).some(record => record.publishedAt === undefined)) fail('Catalog dates are missing; publish with explicit --initialize-dates first');
   }
   const config = await readJson(path.join(root, 'catalog.config.json'));
-  fields(config, ['schemaVersion', 'categories'], 'catalog.config');
+  fields(config, ['schemaVersion', 'purposes', 'categories'], 'catalog.config');
   if (config.schemaVersion !== 1) fail('Unsupported catalog.config.schemaVersion');
   if (!Array.isArray(config.categories) || !config.categories.length || config.categories.length > 4) fail('categories must list one to four supported categories');
   const categoryIds = new Set();
+  const purposes = catalogPurposes(config.purposes);
   const categories = config.categories.map(category => {
-    fields(category, ['id', 'name', 'type'], 'category');
+    fields(category, ['id', 'name', 'type', 'purpose'], 'category');
     if (!Object.hasOwn(TYPES, category.id) || TYPES[category.id] !== category.type) fail('Unsupported category/type mapping');
     if (categoryIds.has(category.id)) fail(`Duplicate category ${category.id}`);
     categoryIds.add(category.id);
-    return { id: category.id, name: text(category.name, 'category.name', 64), type: category.type };
+    return { id: category.id, name: text(category.name, 'category.name', 64), type: category.type,
+      ...categoryPurpose(category, purposes) };
   });
   const stateResources = Object.create(null);
   for (const id of Object.keys(previous || {})) stateResources[id] = { ...previous[id], active: false };
@@ -388,7 +412,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
   const orderedState = Object.create(null);
   for (const id of sorted(Object.keys(stateResources))) orderedState[id] = stateResources[id];
   return {
-    catalog: { schemaVersion: 1, sourceCommit, categories: catalogCategories },
+    catalog: { schemaVersion: 1, sourceCommit, ...(purposes === undefined ? {} : { purposes }), categories: catalogCategories },
     indexes,
     state: { schemaVersion: 1, sourceCommit, resources: orderedState },
   };
@@ -404,8 +428,10 @@ async function checkOutputDirectory(directory) {
   const oldState = await readJson(path.join(directory, 'state.json'), MAX_STATE_BYTES);
   checkState(oldState);
   const oldCatalog = await readJson(path.join(directory, 'catalog.json'));
-  fields(oldCatalog, ['schemaVersion', 'sourceCommit', 'categories'], 'existing output catalog');
+  fields(oldCatalog, ['schemaVersion', 'sourceCommit', 'purposes', 'categories'], 'existing output catalog');
   if (oldCatalog.schemaVersion !== 1 || !Array.isArray(oldCatalog.categories)) fail('Existing output catalog is invalid');
+  const purposes = catalogPurposes(oldCatalog.purposes);
+  for (const category of oldCatalog.categories) categoryPurpose(category, purposes);
   if (commit(oldCatalog.sourceCommit) !== commit(oldState.sourceCommit)) fail('Existing output has inconsistent commits');
   const oldIndexes = Object.create(null);
   for (const name of names) {

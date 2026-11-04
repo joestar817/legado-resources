@@ -1,9 +1,15 @@
 {
   "schemaVersion": 1,
+  "purposes": [
+    { "id": "reading", "name": "阅读" },
+    { "id": "appearance", "name": "外观" },
+    { "id": "listening", "name": "听书" },
+    { "id": "pets", "name": "宠物" }
+  ],
   "categories": [
-    { "id": "fonts", "name": "字体", "type": "font" },
-    { "id": "backgrounds", "name": "阅读背景", "type": "background" },
-    { "id": "tts", "name": "TTS", "type": "tts" },
-    { "id": "themes", "name": "主题", "type": "theme" }
+    { "id": "fonts", "name": "字体", "type": "font", "purpose": "reading" },
+    { "id": "backgrounds", "name": "背景", "type": "background", "purpose": "reading" },
+    { "id": "themes", "name": "主题包", "type": "theme", "purpose": "appearance" },
+    { "id": "tts", "name": "TTS 脚本", "type": "tts", "purpose": "listening" }
   ]
 }
