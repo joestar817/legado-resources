@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "def125458f318cf2c61dfe955f4079be1608e431",
+  "sourceCommit": "704dd6a70713466e9901934c09ecdead1eac9526",
   "type": "pet",
   "resources": [
     {
@@ -50,40 +50,41 @@
       "id": "pet.gugugaga",
       "name": "咕嘎",
       "author": "阅读 NG",
-      "versionCode": 2,
+      "versionCode": 3,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-05T03:10:32.000Z",
+      "updatedAt": "2026-11-05T16:42:35.000Z",
       "payload": {
-        "path": "resources/pets/gugugaga-2.zip",
+        "path": "resources/pets/gugugaga-3.zip",
         "format": "zip",
-        "size": 876060,
-        "sha256": "2fd97a74d6532ca8267778ff98946e21ce5b5161c5726b7a3eef9ed68589d4ca",
+        "size": 1772007,
+        "sha256": "d4c4035ecbc029c902e0c0d0e507abeef9601f6499c83ee8d873d54b8fbdb6bc",
         "pluginId": "gugugaga"
       },
       "preview": {
         "thumbnail": {
-          "path": "previews/db8cdb46b9f79cefa391646c37d8d53195f5ead9beb72f0f60b473a9c4892ad0.png",
-          "size": 48706,
-          "sha256": "db8cdb46b9f79cefa391646c37d8d53195f5ead9beb72f0f60b473a9c4892ad0",
+          "path": "previews/20973b8e8c6fbd726c0f85bb6f604a626086e547020324639edc1c6f34de67f1.png",
+          "size": 49807,
+          "sha256": "20973b8e8c6fbd726c0f85bb6f604a626086e547020324639edc1c6f34de67f1",
           "width": 256,
           "height": 256
         },
         "detail": {
-          "path": "previews/9c66106dc6162b0c16ed0d320d88b038bd65aac6bc1bfea14827d5ba0739a69e.png",
-          "size": 290101,
-          "sha256": "9c66106dc6162b0c16ed0d320d88b038bd65aac6bc1bfea14827d5ba0739a69e",
+          "path": "previews/ec34562229cdcdb0f29075f4db4d7d6fedb0bb58956a8fda14304fc89923709f.png",
+          "size": 317032,
+          "sha256": "ec34562229cdcdb0f29075f4db4d7d6fedb0bb58956a8fda14304fc89923709f",
           "width": 768,
           "height": 768
         }
       },
       "license": "NOASSERTION",
       "description": "咕嘎独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
-      "versionName": "2.0",
+      "versionName": "2.1",
       "requirements": {
         "capabilities": [
           "pet.api.2"
         ]
       },
+      "changelog": "恢复原始素材",
       "tags": [
         "宠物",
         "代码插件"

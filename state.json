@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "def125458f318cf2c61dfe955f4079be1608e431",
+  "sourceCommit": "704dd6a70713466e9901934c09ecdead1eac9526",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -37,11 +37,11 @@
     },
     "pet.gugugaga": {
       "type": "pet",
-      "versionCode": 2,
-      "fingerprint": "e6024d458af5e4d55586ab14742ac4a09695033d1839a7d46b31aa3117df8d0d",
+      "versionCode": 3,
+      "fingerprint": "c7efa5d3340b1935a9ae9388da4df225f90569ec79b239ed620d379c42b31940",
       "active": true,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-05T03:10:32.000Z",
+      "updatedAt": "2026-11-05T16:42:35.000Z",
       "pluginId": "gugugaga"
     },
     "theme.example.warm-paper": {
