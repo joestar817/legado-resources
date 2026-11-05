@@ -4,8 +4,9 @@
   "name": "咕嘎",
   "author": "阅读 NG",
   "license": "NOASSERTION",
-  "versionName": "2.0",
+  "versionName": "2.1",
   "description": "咕嘎独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+  "changelog": "恢复原始素材",
   "tags": [
     "宠物",
     "代码插件"
@@ -14,7 +15,7 @@
     "capabilities": ["pet.api.2"]
   },
   "payload": {
-    "path": "resources/pets/gugugaga-2.zip",
+    "path": "resources/pets/gugugaga-3.zip",
     "format": "zip",
     "pluginId": "gugugaga"
   },
