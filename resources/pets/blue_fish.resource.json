@@ -17,5 +17,9 @@
     "path": "resources/pets/blue_fish-2.zip",
     "format": "zip",
     "pluginId": "blue_fish"
+  },
+  "previewSource": {
+    "thumbnail": "resources/pets/previews/blue_fish-thumbnail.png",
+    "detail": "resources/pets/previews/blue_fish-detail.png"
   }
 }

@@ -66,7 +66,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 | `payload.pluginId` | 宠物清单中的稳定插件身份，与资源说明一致 |
 | `requirements` | 可选的 `minAppVersionCode` 与 `capabilities` |
 | `description`、`changelog`、`tags` | 可选展示信息 |
-| `preview` | 字体的自动缩略图和详情样张，仅生成器输出，投稿不填写 |
+| `preview` | 字体样张或宠物形象的缩略图与详情图，仅生成器输出，投稿不填写 |
 
 同 ID 的类型、TTS 引擎身份和宠物插件身份须保持稳定。文件名／路径仅定位载荷，不能当作资源身份。索引格式版本、机器修订、作者版本和 App 版本分别有自己的语义。
 
@@ -137,3 +137,11 @@ NG 独立保存来源仓库、资源 ID、已安装版本、载荷摘要、来�
 自动归类表示加入资源库，不自动切换字体、背景、主题或启用 TTS。下载失败、更新不兼容、远端删除均保留现有安装。用户编辑的内容与个人配置不能直接被云端版本覆盖。
 
 NG 资源中心已实现目录与单文件安装消费；日期在详情页按设备时区显示，缺失或非法日期显示“—”，不会以当前时间兜底。
+
+## 宠物形象预览
+
+宠物可在资源说明中添加 previewSource，分别提供 thumbnail 和 detail 两个仓库路径，例如 resources/pets/previews/blue_fish-thumbnail.png 和 resources/pets/previews/blue_fish-detail.png。两张图均为 8-bit RGBA PNG，尺寸分别为 256×256 和 768×768，每张最多 1 MiB。图片路径必须位于同一资源分类目录，PNG 只含 IHDR、IDAT 和 IEND 块。
+
+生成器静态读取图片并验证完整性，在 catalog 分支生成 previews/<sha256>.png。公开索引采用与字体一致的 preview.thumbnail / preview.detail 结构，包含路径、尺寸、大小和 SHA-256。客户端按目录提交和图片摘要加载，可以在下载插件之前显示角色形象。
+
+预览源路径和图像字节属于展示信息，变更它们会刷新目录预览，宠物的安装版本、首次日期和内容更新时间按插件 ZIP 的指纹计算。字体预览仍由固定渲染器生成，尺寸仍为 256×256 和 960×420。

@@ -12,6 +12,7 @@ const PNG_SIGNATURE = Buffer.from('89504e470d0a1a0a', 'hex');
 const MAX_IMAGE_BYTES = 1024 * 1024;
 const MAX_FONT_BYTES = 64 * 1024 * 1024;
 const SIZES = Object.freeze({ thumbnail: [256, 256], detail: [960, 420] });
+const PET_SIZES = Object.freeze({ thumbnail: [256, 256], detail: [768, 768] });
 const rendererScript = fileURLToPath(new URL('./render-font-preview.py', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const crcTable = Array.from({ length: 256 }, (_, value) => {
@@ -67,9 +68,9 @@ function validatePng(bytes, width, height) {
   for (let row = 0; row < height; row++) if (pixels[row * stride] > 4) fail('Invalid preview PNG filter');
 }
 
-function validateAsset(asset, kind, files) {
+function validateAsset(asset, kind, files, type = 'font') {
   fields(asset, ['path', 'size', 'sha256', 'width', 'height'], `preview.${kind}`);
-  const [width, height] = SIZES[kind];
+  const [width, height] = (type === 'pet' ? PET_SIZES : SIZES)[kind];
   if (!HASH.test(asset.sha256) || asset.path !== `previews/${asset.sha256}.png`
     || !Number.isSafeInteger(asset.size) || asset.size < 1 || asset.size > MAX_IMAGE_BYTES
     || asset.width !== width || asset.height !== height) fail(`Invalid preview.${kind} metadata`);
@@ -86,10 +87,10 @@ export function validatePreviewFiles(indexes, files = {}) {
     if (!Array.isArray(index?.resources)) fail('Invalid preview index resources');
     for (const resource of index.resources) {
       if (resource.preview === undefined) continue;
-      if (index.type !== 'font') fail('Only fonts may contain font previews');
+      if (!['font', 'pet'].includes(index.type)) fail('Only fonts and pets may contain previews');
       fields(resource.preview, Object.keys(SIZES), 'preview');
       for (const kind of Object.keys(SIZES)) {
-        validateAsset(resource.preview[kind], kind, files);
+        validateAsset(resource.preview[kind], kind, files, index.type);
         referenced.add(resource.preview[kind].path);
       }
     }
@@ -152,7 +153,8 @@ export async function attachFontPreviews(result, { root, pythonExecutable = proc
   if (typeof root !== 'string' || !root) fail('Preview source root is required');
   await ordinary(path.resolve(root), true);
   root = await fs.realpath(path.resolve(root));
-  const files = Object.create(null), reused = new Map(), indexes = Object.create(null);
+  const files = Object.assign(Object.create(null), result.previewFiles ?? {});
+  const reused = new Map(), indexes = Object.create(null);
   const scratch = await fs.mkdtemp(path.join(os.tmpdir(), 'ng-font-previews-'));
   try {
     for (const [category, index] of Object.entries(result.indexes)) {

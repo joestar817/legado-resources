@@ -217,3 +217,101 @@ test('CLI renderer failure leaves the previous catalog intact', async t => {
   assert.match(failure.stderr, /renderer failed/);
   assert.deepEqual(await fs.readFile(path.join(output, 'catalog.json')), before);
 });
+
+async function petFixture(t, withFont = false) {
+  const f = await fixture(t, withFont ? 1 : 0);
+  const petDir = path.join(f.root, 'resources/pets');
+  await fs.mkdir(path.join(petDir, 'images'), { recursive: true });
+  await fs.copyFile(new URL('../resources/pets/gugugaga-2.zip', import.meta.url), path.join(petDir, 'pet.zip'));
+  const categories = [{ id: 'pets', name: '宠物', type: 'pet' }];
+  if (withFont) categories.unshift({ id: 'fonts', name: '字体', type: 'font' });
+  await writeJson(path.join(f.root, 'catalog.config.json'), { schemaVersion: 1, categories });
+  const meta = {
+    schemaVersion: 1, id: 'pet.fixture', name: '测试宠物', author: '作者',
+    requirements: { capabilities: ['pet.api.2'] },
+    payload: { path: 'resources/pets/pet.zip', format: 'zip', pluginId: 'gugugaga' },
+    previewSource: { thumbnail: 'resources/pets/images/thumb.png', detail: 'resources/pets/images/detail.png' },
+  };
+  await fs.writeFile(path.join(f.root, meta.previewSource.thumbnail), png(256, 256));
+  await fs.writeFile(path.join(f.root, meta.previewSource.detail), png(768, 768));
+  const metadataFile = path.join(petDir, 'pet.resource.json');
+  await writeJson(metadataFile, meta);
+  const build = options => buildCatalog({ root: f.root, sourceCommit, ...options });
+  return { ...f, meta, metadataFile, build };
+}
+
+test('pet previews use verified content-addressed PNGs without changing installed versions or dates', async t => {
+  const f = await petFixture(t), first = await f.build();
+  assert.equal(first.indexes.pets.resources[0].versionCode, 2);
+  for (const record of Object.values(first.state.resources)) Object.assign(record, { publishedAt: new Date(sourceTime).toISOString(), updatedAt: new Date(sourceTime).toISOString() });
+  const beforeState = Object.assign(Object.create(null), structuredClone(first.state.resources));
+  const options = { previousState: first.state, sourceTime: '2026-11-05T01:00:00Z' };
+  const enriched = await f.build(options);
+  assert.deepEqual(enriched.state.resources, beforeState);
+  const item = enriched.indexes.pets.resources[0];
+  assert.equal(item.preview.thumbnail.width, 256);
+  assert.equal(item.preview.detail.width, 768);
+  assert.equal(item.preview.detail.height, 768);
+  assert.equal(Object.keys(enriched.previewFiles).length, 2);
+  assert.deepEqual(validatePreviewFiles(enriched.indexes, enriched.previewFiles), enriched.previewFiles);
+  assert.equal(item.previewSource, undefined);
+  await fs.writeFile(path.join(f.root, f.meta.previewSource.detail), png(768, 768, 128));
+  const changed = await f.build(options);
+  assert.notEqual(changed.indexes.pets.resources[0].preview.detail.sha256, item.preview.detail.sha256);
+  assert.deepEqual(changed.state.resources, beforeState);
+  const renamed = 'resources/pets/images/renamed.png';
+  await fs.rename(path.join(f.root, f.meta.previewSource.detail), path.join(f.root, renamed));
+  f.meta.previewSource.detail = renamed;
+  await writeJson(f.metadataFile, f.meta);
+  const moved = await f.build(options);
+  assert.deepEqual(moved.indexes.pets.resources[0].preview, changed.indexes.pets.resources[0].preview);
+  assert.deepEqual(moved.state.resources, beforeState);
+});
+
+test('font rendering keeps pet preview files and both kinds publish atomically', async t => {
+  const f = await petFixture(t, true), built = await f.build();
+  const petPreview = structuredClone(built.indexes.pets.resources[0].preview);
+  const enriched = await attachFontPreviews(built, { root: f.root, render: fakeRenderer });
+  assert.deepEqual(enriched.indexes.pets.resources[0].preview, petPreview);
+  assert.equal(enriched.indexes.fonts.resources[0].preview.detail.width, 960);
+  assert.equal(enriched.indexes.fonts.resources[0].preview.detail.height, 420);
+  const out = path.join(f.scratch, 'catalog');
+  await writeCatalog(enriched, out);
+  for (const [name, bytes] of Object.entries(enriched.previewFiles)) assert.deepEqual(await fs.readFile(path.join(out, name)), bytes);
+  await writeCatalog(enriched, out);
+  const saved = JSON.parse(await fs.readFile(path.join(out, 'resources/pets/index.json')));
+  assert.deepEqual(saved.resources[0].preview, petPreview);
+});
+
+for (const [label, edit] of [
+  ['foreign category', f => { f.meta.previewSource.detail = 'resources/fonts/detail.png'; }],
+  ['parent traversal', f => { f.meta.previewSource.detail = 'resources/pets/../detail.png'; }],
+  ['backslash path', f => { f.meta.previewSource.detail = 'resources\\pets\\detail.png'; }],
+  ['URL', f => { f.meta.previewSource.detail = 'https://example.org/detail.png'; }],
+  ['missing detail', f => { delete f.meta.previewSource.detail; }],
+  ['machine field', f => { f.meta.previewSource.sha256 = 'a'.repeat(64); }],
+]) test('pet preview rejects ' + label, async t => {
+  const f = await petFixture(t);
+  edit(f);
+  await writeJson(f.metadataFile, f.meta);
+  await assert.rejects(f.build());
+});
+
+test('pet preview rejects bad PNG bytes, mismatched sizes and oversized images', async t => {
+  const f = await petFixture(t), file = path.join(f.root, f.meta.previewSource.detail);
+  for (const bytes of [png(960, 420), Buffer.from('not PNG'), Buffer.alloc(1024 * 1024 + 1)]) {
+    await fs.writeFile(file, bytes);
+    await assert.rejects(f.build());
+  }
+  const broken = png(768, 768); broken[40] ^= 1;
+  await fs.writeFile(file, broken);
+  await assert.rejects(f.build(), /checksum/);
+});
+
+test('font sources cannot override generated previews with pet previewSource', async t => {
+  const f = await fixture(t);
+  const file = path.join(f.root, 'resources/fonts/font0.resource.json');
+  const meta = JSON.parse(await fs.readFile(file)); meta.previewSource = {};
+  await writeJson(file, meta);
+  await assert.rejects(f.build(), /previewSource is supported only for pets/);
+});

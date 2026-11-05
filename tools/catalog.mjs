@@ -311,6 +311,31 @@ export function initializeCatalogDates(history) {
   return { ...lastState, resources: previous };
 }
 
+/** Preview images are display metadata and are excluded from installation fingerprints. */
+async function sourcePreview(root, category, source, files) {
+  if (source === undefined) return undefined;
+  if (category.type !== 'pet') fail('previewSource is supported only for pets');
+  fields(source, ['thumbnail', 'detail'], 'previewSource');
+  const preview = {};
+  for (const [kind, width, height] of [['thumbnail', 256, 256], ['detail', 768, 768]]) {
+    const relative = relativePath(source[kind], category.id);
+    if (path.posix.extname(relative) !== '.png') fail('Pet preview source must be PNG');
+    const filename = await safePayload(root, relative);
+    const stat = await ordinary(filename, 'file');
+    if (stat.size < 1 || stat.size > 1024 * 1024) fail('Pet preview source exceeds the image limit');
+    const bytes = await fs.readFile(filename);
+    if (bytes.length !== stat.size) fail('Pet preview source changed while reading');
+    const sha256 = digest(bytes);
+    const outputPath = 'previews/' + sha256 + '.png';
+    files[outputPath] = bytes;
+    preview[kind] = { path: outputPath, size: bytes.length, sha256, width, height };
+  }
+  // Validate PNG dimensions, decompressed data and checksums before exposing the preview.
+  const images = Object.fromEntries(Object.values(preview).map(asset => [asset.path, files[asset.path]]));
+  validatePreviewFiles({ pet: { type: 'pet', resources: [{ preview }] } }, images);
+  return preview;
+}
+
 /** Read resources without evaluating code. Omit sourceTime only for validation, never publication. */
 export async function buildCatalog({ root, sourceCommit, sourceTime, previousState = null }) {
   if (typeof root !== 'string' || !root) fail('root is required');
@@ -336,6 +361,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
     return { id: category.id, name: text(category.name, 'category.name', 64), type: category.type,
       ...categoryPurpose(category, purposes) };
   });
+  const previewFiles = Object.create(null);
   const stateResources = Object.create(null);
   for (const id of Object.keys(previous || {})) stateResources[id] = { ...previous[id], active: false };
   const seenIds = new Set();
@@ -355,7 +381,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
     const resources = [];
     for (const metadataFile of present ? await metadataFiles(directory) : []) {
       const meta = await readJson(metadataFile);
-      fields(meta, ['schemaVersion', 'id', 'name', 'author', 'description', 'license', 'versionName', 'payload', 'requirements', 'changelog', 'tags', 'verification'], metadataFile);
+      fields(meta, ['schemaVersion', 'id', 'name', 'author', 'description', 'license', 'versionName', 'payload', 'requirements', 'changelog', 'tags', 'verification', 'previewSource'], metadataFile);
       if (meta.schemaVersion !== 1) fail(`Unsupported resource schema in ${metadataFile}`);
       const id = identifier(meta.id, 'resource.id');
       if (seenIds.has(id)) fail(`Duplicate resource ID ${id}`);
@@ -407,6 +433,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
         if (prior && sourceTime < prior.updatedAt) fail(`Source time moved backwards for ${id}`);
         dates = { publishedAt: prior?.publishedAt ?? sourceTime, updatedAt: sourceTime };
       }
+      const preview = await sourcePreview(root, category, meta.previewSource, previewFiles);
       const resource = {
         id,
         name: text(meta.name ?? header?.name, `${id}.name`, 256),
@@ -414,6 +441,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
         versionCode,
         ...dates,
         payload,
+        ...(preview ? { preview } : {}),
       };
       const optionals = {
         license: optionalText(meta.license, `${id}.license`, 256),
@@ -440,6 +468,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
     catalog: { schemaVersion: 1, sourceCommit, ...(purposes === undefined ? {} : { purposes }), categories: catalogCategories },
     indexes,
     state: { schemaVersion: 1, sourceCommit, resources: orderedState },
+    ...(Object.keys(previewFiles).length ? { previewFiles } : {}),
   };
 }
 

@@ -57,7 +57,7 @@
 - 删除资源时删除对应说明和不再使用的载荷；内部历史由发布器保留，作者不编辑台账。
 - 不提交 `catalog.json`、分类 `index.json`、`state.json`、密钥、Cookie、账号配置或测试音频。
 
-投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。
+投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。宠物还可填写 `previewSource`，提供 256×256 缩略图与 768×768 详情图，格式为透明 RGBA PNG，详见[宠物形象预览](docs/CATALOG_PROTOCOL.md#宠物形象预览)。
 
 元数据只保留资源展示、识别、版本和安装所需的信息。校验日期、测试状态与验证过程放在投稿说明或本地记录中，不填写 `verification`，避免增加后续手动维护负担。
 

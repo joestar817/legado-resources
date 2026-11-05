@@ -17,5 +17,9 @@
     "path": "resources/pets/gugugaga-2.zip",
     "format": "zip",
     "pluginId": "gugugaga"
+  },
+  "previewSource": {
+    "thumbnail": "resources/pets/previews/gugugaga-thumbnail.png",
+    "detail": "resources/pets/previews/gugugaga-detail.png"
   }
 }
