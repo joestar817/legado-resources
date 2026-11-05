@@ -2,7 +2,7 @@
 
 将资源放入 `resources/` 下的对应分类，并在旁边添加以 `.resource.json` 结尾的 UTF-8 JSON 说明。一个说明对应一个载荷文件；资源可放分类子目录，不需要修改总索引。`payload.path` 从仓库根目录计算，必须带 `resources/<分类>/` 前缀。
 
-资源中心按用途浏览，投稿仍放稳定的资源类型目录：阅读的字体与背景放 `fonts`、`backgrounds`，外观的主题包放 `themes`，听书的 TTS 脚本放 `tts`。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物入口当前没有可安装资源，暂不提交空壳占位包。
+资源中心按用途浏览，投稿仍放稳定的资源类型目录：阅读的字体与背景放 `fonts`、`backgrounds`，外观的主题包放 `themes`，听书的 TTS 脚本放 `tts`。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物代码插件放在 `resources/pets/`。
 
 ## 字体例子
 
@@ -38,6 +38,14 @@
 ```
 
 脚本头部应有 `// @uuid`、`// @name`、`// @author`；可附 `// @version` 和 `// @description`。工具静态读取这些注释，不执行 JS。说明中显式填写的 `name`、`author`、`versionName` 可覆盖相应展示值；避免重复维护没有必要的字段。
+
+## 宠物插件
+
+作者可下载[宠物开发 SDK 2.0.0](sdk/pet/2.0.0/pet-sdk-2.0.0.zip)，解压后按包内说明从独立工程构建自己的宠物。SDK 归档与用户安装的角色包分别发布，资源中心“宠物”列表只收录角色包。
+
+提交独立 SDK 生成的标准 ZIP 和同目录的资源说明。ZIP 根含 `classes.dex`，`assets/plugin.json` 声明 `schemaVersion: 2`、`apiVersion: 2`、`kind: "pet"`、稳定的 `id`、`name`、`entryClass` 和 `versionCode`。素材由作者按需放入包内。`none` 和 `button` 是宿主保留 ID。
+
+资源说明沿用目录协议 v1。填写 `payload.format: "zip"`、`payload.pluginId` 和 `requirements.capabilities: ["pet.api.2"]`。例如可参考[大肥鱼资源说明](resources/pets/blue_fish.resource.json)。首次上架时插件修订号取 1，更新内容时加 1。目录已有下载指纹时，同一资源的插件 ID 与首次发布时间应保持一致。正式发布和 PR 检查会用历史台账核对升级版本。
 
 ## 更新规则
 

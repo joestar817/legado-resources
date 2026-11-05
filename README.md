@@ -7,21 +7,22 @@
 | 阅读 | 字体、背景 | `fonts`、`backgrounds` |
 | 外观 | 主题包 | `themes` |
 | 听书 | TTS 脚本 | `tts` |
-| 宠物 | 暂无已接入资源 | 保留用途入口，不生成虚假资源 |
+| 宠物 | 编译宠物插件 | `pets` |
 
-阅读预设、动态场景、本地 TTS 引擎与宠物等类型，需对应安装或执行适配器接入后再上架。字体、背景、主题数据包和 TTS 脚本继续按各自类型处理；需要编译的可选功能不因归类而自动具备插件加载能力。
+阅读预设、动态场景、本地 TTS 引擎等类型，需对应安装或执行适配器接入后再上架。字体、背景、主题数据包和 TTS 脚本继续按各自类型处理；需要编译的可选功能不因归类而自动具备插件加载能力。
 
-所有资源统一放在 `resources/` 下，根目录只保留仓库配置、文档、工具和测试：
+资源中心的安装包放在 `resources/` 下，供作者下载的工具包按版本放在 `sdk/` 下。
 
 ```text
 resources/
 ├── fonts/
 ├── backgrounds/
 ├── tts/
-└── themes/
+├── themes/
+└── pets/
 ```
 
-当前包含一款标题字体，以及背景、TTS 和主题示例，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心已接入目录、下载与更新提示；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
+当前包含一款标题字体、咕嘎和蓝色大肥鱼，以及背景、TTS 和主题示例，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心已接入目录、下载与更新提示；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
 
 ## 目录
 
@@ -31,6 +32,8 @@ resources/
 | `resources/backgrounds/` | PNG / JPEG / WebP 阅读背景 |
 | `resources/tts/` | 听书下的 TTS 脚本，当前为接口模板示例 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
+| `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
+| `sdk/pet/` | 提供给作者的版本化宠物开发 SDK |
 | `tools/` | 索引生成与发布工具 |
 | `test/` | 使用临时目录和本地 Git 远端的回归测试 |
 
@@ -97,4 +100,4 @@ python3 -B test/font-preview.test.py
 
 ## 宠物插件
 
-宠物分类分发 .ngpet 编译插件。生成器只读校验 DEX、清单/API、插件身份和编译版本，不执行包内代码；插件素材保留原文件，不再要求 Q95 重压缩。咕嘎和蓝色大肥鱼在应用资源中心下载后启用。
+宠物插件以标准 ZIP 分发。阅读按 `pet` 分类下载，在用户启用后加载包中的代码，素材保留原始质量。生成器检查 DEX 和 `assets/plugin.json`，核对插件身份与修订号。具有 `pet.api.2` 能力的宿主可以安装咕嘎、蓝色大肥鱼及符合相同契约的新宠物。作者接入流程见[投稿说明](CONTRIBUTING.md#宠物插件)。

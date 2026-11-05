@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+import { extname } from 'node:path';
 import { inflateRawSync } from 'node:zlib';
 
 const safePath = name => name && !name.includes('\\') && !/[\x00-\x1f:]/.test(name) && name.split('/').every(p => p && p !== '.' && p !== '..');
@@ -47,9 +48,24 @@ export async function readPetPlugin(filename) {
     return decoded;
   }
   need(data('classes.dex', 16 * 1024 * 1024).subarray(0, 4).toString() === 'dex\n', 'missing compiled DEX');
-  const manifest = JSON.parse(data('assets/pet-plugin.json', 16384));
-  need(manifest.schemaVersion === 1 && manifest.apiVersion === 1, 'unsupported schema or API');
-  need(/^[a-z][a-z0-9_]{0,63}$/.test(manifest.id) && typeof manifest.name === 'string' && manifest.name.trim() &&
-    Number.isSafeInteger(manifest.versionCode) && manifest.versionCode > 0 && /^io\.legado\.plugins\.pets\.[A-Za-z0-9_.]+$/.test(manifest.entryClass), 'invalid manifest');
+  const format = extname(filename).toLowerCase();
+  need(format === '.ngpet' || format === '.zip', 'unsupported package extension');
+  const legacy = format === '.ngpet';
+  const currentPath = 'assets/plugin.json';
+  const legacyPath = 'assets/pet-plugin.json';
+  need(!entries.has(legacy ? currentPath : legacyPath), 'manifest does not match package format');
+  const manifest = JSON.parse(data(legacy ? legacyPath : currentPath, 16384));
+  need(manifest && typeof manifest === 'object' && !Array.isArray(manifest), 'invalid manifest');
+  const api = legacy ? 1 : 2;
+  need(manifest.schemaVersion === api && manifest.apiVersion === api, 'unsupported schema or API');
+  if (!legacy) {
+    need(manifest.kind === 'pet', 'invalid extension kind');
+    need(!['none', 'button'].includes(manifest.id), 'reserved plugin ID');
+  }
+  const className = legacy ? /^io\.legado\.plugins\.pets\.[A-Za-z0-9_.]+$/ : /^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+$/;
+  need(typeof manifest.id === 'string' && /^[a-z][a-z0-9_]{0,63}$/.test(manifest.id) &&
+    typeof manifest.name === 'string' && manifest.name.trim() &&
+    Number.isSafeInteger(manifest.versionCode) && manifest.versionCode > 0 &&
+    typeof manifest.entryClass === 'string' && className.test(manifest.entryClass), 'invalid manifest');
   return manifest;
 }

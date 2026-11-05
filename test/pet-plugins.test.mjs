@@ -50,3 +50,94 @@ test('all five real categories can coexist in the published catalog',async t=>{
  await fs.writeFile(path.join(root,'catalog.config.json'),JSON.stringify({schemaVersion:1,categories}));
  const result=await buildCatalog({root,sourceCommit:'a'.repeat(40)});assert.equal(result.catalog.categories.length,5);
 });
+
+const petV2 = {
+  schemaVersion: 2,
+  kind: 'pet',
+  apiVersion: 2,
+  id: 'light_orb',
+  name: '测试光球',
+  versionCode: 1,
+  entryClass: 'example.orb.OrbPlugin',
+};
+
+function packV2(overrides = {}, extraEntries = []) {
+  return zip([
+    ['classes.dex', 'dex\n035\0'],
+    ['assets/plugin.json', JSON.stringify({ ...petV2, ...overrides })],
+    ...extraEntries,
+  ]);
+}
+
+test('ZIP supports independent entry packages and zero artwork', async t => {
+  const file = path.join(await scratch(t), 'orb.zip');
+  await fs.writeFile(file, packV2());
+  assert.deepEqual(await readPetPlugin(file), petV2);
+});
+
+for (const [name, bytes, error] of [
+  ['legacy bytes renamed to ZIP', pack(), /manifest does not match/],
+  ['two competing manifests', packV2({}, [['assets/pet-plugin.json', '{}']]), /manifest does not match/],
+  ['wrong extension kind', packV2({ kind: 'theme' }), /kind/],
+  ['unknown API', packV2({ apiVersion: 3 }), /API/],
+  ['unknown schema', packV2({ schemaVersion: 3 }), /schema/],
+  ['reserved button ID', packV2({ id: 'button' }), /reserved/],
+  ['reserved none ID', packV2({ id: 'none' }), /reserved/],
+  ['missing plugin identity', packV2({ id: undefined }), /invalid manifest/],
+  ['invalid class name', packV2({ entryClass: 'example.1bad' }), /invalid manifest/],
+]) {
+  test(`v2 rejects ${name}`, async t => {
+    const file = path.join(await scratch(t), 'test.zip');
+    await fs.writeFile(file, bytes);
+    await assert.rejects(readPetPlugin(file), error);
+  });
+}
+
+test('migration keeps v1 identity and dates and advertises v2 host compatibility on new ZIP', async t => {
+  const root = await scratch(t);
+  const folder = path.join(root, 'resources/pets');
+  await fs.mkdir(folder, { recursive: true });
+  await fs.writeFile(path.join(root, 'catalog.config.json'), JSON.stringify({
+    schemaVersion: 1,
+    categories: [{ id: 'pets', name: '宠物插件', type: 'pet' }],
+  }));
+  const metadataFile = path.join(folder, 'one.resource.json');
+  const metadata = {
+    schemaVersion: 1,
+    id: 'pet.gugugaga',
+    name: '咕嘎',
+    author: '测试',
+    payload: { path: 'resources/pets/one.ngpet', format: 'ngpet', pluginId: 'gugugaga' },
+  };
+  const saveMetadata = () => fs.writeFile(metadataFile, JSON.stringify(metadata));
+  await saveMetadata();
+  await fs.writeFile(path.join(folder, 'one.ngpet'), pack());
+  const old = await buildCatalog({ root, sourceCommit: 'a'.repeat(40), sourceTime: '2026-11-05T00:00:00Z' });
+
+  metadata.payload = { path: 'resources/pets/one.zip', format: 'zip', pluginId: 'gugugaga' };
+  await fs.writeFile(path.join(folder, 'one.zip'), packV2({ id: 'gugugaga', versionCode: 2 }));
+  await saveMetadata();
+  const current = { root, sourceCommit: 'b'.repeat(40), sourceTime: '2026-11-05T00:01:00Z', previousState: old.state };
+  await assert.rejects(buildCatalog(current), /requires the pet.api.2 host capability/);
+  metadata.requirements = { capabilities: ['pet.api.2'] };
+  await saveMetadata();
+  const updated = await buildCatalog(current);
+  const [item] = updated.indexes.pets.resources;
+  assert.equal(item.id, metadata.id);
+  assert.equal(item.versionCode, 2);
+  assert.equal(item.payload.pluginId, 'gugugaga');
+  assert.equal(item.payload.format, 'zip');
+  assert.deepEqual(item.requirements, metadata.requirements);
+  assert.equal(item.publishedAt, old.indexes.pets.resources[0].publishedAt);
+  assert.equal(item.updatedAt, '2026-11-05T00:01:00.000Z');
+
+  const repeated = await buildCatalog({ ...current, sourceCommit: 'c'.repeat(40), previousState: updated.state });
+  assert.deepEqual(repeated.indexes.pets.resources, updated.indexes.pets.resources);
+  const noHistoryValidate = await buildCatalog({ root, sourceCommit: current.sourceCommit });
+  assert.equal(noHistoryValidate.indexes.pets.resources[0].versionCode, 2);
+  await assert.rejects(buildCatalog({ ...current, previousState: null }), /version must match/);
+
+  metadata.id = 'pet.another-owner';
+  await saveMetadata();
+  await assert.rejects(buildCatalog(current), /belongs to another resource/);
+});

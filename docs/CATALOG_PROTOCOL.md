@@ -12,6 +12,7 @@ resources/fonts/index.json
 resources/backgrounds/index.json
 resources/tts/index.json
 resources/themes/index.json
+resources/pets/index.json
 state.json
 previews/<图片SHA256>.png
 ```
@@ -26,7 +27,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 目录保持 `schemaVersion: 1`，增加可选的用途展示信息：根级 `purposes` 是按展示顺序排列的 `{ id, name }` 列表；声明用途时，各分类必须通过 `purpose` 引用其中一项。当前用途为 `reading`（阅读）、`appearance`（外观）、`listening`（听书）与 `pets`（宠物）。同一用途可包含多个资源类型，没有已接入类型的用途只保留入口，不生成虚假分类或资源。
 
-当前映射固定为 `font/background → reading`、`theme → appearance`、`tts → listening`，与客户端已接入的类型对应。生成器拒绝未知、重复、缺失或与类型不符的用途。未声明用途的既有配置不自动补造字段；不消费用途信息的客户端继续按原有类型读取，安装协议不变。
+当前映射固定为 `font/background → reading`、`theme → appearance`、`tts → listening`、`pet → pets`，与客户端已接入的类型对应。生成器拒绝未知、重复、缺失或与类型不符的用途。未声明用途的既有配置不自动补造字段；不消费用途信息的客户端继续按原有类型读取，安装协议不变。
 
 用途、显示名称与分类顺序只影响浏览，不改变目录分类 ID、资源 ID、TTS 引擎身份、载荷路径、内容版本或发布时间。资源目录仍由可安装类型划分；用途不是一种新的安装器或代码插件协议。
 
@@ -62,13 +63,20 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 | `payload.path`、`format` | 带 `resources/<分类>/` 前缀的仓库相对路径、载荷格式 |
 | `payload.size`、`sha256` | 实际内容字节数及 SHA-256 |
 | `payload.engineId` | TTS 从脚本 `@uuid` 提取的原生引擎身份 |
+| `payload.pluginId` | 宠物清单中的稳定插件身份，与资源说明一致 |
 | `requirements` | 可选的 `minAppVersionCode` 与 `capabilities` |
 | `description`、`changelog`、`tags` | 可选展示信息 |
 | `preview` | 字体的自动缩略图和详情样张，仅生成器输出，投稿不填写 |
 
-同 ID 的类型及 TTS 引擎身份不得变化。文件名／路径仅定位载荷，不能当作资源身份。索引格式版本、机器修订、作者版本和 App 版本分别有自己的语义。
+同 ID 的类型、TTS 引擎身份和宠物插件身份须保持稳定。文件名／路径仅定位载荷，不能当作资源身份。索引格式版本、机器修订、作者版本和 App 版本分别有自己的语义。
 
 资源元数据不维护校验日期、测试状态或验证过程；这些记录放在投稿说明或本地诊断中，不作为资源内容维护。
+
+## 宠物 ZIP
+
+索引中的资源类型为 `pet`，载荷格式为 `zip`。发布时静态检查 DEX、`assets/plugin.json`、接口版本、插件与资源身份及编译版本号。`requirements.capabilities` 必须包含 `pet.api.2`，客户端在下载前同时检查格式和能力。主题 ZIP 与宠物 ZIP 通过目录类型和包内协议区分。
+
+首次收录的两只宠物使用 `.ngpet`、`assets/pet-plugin.json` 和接口 v1。旧历史记录继续沿用原 `pluginId` 和首次收录时间，升级到 ZIP 后产生新的安装版本。独立 validate 在没有台账时检查编译版本的合法性，正式发布使用上一份台账验证确切的下一修订号。
 
 ## 字体预览
 
@@ -101,7 +109,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 ## 自动版本
 
-发布器读取上次成功发布的 `state.json`，按资源 ID 对比安装内容指纹。指纹包含类型、格式、实际文件摘要及 TTS 引擎 ID；展示信息、下载源路径和兼容要求不计入当前单文件安装指纹。
+发布器读取上次成功发布的 `state.json`，按资源 ID 对比安装内容指纹。指纹包含类型、格式、实际文件摘要及对应类型的 TTS 引擎 ID 或宠物插件 ID；展示信息、下载源路径和兼容要求不计入当前单文件安装指纹。
 
 - 第一次出现：版本 1。
 - 安装内容不变：沿用版本；重复任务不额外升版。
@@ -112,7 +120,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 兼容条件变化仍会更新目录，NG 每次安装或更新都应重新判断兼容性，不能仅比较 `versionCode`。将来如果增加会改变安装结果的参数，必须同步修改指纹协议及测试。
 
-台账至少包含 `schemaVersion`、`sourceCommit` 和 `resources` 映射。每条记录为 `type`、`versionCode`、`fingerprint`、`active`、`publishedAt`、`updatedAt`，TTS 另有必需 `engineId`。已有台账损坏、缺失或来源历史分叉时停止发布，不能静默初始化成版本 1。
+台账至少包含 `schemaVersion`、`sourceCommit` 和 `resources` 映射。每条记录为 `type`、`versionCode`、`fingerprint`、`active`、`publishedAt`、`updatedAt`，TTS 另有必需 `engineId`，宠物另有必需 `pluginId`。已有台账损坏、缺失或来源历史分叉时停止发布，不能静默初始化成版本 1。
 
 ## 安全与一致性边界
 

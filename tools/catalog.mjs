@@ -13,7 +13,7 @@ const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet'],
+  tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet', 'zip'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -374,6 +374,8 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       const filename = await safePayload(root, relative);
       const file = await payloadDigest(filename, category.type === 'tts');
       const pet = category.type === 'pet' ? await readPetPlugin(filename) : null;
+      const required = requirements(meta.requirements);
+      if (pet?.apiVersion === 2 && !required?.capabilities?.includes('pet.api.2')) fail('Pet ZIP requires the pet.api.2 host capability');
       if (pet && meta.payload.pluginId !== pet.id) fail('Pet plugin identity mismatch');
       if (!pet && meta.payload.pluginId !== undefined) fail('Unexpected pluginId');
       if (pet && seenPluginIds.has(pet.id)) fail('Duplicate pet plugin identity');
@@ -392,7 +394,10 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       const prior = previous?.[id];
       if (prior && prior.type !== category.type) fail(`Resource ${id} cannot change type`);
       if (prior?.type === 'tts' && prior.engineId !== header.uuid) fail(`Resource ${id} cannot change its TTS engine ID`);
-      const versionCode = prior ? prior.versionCode + (prior.fingerprint === fingerprint ? 0 : 1) : 1;
+      // A standalone validate command has no published history to compare. Publication,
+      // bootstrap and PR validation still enforce the exact, history-derived revision.
+      const initialVersion = pet && previous === null && sourceTime === undefined ? pet.versionCode : 1;
+      const versionCode = prior ? prior.versionCode + (prior.fingerprint === fingerprint ? 0 : 1) : initialVersion;
       if (pet && prior && prior.pluginId !== pet.id) fail('Pet plugin cannot change identity');
       if (pet && pet.versionCode !== versionCode) fail('Pet plugin version must match catalog version');
       if (!Number.isSafeInteger(versionCode)) fail(`Version overflow for ${id}`);
@@ -414,7 +419,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
         license: optionalText(meta.license, `${id}.license`, 256),
         description: optionalText(meta.description ?? header?.description, `${id}.description`, 5000),
         versionName: optionalText(meta.versionName ?? header?.version, `${id}.versionName`, 128),
-        requirements: requirements(meta.requirements),
+        requirements: required,
         changelog: optionalText(meta.changelog, `${id}.changelog`, 10000),
         tags: meta.tags === undefined ? undefined : strings(meta.tags, `${id}.tags`, 32, 64),
         verification: verification(meta.verification),
