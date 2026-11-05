@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "685d493aafd91f7d3413ed0630acaabfa08a573c",
+  "sourceCommit": "e3c49d30977b8a646bf5ade8cde6632eef8effc6",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -28,20 +28,20 @@
     },
     "pet.blue_fish": {
       "type": "pet",
-      "versionCode": 1,
-      "fingerprint": "37cdc98bb004429ef19bb48b4e6b7ebdb398a89f02bfdcb6227b89469ac6d862",
+      "versionCode": 2,
+      "fingerprint": "9a55e24600443266909c44573ab765794c346d72d649d790bbe595dd5710f4bb",
       "active": true,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T03:10:32.000Z",
       "pluginId": "blue_fish"
     },
     "pet.gugugaga": {
       "type": "pet",
-      "versionCode": 1,
-      "fingerprint": "e0136ac8e48aa53f694ee78f4f2095a6273e08709c6058e86cdd7d40ff1da655",
+      "versionCode": 2,
+      "fingerprint": "e6024d458af5e4d55586ab14742ac4a09695033d1839a7d46b31aa3117df8d0d",
       "active": true,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T03:10:32.000Z",
       "pluginId": "gugugaga"
     },
     "theme.example.warm-paper": {

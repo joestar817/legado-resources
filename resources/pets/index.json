@@ -1,25 +1,30 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "685d493aafd91f7d3413ed0630acaabfa08a573c",
+  "sourceCommit": "e3c49d30977b8a646bf5ade8cde6632eef8effc6",
   "type": "pet",
   "resources": [
     {
       "id": "pet.blue_fish",
       "name": "蓝色大肥鱼",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T03:10:32.000Z",
       "payload": {
-        "path": "resources/pets/blue_fish-1.ngpet",
-        "format": "ngpet",
-        "size": 7180754,
-        "sha256": "5dd32ef02704fb078735bbf66e01673bf8788f1b12e209bfc25d028760c0a582",
+        "path": "resources/pets/blue_fish-2.zip",
+        "format": "zip",
+        "size": 7191686,
+        "sha256": "93de79a59f4f61354c303bfd0b9739f2503548c0553dce26d325641674ffa254",
         "pluginId": "blue_fish"
       },
       "license": "NOASSERTION",
       "description": "蓝色大肥鱼独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
-      "versionName": "1.0",
+      "versionName": "2.0",
+      "requirements": {
+        "capabilities": [
+          "pet.api.2"
+        ]
+      },
       "tags": [
         "宠物",
         "代码插件"
@@ -29,19 +34,24 @@
       "id": "pet.gugugaga",
       "name": "咕嘎",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-04T23:42:05.000Z",
-      "updatedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T03:10:32.000Z",
       "payload": {
-        "path": "resources/pets/gugugaga-1.ngpet",
-        "format": "ngpet",
-        "size": 864976,
-        "sha256": "166f1bad52ce42e5f27b0fbf99777222ed23d6f61c87aff3ddb00ac3b0044c4f",
+        "path": "resources/pets/gugugaga-2.zip",
+        "format": "zip",
+        "size": 876060,
+        "sha256": "2fd97a74d6532ca8267778ff98946e21ce5b5161c5726b7a3eef9ed68589d4ca",
         "pluginId": "gugugaga"
       },
       "license": "NOASSERTION",
       "description": "咕嘎独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
-      "versionName": "1.0",
+      "versionName": "2.0",
+      "requirements": {
+        "capabilities": [
+          "pet.api.2"
+        ]
+      },
       "tags": [
         "宠物",
         "代码插件"
