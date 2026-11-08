@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "8a0ad7f2cf7d178ddc17ec8bfb47fff10a21ebff",
+  "sourceCommit": "a415d62cd75461ea5bfdcce6184b658682cdaf1b",
   "purposes": [
     {
       "id": "reading",
@@ -42,7 +42,7 @@
       "type": "theme",
       "purpose": "appearance",
       "index": "resources/themes/index.json",
-      "count": 4
+      "count": 3
     },
     {
       "id": "tts",

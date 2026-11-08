@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "8a0ad7f2cf7d178ddc17ec8bfb47fff10a21ebff",
+  "sourceCommit": "a415d62cd75461ea5bfdcce6184b658682cdaf1b",
   "type": "theme",
   "resources": [
     {
@@ -50,31 +50,6 @@
       },
       "description": "日间静水荷塘，夜间夏夜插画，包含日夜原图与配色。",
       "versionName": "1.0.1"
-    },
-    {
-      "id": "theme.example.warm-paper",
-      "name": "暖纸主题示例",
-      "author": "阅读 NG 示例",
-      "versionCode": 1,
-      "publishedAt": "2026-10-26T10:52:23.000Z",
-      "updatedAt": "2026-10-26T10:52:23.000Z",
-      "payload": {
-        "path": "resources/themes/warm-paper-example/warm-paper.ngtheme",
-        "format": "ngtheme",
-        "size": 1498,
-        "sha256": "cd0d8b474275b22bf2118639b1072dab75f49ccac2b679c79e584fd843b00061"
-      },
-      "license": "CC0-1.0",
-      "description": "NG 原生纯配色主题，包含日间/夜间颜色；不绑定本地图片、字体或账号数据。",
-      "versionName": "1.0.0",
-      "tags": [
-        "示例"
-      ],
-      "verification": {
-        "checkedOn": "2026-10-26",
-        "status": "file_validated",
-        "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
-      }
     }
   ]
 }
