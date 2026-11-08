@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "effect.sakura",
+  "name": "湖畔樱花",
+  "author": "阅读 NG",
+  "versionName": "1.1",
+  "description": "湖面涟漪和落樱动效。",
+  "payload": {
+    "path": "resources/themes/effect-sakura/effect.sakura-2-theme.zip",
+    "format": "zip"
+  },
+  "requirements": {
+    "minAppVersionCode": 17802,
+    "capabilities": [
+      "theme.effect.1"
+    ]
+  }
+}
