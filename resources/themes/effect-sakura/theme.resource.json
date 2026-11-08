@@ -4,7 +4,7 @@
   "name": "湖畔樱花",
   "author": "阅读 NG",
   "versionName": "1.1",
-  "description": "湖面涟漪和落樱动效。",
+  "description": "原为阅读 NG 内置主题，樱花随风飘落，湖面泛起涟漪。",
   "payload": {
     "path": "resources/themes/effect-sakura/effect.sakura-2-theme.zip",
     "format": "zip"

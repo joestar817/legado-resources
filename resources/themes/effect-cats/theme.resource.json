@@ -4,7 +4,7 @@
   "name": "好奇猫咪",
   "author": "阅读 NG",
   "versionName": "1.1",
-  "description": "两只小猫在栅栏后探头，带树叶和光影动效。",
+  "description": "原为阅读 NG 内置主题，两只小猫在栅栏后探头，带树叶和光影动效。",
   "payload": {
     "path": "resources/themes/effect-cats/effect.cats-2-theme.zip",
     "format": "zip"
