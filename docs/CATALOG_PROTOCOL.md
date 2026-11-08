@@ -50,6 +50,8 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 ## 分类索引
 
+发布目录中的分类附有 `indexSha256`，对应同级 `index.content.json` 的完整 UTF-8 字节。该文件包含 `schemaVersion`、`type` 和生成预览后的 `resources`，全局来源提交由 `catalog.json` 提供。客户端固定总目录提交后验证文件摘要，摘要相同的分类可复用本地内容。原有 `index.json` 继续携带 `sourceCommit`，供现有客户端读取。
+
 每个索引包含 `schemaVersion`、相同的 `sourceCommit`、分类的 `type` 和按稳定 ID 排序的 `resources`。每项资源包含：
 
 | 字段 | 说明 |

@@ -20,6 +20,8 @@ const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
 const HASH = /^[a-f0-9]{64}$/i;
 const MAX_JSON_BYTES = 1024 * 1024;
 const MAX_STATE_BYTES = 16 * 1024 * 1024;
+const MAX_INDEX_BYTES = 4 * 1024 * 1024;
+const CONTENT_INDEX = 'index.content.json';
 const MAX_RESOURCES = 10000;
 const EMPTY_COMMIT = '0'.repeat(40);
 
@@ -83,6 +85,7 @@ function strings(value, label, maxItems, maxLength) {
 const sorted = values => [...values].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const digest = value => createHash('sha256').update(value).digest('hex');
+const contentIndex = ({ schemaVersion, type, resources }) => json({ schemaVersion, type, resources });
 
 async function lstatOrNull(filename) {
   try { return await fs.lstat(filename); }
@@ -498,10 +501,19 @@ async function checkOutputDirectory(directory) {
       if (!Object.hasOwn(TYPES, category)) fail(`Refusing to replace output containing ${name}/${category}`);
       const categoryDirectory = path.join(item, category);
       await ordinary(categoryDirectory, 'directory');
-      const children = await fs.readdir(categoryDirectory);
-      if (children.length !== 1 || children[0] !== 'index.json') fail('Refusing to replace output with non-generated category files');
+      const descriptor = oldCatalog.categories.find(entry => entry.id === category);
+      const expected = descriptor?.indexSha256 === undefined ? ['index.json'] : [CONTENT_INDEX, 'index.json'];
+      const children = sorted(await fs.readdir(categoryDirectory));
+      if (JSON.stringify(children) !== JSON.stringify(expected)) fail('Refusing to replace output with non-generated category files');
       const index = await readJson(path.join(categoryDirectory, 'index.json'), MAX_STATE_BYTES);
       if (index.schemaVersion !== 1 || index.type !== TYPES[category] || index.sourceCommit !== oldCatalog.sourceCommit) fail('Existing output index is inconsistent');
+      if (descriptor?.indexSha256 !== undefined) {
+        const filename = path.join(categoryDirectory, CONTENT_INDEX);
+        const stat = await ordinary(filename, 'file');
+        if (stat.size > MAX_INDEX_BYTES) fail('Existing content index is too large');
+        const bytes = await fs.readFile(filename);
+        if (descriptor.indexSha256 !== digest(bytes) || !bytes.equals(Buffer.from(contentIndex(index)))) fail('Existing content index is inconsistent');
+      }
       oldIndexes[category] = index;
     }
   }
@@ -525,6 +537,14 @@ export async function writeCatalog(result, outDir) {
     if (!Object.hasOwn(TYPES, category) || index?.type !== TYPES[category] || index.sourceCommit !== result.state.sourceCommit) fail('Invalid generated index');
   }
   const previewFiles = validatePreviewFiles(result.indexes, result.previewFiles);
+  const contentIndexes = new Map();
+  const categories = result.catalog.categories.map(category => {
+    const bytes = contentIndex(result.indexes[category.id]);
+    if (Buffer.byteLength(bytes) > MAX_INDEX_BYTES) fail('Generated content index is too large');
+    contentIndexes.set(category.id, bytes);
+    return { ...category, indexSha256: digest(bytes) };
+  });
+  const catalog = { ...result.catalog, categories };
   await fs.mkdir(parent, { recursive: true });
   const parentReal = await fs.realpath(parent);
   if (path.resolve(parentReal) !== path.resolve(parent)) fail('Output parent must not contain symbolic links');
@@ -533,12 +553,13 @@ export async function writeCatalog(result, outDir) {
   let backup = null;
   let stageMoved = false;
   try {
-    await fs.writeFile(path.join(stage, 'catalog.json'), json(result.catalog), { flag: 'wx' });
+    await fs.writeFile(path.join(stage, 'catalog.json'), json(catalog), { flag: 'wx' });
     await fs.writeFile(path.join(stage, 'state.json'), json(result.state), { flag: 'wx' });
     await fs.mkdir(path.join(stage, RESOURCE_ROOT));
     for (const category of sorted(Object.keys(result.indexes))) {
       await fs.mkdir(path.join(stage, RESOURCE_ROOT, category));
       await fs.writeFile(path.join(stage, RESOURCE_ROOT, category, 'index.json'), json(result.indexes[category]), { flag: 'wx' });
+      await fs.writeFile(path.join(stage, RESOURCE_ROOT, category, CONTENT_INDEX), contentIndexes.get(category), { flag: 'wx' });
     }
     if (Object.keys(previewFiles).length) {
       await fs.mkdir(path.join(stage, 'previews'));

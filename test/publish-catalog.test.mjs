@@ -60,7 +60,7 @@ test('first publication creates a complete catalog and repeated publication is a
   assert.equal(f.read('catalog.json').sourceCommit, f.first);
   assert.equal(f.read('resources/tts/index.json').resources[0].payload.engineId, 'fixture_engine');
   const treeFiles = git(f.remote, ['ls-tree', '-r', '--name-only', f.head()]).split('\n');
-  assert.deepEqual(treeFiles.sort(), ['catalog.json', 'resources/tts/index.json', 'state.json']);
+  assert.deepEqual(treeFiles.sort(), ['catalog.json', 'resources/tts/index.content.json', 'resources/tts/index.json', 'state.json']);
   const firstHead = f.head();
   assert.equal((await f.publish()).status, 'unchanged');
   assert.equal(f.head(), firstHead);

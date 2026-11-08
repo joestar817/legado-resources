@@ -179,8 +179,15 @@ test('preview PNGs and references are written atomically and old images are remo
   const f = await fixture(t), built = await f.build(), output = path.join(f.scratch, 'catalog');
   const first = await attachFontPreviews(built, { root: f.root, render: fakeRenderer });
   await writeCatalog(first, output);
+  const catalogFile = path.join(output, 'catalog.json');
+  const firstHash = JSON.parse(await fs.readFile(catalogFile)).categories.find(category => category.id === 'fonts').indexSha256;
   const second = await attachFontPreviews(built, { root: f.root, render: args => fakeRenderer(args, 128) });
   await writeCatalog(second, output);
+  const secondHash = JSON.parse(await fs.readFile(catalogFile)).categories.find(category => category.id === 'fonts').indexSha256;
+  assert.notEqual(firstHash, secondHash);
+  const indexBytes = await fs.readFile(path.join(output, 'resources/fonts/index.content.json'));
+  assert.equal(secondHash, digest(indexBytes));
+  assert.deepEqual(JSON.parse(indexBytes).resources[0].preview, second.indexes.fonts.resources[0].preview);
   assert.deepEqual((await fs.readdir(path.join(output, 'previews'))).sort(), Object.keys(second.previewFiles).map(p => path.basename(p)).sort());
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'resources/fonts/index.json'), 'utf8')), second.indexes.fonts);
   await fs.writeFile(path.join(output, 'previews/keep.txt'), 'user data');

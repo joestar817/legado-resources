@@ -457,7 +457,9 @@ test('catalog publishes purpose hierarchy and retains an empty purpose without f
   const output = path.join(scratch, 'published');
   await writeCatalog(result, output);
   await writeCatalog(result, output);
-  assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'catalog.json'), 'utf8')), result.catalog);
+  const published = JSON.parse(await fs.readFile(path.join(output, 'catalog.json'), 'utf8'));
+  assert.deepEqual(published.categories.map(({ indexSha256, ...category }) => category), result.catalog.categories);
+  assert.deepEqual(published.purposes, result.catalog.purposes);
 });
 
 test('classification labels and order never bump installation versions or dates', async t => {
@@ -682,15 +684,28 @@ test('writeCatalog writes a coherent snapshot and can replace its own generated 
   const first = await build(root);
   const output = path.join(scratch, 'catalog-output');
   await writeCatalog(first, output);
-  assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'catalog.json'), 'utf8')), first.catalog);
+  const catalogFile = path.join(output, 'catalog.json');
+  const published = JSON.parse(await fs.readFile(catalogFile, 'utf8'));
+  assert.deepEqual(published.categories.map(({ indexSha256, ...category }) => category), first.catalog.categories);
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'state.json'), 'utf8')), JSON.parse(JSON.stringify(first.state)));
   for (const category of categories) {
-    assert.deepEqual(JSON.parse(await fs.readFile(path.join(output, 'resources', category.id, 'index.json'), 'utf8')), first.indexes[category.id]);
+    const folder = path.join(output, 'resources', category.id);
+    assert.deepEqual(JSON.parse(await fs.readFile(path.join(folder, 'index.json'), 'utf8')), first.indexes[category.id]);
+    const bytes = await fs.readFile(path.join(folder, 'index.content.json'));
+    const { sourceCommit, ...content } = first.indexes[category.id];
+    assert.deepEqual(JSON.parse(bytes), content);
+    assert.equal(published.categories.find(entry => entry.id === category.id).indexSha256, digest(bytes));
   }
   await put(root, 'resources/fonts/serif.ttf', 'second content');
   const second = await build(root, first.state, SOURCE_B);
   await writeCatalog(second, output);
   assert.equal(JSON.parse(await fs.readFile(path.join(output, 'resources', 'fonts', 'index.json'), 'utf8')).resources[0].versionCode, 2);
+  const updated = JSON.parse(await fs.readFile(catalogFile, 'utf8'));
+  for (const old of published.categories) {
+    const next = updated.categories.find(category => category.id === old.id);
+    if (old.id === 'fonts') assert.notEqual(next.indexSha256, old.indexSha256);
+    else assert.equal(next.indexSha256, old.indexSha256);
+  }
 });
 
 test('writeCatalog refuses source roots and directories containing unrelated user files', async (t) => {
