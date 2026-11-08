@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "e14053261e088e95e89ea6c178818119bceea0c6",
+  "sourceCommit": "0a63e245527e47abc87cec4d05643cf36df221e6",
   "purposes": [
     {
       "id": "reading",
@@ -26,7 +26,8 @@
       "type": "font",
       "purpose": "reading",
       "index": "resources/fonts/index.json",
-      "count": 1
+      "count": 1,
+      "indexSha256": "8db18a7ac4bc5a7974717544908df62e6b4c4f92d7c959462641cdf02e1dc0c7"
     },
     {
       "id": "backgrounds",
@@ -34,7 +35,8 @@
       "type": "background",
       "purpose": "reading",
       "index": "resources/backgrounds/index.json",
-      "count": 1
+      "count": 1,
+      "indexSha256": "e59de52f7feace1c3c3dcafa62bf4f3102fc09e122cb0910f211245775df2741"
     },
     {
       "id": "themes",
@@ -42,7 +44,8 @@
       "type": "theme",
       "purpose": "appearance",
       "index": "resources/themes/index.json",
-      "count": 5
+      "count": 5,
+      "indexSha256": "777c72a0e3db096e4bc32ca87476803d29a53207450756ff0304f5e2ac985b0b"
     },
     {
       "id": "tts",
@@ -50,7 +53,8 @@
       "type": "tts",
       "purpose": "listening",
       "index": "resources/tts/index.json",
-      "count": 1
+      "count": 1,
+      "indexSha256": "f8b5c25099bc201bb81b7034fc6fcdea093e5a1dd0b23daec0c9162c3fe37c19"
     },
     {
       "id": "pets",
@@ -58,7 +62,8 @@
       "type": "pet",
       "purpose": "pets",
       "index": "resources/pets/index.json",
-      "count": 2
+      "count": 2,
+      "indexSha256": "6d50b09add21d93fac1694676c830d60607659ea5dc4481f1448df0e055688e6"
     }
   ]
 }

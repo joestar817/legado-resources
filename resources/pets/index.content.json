@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "type": "pet",
+  "resources": [
+    {
+      "id": "pet.blue_fish",
+      "name": "蓝色大肥鱼",
+      "author": "阅读 NG",
+      "versionCode": 2,
+      "publishedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T03:10:32.000Z",
+      "payload": {
+        "path": "resources/pets/blue_fish-2.zip",
+        "format": "zip",
+        "size": 7191686,
+        "sha256": "93de79a59f4f61354c303bfd0b9739f2503548c0553dce26d325641674ffa254",
+        "pluginId": "blue_fish"
+      },
+      "preview": {
+        "thumbnail": {
+          "path": "previews/37328bdfb4c062d6d9f121a11d4b8e4fa1a7e565f022461691e7bdfc47521edc.png",
+          "size": 66767,
+          "sha256": "37328bdfb4c062d6d9f121a11d4b8e4fa1a7e565f022461691e7bdfc47521edc",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/60fb26d9ababfc2e3a999f04a012a22b07c5934897ccfa26fcff9e7e718f4170.png",
+          "size": 445789,
+          "sha256": "60fb26d9ababfc2e3a999f04a012a22b07c5934897ccfa26fcff9e7e718f4170",
+          "width": 768,
+          "height": 768
+        }
+      },
+      "license": "NOASSERTION",
+      "description": "蓝色大肥鱼独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+      "versionName": "2.0",
+      "requirements": {
+        "capabilities": [
+          "pet.api.2"
+        ]
+      },
+      "tags": [
+        "宠物",
+        "代码插件"
+      ]
+    },
+    {
+      "id": "pet.gugugaga",
+      "name": "咕嘎",
+      "author": "阅读 NG",
+      "versionCode": 3,
+      "publishedAt": "2026-11-04T23:42:05.000Z",
+      "updatedAt": "2026-11-05T16:42:35.000Z",
+      "payload": {
+        "path": "resources/pets/gugugaga-3.zip",
+        "format": "zip",
+        "size": 1772007,
+        "sha256": "d4c4035ecbc029c902e0c0d0e507abeef9601f6499c83ee8d873d54b8fbdb6bc",
+        "pluginId": "gugugaga"
+      },
+      "preview": {
+        "thumbnail": {
+          "path": "previews/20973b8e8c6fbd726c0f85bb6f604a626086e547020324639edc1c6f34de67f1.png",
+          "size": 49807,
+          "sha256": "20973b8e8c6fbd726c0f85bb6f604a626086e547020324639edc1c6f34de67f1",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/ec34562229cdcdb0f29075f4db4d7d6fedb0bb58956a8fda14304fc89923709f.png",
+          "size": 317032,
+          "sha256": "ec34562229cdcdb0f29075f4db4d7d6fedb0bb58956a8fda14304fc89923709f",
+          "width": 768,
+          "height": 768
+        }
+      },
+      "license": "NOASSERTION",
+      "description": "咕嘎独立代码插件，保留原有动画、拖动和点击聊天交互。下载后点击使用启用。",
+      "versionName": "2.1",
+      "requirements": {
+        "capabilities": [
+          "pet.api.2"
+        ]
+      },
+      "changelog": "恢复原始素材",
+      "tags": [
+        "宠物",
+        "代码插件"
+      ]
+    }
+  ]
+}
