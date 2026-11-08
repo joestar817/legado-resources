@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "a415d62cd75461ea5bfdcce6184b658682cdaf1b",
+  "sourceCommit": "d9bae6778fcc746199cb7159f6be6476acb625ac",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -9,6 +9,22 @@
       "active": true,
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T19:37:33.000Z"
+    },
+    "effect.cats": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "eb1c0d2fe0757b12dd8f8824c567dde012d88beaeefd35607d3cba6211f3bab9",
+      "active": true,
+      "publishedAt": "2026-11-08T02:35:37.000Z",
+      "updatedAt": "2026-11-08T02:35:37.000Z"
+    },
+    "effect.sakura": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "5947673fdc7ceddbab9939432a1acd8de7456d55d0e51fa8fcebd989cd48be57",
+      "active": true,
+      "publishedAt": "2026-11-08T02:35:37.000Z",
+      "updatedAt": "2026-11-08T02:35:37.000Z"
     },
     "font.example.noto-sans": {
       "type": "font",

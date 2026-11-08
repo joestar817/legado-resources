@@ -1,8 +1,52 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "a415d62cd75461ea5bfdcce6184b658682cdaf1b",
+  "sourceCommit": "d9bae6778fcc746199cb7159f6be6476acb625ac",
   "type": "theme",
   "resources": [
+    {
+      "id": "effect.cats",
+      "name": "好奇猫咪",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-08T02:35:37.000Z",
+      "updatedAt": "2026-11-08T02:35:37.000Z",
+      "payload": {
+        "path": "resources/themes/effect-cats/effect.cats-2-theme.zip",
+        "format": "zip",
+        "size": 4946610,
+        "sha256": "6f9255557fd3d24183394192232bed78204e9866cdff8b1fd68db6ac1db7b6a8"
+      },
+      "description": "两只小猫在栅栏后探头，带树叶和光影动效。",
+      "versionName": "1.1",
+      "requirements": {
+        "minAppVersionCode": 17802,
+        "capabilities": [
+          "theme.effect.1"
+        ]
+      }
+    },
+    {
+      "id": "effect.sakura",
+      "name": "湖畔樱花",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-08T02:35:37.000Z",
+      "updatedAt": "2026-11-08T02:35:37.000Z",
+      "payload": {
+        "path": "resources/themes/effect-sakura/effect.sakura-2-theme.zip",
+        "format": "zip",
+        "size": 2257769,
+        "sha256": "640df29be08a223a3343d37f5e7f1ffc7c1776b8b1942a1fc8f839385a23847a"
+      },
+      "description": "湖面涟漪和落樱动效。",
+      "versionName": "1.1",
+      "requirements": {
+        "minAppVersionCode": 17802,
+        "capabilities": [
+          "theme.effect.1"
+        ]
+      }
+    },
     {
       "id": "ng.theme.autumn_mountains",
       "name": "秋山书意",
