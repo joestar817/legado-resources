@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.theme.autumn_mountains",
+  "name": "秋山书意",
+  "author": "阅读 NG",
+  "description": "秋山书意的日夜山景壁纸与配色，背景使用原始 PNG。",
+  "versionName": "1.0.1",
+  "payload": {
+    "path": "resources/themes/autumn-mountains/autumn-mountains.zip",
+    "format": "zip"
+  }
+}

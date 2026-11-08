@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.theme.summer_childhood",
+  "name": "夏日童趣",
+  "author": "阅读 NG",
+  "description": "日间静水荷塘，夜间夏夜插画，包含日夜原图与配色。",
+  "versionName": "1.0.1",
+  "payload": {
+    "path": "resources/themes/summer-childhood/summer-childhood.zip",
+    "format": "zip"
+  }
+}

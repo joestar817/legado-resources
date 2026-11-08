@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.theme.storybook_house",
+  "name": "绘本书屋",
+  "author": "阅读 NG",
+  "description": "日间绘本小猫，夜间灯下书香，包含日夜原图与配色。",
+  "versionName": "1.0.1",
+  "payload": {
+    "path": "resources/themes/storybook-house/storybook-house.zip",
+    "format": "zip"
+  }
+}
