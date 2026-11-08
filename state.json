@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "704dd6a70713466e9901934c09ecdead1eac9526",
+  "sourceCommit": "8a0ad7f2cf7d178ddc17ec8bfb47fff10a21ebff",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -25,6 +25,30 @@
       "active": true,
       "publishedAt": "2026-10-26T21:39:26.000Z",
       "updatedAt": "2026-10-26T21:39:26.000Z"
+    },
+    "ng.theme.autumn_mountains": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "483e79b60d78e343e83b08cdb85cea876c05d58395c11ab13749379eacc28b6f",
+      "active": true,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z"
+    },
+    "ng.theme.storybook_house": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "40f61fd810b29984e7fafe42b9fda98fb8f0130654e860d4371ca973ae05c83f",
+      "active": true,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z"
+    },
+    "ng.theme.summer_childhood": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "4932b06a2b49d98fc4e90d2b2938c323c74f782755c8f4d8928f7b8f751a7756",
+      "active": true,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z"
     },
     "pet.blue_fish": {
       "type": "pet",

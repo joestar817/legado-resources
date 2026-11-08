@@ -1,8 +1,56 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "704dd6a70713466e9901934c09ecdead1eac9526",
+  "sourceCommit": "8a0ad7f2cf7d178ddc17ec8bfb47fff10a21ebff",
   "type": "theme",
   "resources": [
+    {
+      "id": "ng.theme.autumn_mountains",
+      "name": "秋山书意",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z",
+      "payload": {
+        "path": "resources/themes/autumn-mountains/autumn-mountains.zip",
+        "format": "zip",
+        "size": 3953275,
+        "sha256": "7127f078750f7ca3fdfefe8bb89200ff0157ced9a6b0150939d01fbc82547bdb"
+      },
+      "description": "秋山书意的日夜山景壁纸与配色，背景使用原始 PNG。",
+      "versionName": "1.0.1"
+    },
+    {
+      "id": "ng.theme.storybook_house",
+      "name": "绘本书屋",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z",
+      "payload": {
+        "path": "resources/themes/storybook-house/storybook-house.zip",
+        "format": "zip",
+        "size": 2910576,
+        "sha256": "0c1a02a6c8c3cee5900f40899121ff5628230ce726a147d4f038c2d1c7e6a5d4"
+      },
+      "description": "日间绘本小猫，夜间灯下书香，包含日夜原图与配色。",
+      "versionName": "1.0.1"
+    },
+    {
+      "id": "ng.theme.summer_childhood",
+      "name": "夏日童趣",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-08T01:24:55.000Z",
+      "payload": {
+        "path": "resources/themes/summer-childhood/summer-childhood.zip",
+        "format": "zip",
+        "size": 5689690,
+        "sha256": "51fa7e62927461aa57f282906df07dda5e4994b410577d336d96eb8801816ad2"
+      },
+      "description": "日间静水荷塘，夜间夏夜插画，包含日夜原图与配色。",
+      "versionName": "1.0.1"
+    },
     {
       "id": "theme.example.warm-paper",
       "name": "暖纸主题示例",
