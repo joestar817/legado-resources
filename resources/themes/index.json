@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "d9bae6778fcc746199cb7159f6be6476acb625ac",
+  "sourceCommit": "e14053261e088e95e89ea6c178818119bceea0c6",
   "type": "theme",
   "resources": [
     {
@@ -16,7 +16,7 @@
         "size": 4946610,
         "sha256": "6f9255557fd3d24183394192232bed78204e9866cdff8b1fd68db6ac1db7b6a8"
       },
-      "description": "两只小猫在栅栏后探头，带树叶和光影动效。",
+      "description": "原为阅读 NG 内置主题，两只小猫在栅栏后探头，带树叶和光影动效。",
       "versionName": "1.1",
       "requirements": {
         "minAppVersionCode": 17802,
@@ -38,7 +38,7 @@
         "size": 2257769,
         "sha256": "640df29be08a223a3343d37f5e7f1ffc7c1776b8b1942a1fc8f839385a23847a"
       },
-      "description": "湖面涟漪和落樱动效。",
+      "description": "原为阅读 NG 内置主题，樱花随风飘落，湖面泛起涟漪。",
       "versionName": "1.1",
       "requirements": {
         "minAppVersionCode": 17802,
@@ -60,7 +60,7 @@
         "size": 3953275,
         "sha256": "7127f078750f7ca3fdfefe8bb89200ff0157ced9a6b0150939d01fbc82547bdb"
       },
-      "description": "秋山书意的日夜山景壁纸与配色，背景使用原始 PNG。",
+      "description": "原为阅读 NG 内置主题，白天是红枫与远山，夜里是月下山景。",
       "versionName": "1.0.1"
     },
     {
@@ -76,7 +76,7 @@
         "size": 2910576,
         "sha256": "0c1a02a6c8c3cee5900f40899121ff5628230ce726a147d4f038c2d1c7e6a5d4"
       },
-      "description": "日间绘本小猫，夜间灯下书香，包含日夜原图与配色。",
+      "description": "原为阅读 NG 内置主题，白天有趴在书上的小猫，夜里亮起一盏暖灯。",
       "versionName": "1.0.1"
     },
     {
@@ -92,7 +92,7 @@
         "size": 5689690,
         "sha256": "51fa7e62927461aa57f282906df07dda5e4994b410577d336d96eb8801816ad2"
       },
-      "description": "日间静水荷塘，夜间夏夜插画，包含日夜原图与配色。",
+      "description": "原为阅读 NG 内置主题，白天在荷塘边垂钓，夜里看莲叶间的点点萤火。",
       "versionName": "1.0.1"
     }
   ]
