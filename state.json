@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "88961a9b1264eeaba259ff08ca1f826969fdc273",
+  "sourceCommit": "223957c436aea9de3a983b85f40f7b90a5709514",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -68,11 +68,11 @@
     },
     "ng.theme.summer_childhood": {
       "type": "theme",
-      "versionCode": 1,
-      "fingerprint": "4932b06a2b49d98fc4e90d2b2938c323c74f782755c8f4d8928f7b8f751a7756",
+      "versionCode": 2,
+      "fingerprint": "19ea593c6fe4ccb7b45afce390d87a2b4d0097c37ee7aee0246ee5fe83e6e700",
       "active": true,
       "publishedAt": "2026-11-08T01:24:55.000Z",
-      "updatedAt": "2026-11-08T01:24:55.000Z"
+      "updatedAt": "2026-11-09T23:56:16.000Z"
     },
     "pet.blue_fish": {
       "type": "pet",

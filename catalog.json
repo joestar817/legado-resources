@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "88961a9b1264eeaba259ff08ca1f826969fdc273",
+  "sourceCommit": "223957c436aea9de3a983b85f40f7b90a5709514",
   "purposes": [
     {
       "id": "reading",
@@ -45,7 +45,7 @@
       "purpose": "appearance",
       "index": "resources/themes/index.json",
       "count": 6,
-      "indexSha256": "7f734afbb4192dee76fce282e0d8933e979c6ba0dc4f7a2ed4413af7788b568f"
+      "indexSha256": "7c45536c67aac1aded1215b59cb4daef91df829ac2dfc0e36077a18fd579b0ef"
     },
     {
       "id": "tts",

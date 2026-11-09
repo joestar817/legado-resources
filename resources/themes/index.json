@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "88961a9b1264eeaba259ff08ca1f826969fdc273",
+  "sourceCommit": "223957c436aea9de3a983b85f40f7b90a5709514",
   "type": "theme",
   "resources": [
     {
@@ -99,17 +99,17 @@
       "id": "ng.theme.summer_childhood",
       "name": "夏日童趣",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-08T01:24:55.000Z",
-      "updatedAt": "2026-11-08T01:24:55.000Z",
+      "updatedAt": "2026-11-09T23:56:16.000Z",
       "payload": {
         "path": "resources/themes/summer-childhood/summer-childhood.zip",
         "format": "zip",
-        "size": 5689690,
-        "sha256": "51fa7e62927461aa57f282906df07dda5e4994b410577d336d96eb8801816ad2"
+        "size": 12958036,
+        "sha256": "126bb7525e8fe300931c0b85183c43222d5de96c167db52914dee7e2e26a9fe9"
       },
       "description": "原为阅读 NG 内置主题，白天在荷塘边垂钓，夜里看莲叶间的点点萤火。",
-      "versionName": "1.0.1"
+      "versionName": "1.0.2"
     }
   ]
 }
