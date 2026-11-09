@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "0a63e245527e47abc87cec4d05643cf36df221e6",
+  "sourceCommit": "88961a9b1264eeaba259ff08ca1f826969fdc273",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -49,6 +49,14 @@
       "active": true,
       "publishedAt": "2026-11-08T01:24:55.000Z",
       "updatedAt": "2026-11-08T01:24:55.000Z"
+    },
+    "ng.theme.bamboo_shadow": {
+      "type": "theme",
+      "versionCode": 1,
+      "fingerprint": "557461db553f59c7c399f2c4d1f9d3456256bdc6c86cf0376415a82b17699783",
+      "active": true,
+      "publishedAt": "2026-11-09T10:54:54.000Z",
+      "updatedAt": "2026-11-09T10:54:54.000Z"
     },
     "ng.theme.storybook_house": {
       "type": "theme",
