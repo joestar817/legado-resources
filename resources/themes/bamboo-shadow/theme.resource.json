@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.theme.bamboo_shadow",
+  "name": "竹影之韵",
+  "author": "阅读 NG",
+  "description": "原阅读 NG 内置主题「竹影之韵」的改版，青绿底纹上疏落的竹叶与竹影相映。",
+  "versionName": "1.0.0",
+  "payload": {
+    "path": "resources/themes/bamboo-shadow/bamboo-shadow.zip",
+    "format": "zip"
+  }
+}
