@@ -4,32 +4,31 @@
 
 | 一级用途 | 当前资源类型 | 稳定分类 ID |
 |---|---|---|
-| 阅读 | 字体、背景 | `fonts`、`backgrounds` |
+| 阅读 | 阅读预设包 | `read-presets` |
 | 外观 | 主题包 | `themes` |
 | 听书 | TTS 脚本 | `tts` |
 | 宠物 | 编译宠物插件 | `pets` |
 
-阅读预设、动态场景、本地 TTS 引擎等类型，需对应安装或执行适配器接入后再上架。字体、背景、主题数据包和 TTS 脚本继续按各自类型处理；需要编译的可选功能不因归类而自动具备插件加载能力。
+阅读预设包可包含背景、字体、排版和浮窗配色，下载后加入阅读预设列表，由用户选择使用。独立字体和背景不再提供在线分发；历史文件保留，不影响本地已有资源。动态场景、本地 TTS 引擎等类型需接入对应适配器后再上架。
 
 资源中心的安装包放在 `resources/` 下，供作者下载的工具包按版本放在 `sdk/` 下。
 
 ```text
 resources/
-├── fonts/
-├── backgrounds/
+├── read-presets/
 ├── tts/
 ├── themes/
 └── pets/
 ```
 
-当前包含一款标题字体、咕嘎和蓝色大肥鱼，以及背景、TTS 和主题示例，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板，本机原有的服务脚本与资料不在仓库中。NG 内资源中心已接入目录、下载与更新提示；云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
+当前包含三款阅读预设、咕嘎和蓝色大肥鱼，以及 TTS 和主题资源，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板。云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
 
 ## 目录
 
 | 目录 | 内容 |
 |---|---|
-| `resources/fonts/` | TTF / OTF 字体 |
-| `resources/backgrounds/` | PNG / JPEG / WebP 阅读背景 |
+| `resources/read-presets/` | 阅读预设 ZIP、资源说明与预览图 |
+| `resources/fonts/`、`resources/backgrounds/` | 保留的历史资源，不再加入目录 |
 | `resources/tts/` | 听书下的 TTS 脚本，当前为接口模板示例 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
 | `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
@@ -39,8 +38,7 @@ resources/
 
 资源与示例：
 
-- [风云体（标题字形版）](resources/fonts/ss-fengyun-title/font.resource.json)：用于章节标题，保留所提供字体的原始字节；仅含部分字形，不是完整正文字库。每款字体一个目录，仅放字体文件与资源元数据，投稿格式见 [贡献说明](CONTRIBUTING.md)。
-- [暖纸阅读背景](resources/backgrounds/warm-paper-example/README.md)：1080×1440 原创 PNG。
+- [敦煌绮笺](resources/read-presets/dunhuang-letter/preset.resource.json)、[江湖驿书](resources/read-presets/jianghu-letter/preset.resource.json)和[星河秘笺](resources/read-presets/starry-letter/preset.resource.json)：包含背景、字体及阅读样式的预设包。
 - [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
 
@@ -82,7 +80,7 @@ python3 -B test/font-preview.test.py
 
 生成目录包括总目录 `catalog.json`、各分类的 `index.json`、内部版本台账 `state.json`，以及 `previews/` 下按图片 SHA256 命名的字体与宠物预览 PNG。开发者不手改这些文件，不把它们提交到 `main`；每项字体的源目录仍只需字体文件与元数据。
 
-`preview` 是索引中的机器字段，不能写进投稿元数据。宠物可通过 `previewSource` 提供静态形象图，详情见[目录协议](docs/CATALOG_PROTOCOL.md#宠物形象预览)。仅更换样张布局或渲染规则会更新图片缓存，不增加字体安装版本，也不修改资源的发布时间或内容更新时间。渲染失败会停止本次生成/发布，保留上次可用目录。
+`preview` 是索引中的机器字段，不能写进投稿元数据。宠物和阅读预设可通过 `previewSource` 提供预览图，详情见[目录协议](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。仅更换预览不会增加安装版本，也不修改资源的发布时间或内容更新时间。预览校验失败会停止本次发布，保留上次可用目录。
 
 新资源版本为 1；安装内容变化才递增。改介绍、移动源文件或重复运行不升版。删除后保留台账，重新加入同 ID 不重置版本。生成失败保留上次目录；旧任务不能覆盖已发布的新来源。目录分支丢失时普通任务会停止，不会自动重建为版本 1；只有首次初始化才使用 `bootstrap`。详见 [目录协议](docs/CATALOG_PROTOCOL.md)。
 

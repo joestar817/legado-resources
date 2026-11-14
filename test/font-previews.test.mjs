@@ -201,7 +201,7 @@ test('output refuses missing or orphan PNGs and previews on non-font resources',
   const absent = { ...result.previewFiles }; delete absent[filename];
   assert.throws(() => validatePreviewFiles(result.indexes, absent), /Missing or mismatched/);
   assert.throws(() => validatePreviewFiles(result.indexes, { ...result.previewFiles, 'previews/keep.png': Buffer.from('x') }), /Unreferenced or unsafe/);
-  assert.throws(() => validatePreviewFiles({ fonts: { ...result.indexes.fonts, type: 'theme' } }, result.previewFiles), /Only fonts/);
+  assert.throws(() => validatePreviewFiles({ fonts: { ...result.indexes.fonts, type: 'theme' } }, result.previewFiles), /Unsupported preview type/);
 });
 
 test('renderer receives no publication credentials or injected Python paths', () => {
@@ -223,6 +223,35 @@ test('CLI renderer failure leaves the previous catalog intact', async t => {
   assert.notEqual(failure.status, 0);
   assert.match(failure.stderr, /renderer failed/);
   assert.deepEqual(await fs.readFile(path.join(output, 'catalog.json')), before);
+});
+
+test('reading preset previews are verified and do not change the package version', async t => {
+  const f = await fixture(t, 0);
+  const directory = path.join(f.root, 'resources/read-presets/sample');
+  await fs.mkdir(directory, { recursive: true });
+  await writeJson(path.join(f.root, 'catalog.config.json'), {
+    schemaVersion: 1, categories: [{ id: 'read-presets', name: '阅读预设', type: 'read_preset' }],
+  });
+  await fs.writeFile(path.join(directory, 'preset.zip'), 'package bytes');
+  const meta = {
+    schemaVersion: 1, id: 'read.preset.sample', name: '阅读预设', author: '作者',
+    payload: { path: 'resources/read-presets/sample/preset.zip', format: 'zip' },
+    previewSource: { thumbnail: 'resources/read-presets/sample/thumb.png', detail: 'resources/read-presets/sample/detail.png' },
+  };
+  await fs.writeFile(path.join(directory, 'thumb.png'), png(256, 256));
+  await fs.writeFile(path.join(directory, 'detail.png'), png(768, 768));
+  await writeJson(path.join(directory, 'preset.resource.json'), meta);
+  const first = await f.build();
+  assert.equal(first.indexes['read-presets'].resources[0].preview.detail.width, 768);
+  assert.equal(Object.keys(first.previewFiles).length, 2);
+  assert.deepEqual(validatePreviewFiles(first.indexes, first.previewFiles), first.previewFiles);
+  await fs.writeFile(path.join(directory, 'detail.png'), png(768, 768, 128));
+  const second = await buildCatalog({ root: f.root, sourceCommit, sourceTime, previousState: first.state });
+  assert.notEqual(first.indexes['read-presets'].resources[0].preview.detail.sha256,
+    second.indexes['read-presets'].resources[0].preview.detail.sha256);
+  assert.deepEqual(second.state, first.state);
+  await fs.writeFile(path.join(directory, 'detail.png'), png(960, 420));
+  await assert.rejects(f.build(), /preview|PNG/i);
 });
 
 async function petFixture(t, withFont = false) {

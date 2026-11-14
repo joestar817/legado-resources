@@ -20,15 +20,9 @@
   ],
   "categories": [
     {
-      "id": "fonts",
-      "name": "字体",
-      "type": "font",
-      "purpose": "reading"
-    },
-    {
-      "id": "backgrounds",
-      "name": "背景",
-      "type": "background",
+      "id": "read-presets",
+      "name": "阅读预设",
+      "type": "read_preset",
       "purpose": "reading"
     },
     {

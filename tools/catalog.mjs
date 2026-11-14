@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { readPetPlugin } from './pet-plugins.mjs';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
-const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', tts: 'tts', themes: 'theme', pets: 'pet' });
-const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', theme: 'appearance', tts: 'listening', pet: 'pets' });
+const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset', tts: 'tts', themes: 'theme', pets: 'pet' });
+const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', read_preset: 'reading', theme: 'appearance', tts: 'listening', pet: 'pets' });
 const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet', 'zip'],
+  read_preset: ['zip'], tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet', 'zip'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -317,15 +317,15 @@ export function initializeCatalogDates(history) {
 /** Preview images are display metadata and are excluded from installation fingerprints. */
 async function sourcePreview(root, category, source, files) {
   if (source === undefined) return undefined;
-  if (category.type !== 'pet') fail('previewSource is supported only for pets');
+  if (!['pet', 'read_preset'].includes(category.type)) fail('previewSource is supported only for pets and reading presets');
   fields(source, ['thumbnail', 'detail'], 'previewSource');
   const preview = {};
   for (const [kind, width, height] of [['thumbnail', 256, 256], ['detail', 768, 768]]) {
     const relative = relativePath(source[kind], category.id);
-    if (path.posix.extname(relative) !== '.png') fail('Pet preview source must be PNG');
+    if (path.posix.extname(relative) !== '.png') fail('Preview source must be PNG');
     const filename = await safePayload(root, relative);
     const stat = await ordinary(filename, 'file');
-    if (stat.size < 1 || stat.size > 1024 * 1024) fail('Pet preview source exceeds the image limit');
+    if (stat.size < 1 || stat.size > 1024 * 1024) fail('Preview source exceeds the image limit');
     const bytes = await fs.readFile(filename);
     if (bytes.length !== stat.size) fail('Pet preview source changed while reading');
     const sha256 = digest(bytes);
@@ -335,7 +335,7 @@ async function sourcePreview(root, category, source, files) {
   }
   // Validate PNG dimensions, decompressed data and checksums before exposing the preview.
   const images = Object.fromEntries(Object.values(preview).map(asset => [asset.path, files[asset.path]]));
-  validatePreviewFiles({ pet: { type: 'pet', resources: [{ preview }] } }, images);
+  validatePreviewFiles({ resource: { type: category.type, resources: [{ preview }] } }, images);
   return preview;
 }
 

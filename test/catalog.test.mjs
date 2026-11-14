@@ -147,6 +147,30 @@ test('empty configured categories are valid and retain category routing', async 
   assert.equal(Object.keys(result.state.resources).length, 0);
 });
 
+test('reading preset catalog replaces standalone reading entries while retaining their history', async t => {
+  const { root } = await fixture(t);
+  await addFont(root);
+  const previous = await build(root);
+  const presetCategory = { id: 'read-presets', name: '阅读预设', type: 'read_preset' };
+  await putJson(root, 'catalog.config.json', { schemaVersion: 1, categories: [presetCategory] });
+  const content = Buffer.from('test preset package');
+  await put(root, 'resources/read-presets/sample/preset.zip', content);
+  await putJson(root, 'resources/read-presets/sample/preset.resource.json', {
+    schemaVersion: 1, id: 'read.preset.sample', name: '阅读预设', author: '作者',
+    payload: { path: 'resources/read-presets/sample/preset.zip', format: 'zip' },
+  });
+  const result = await build(root, previous.state, SOURCE_B);
+  assert.equal(result.catalog.categories.length, 1);
+  assert.equal(result.indexes['read-presets'].resources[0].payload.sha256, digest(content));
+  assert.equal(result.state.resources['font.example.serif'].active, false);
+  assert.equal(result.state.resources['read.preset.sample'].active, true);
+  assert.equal(result.state.resources['read.preset.sample'].versionCode, 1);
+  await put(root, 'resources/read-presets/sample/preset.zip', Buffer.from('new preset'));
+  const updated = await build(root, result.state, SOURCE_C);
+  assert.equal(updated.state.resources['read.preset.sample'].versionCode, 2);
+  assert.equal(updated.state.resources['font.example.serif'].active, false);
+});
+
 test('resources root is required instead of silently publishing an empty inventory', async (t) => {
   const { root } = await fixture(t);
   await fs.rmdir(path.join(root, 'resources'));

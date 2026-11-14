@@ -70,7 +70,7 @@ function validatePng(bytes, width, height) {
 
 function validateAsset(asset, kind, files, type = 'font') {
   fields(asset, ['path', 'size', 'sha256', 'width', 'height'], `preview.${kind}`);
-  const [width, height] = (type === 'pet' ? PET_SIZES : SIZES)[kind];
+  const [width, height] = (type === 'pet' || type === 'read_preset' ? PET_SIZES : SIZES)[kind];
   if (!HASH.test(asset.sha256) || asset.path !== `previews/${asset.sha256}.png`
     || !Number.isSafeInteger(asset.size) || asset.size < 1 || asset.size > MAX_IMAGE_BYTES
     || asset.width !== width || asset.height !== height) fail(`Invalid preview.${kind} metadata`);
@@ -87,7 +87,7 @@ export function validatePreviewFiles(indexes, files = {}) {
     if (!Array.isArray(index?.resources)) fail('Invalid preview index resources');
     for (const resource of index.resources) {
       if (resource.preview === undefined) continue;
-      if (!['font', 'pet'].includes(index.type)) fail('Only fonts and pets may contain previews');
+      if (!['font', 'pet', 'read_preset'].includes(index.type)) fail('Unsupported preview type');
       fields(resource.preview, Object.keys(SIZES), 'preview');
       for (const kind of Object.keys(SIZES)) {
         validateAsset(resource.preview[kind], kind, files, index.type);

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "read.preset.starry_letter",
+  "name": "星河秘笺",
+  "author": "阅读 NG",
+  "description": "阅读预设包，包含背景图、字体、排版和浮窗配色。",
+  "license": "包内字体遵循 SIL OFL 1.1",
+  "versionName": "1.0.0",
+  "payload": {
+    "path": "resources/read-presets/starry-letter/preset.zip",
+    "format": "zip"
+  },
+  "previewSource": {
+    "thumbnail": "resources/read-presets/starry-letter/thumbnail.png",
+    "detail": "resources/read-presets/starry-letter/detail.png"
+  }
+}

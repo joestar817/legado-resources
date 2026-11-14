@@ -2,27 +2,27 @@
 
 将资源放入 `resources/` 下的对应分类，并在旁边添加以 `.resource.json` 结尾的 UTF-8 JSON 说明。一个说明对应一个载荷文件；资源可放分类子目录，不需要修改总索引。`payload.path` 从仓库根目录计算，必须带 `resources/<分类>/` 前缀。
 
-资源中心按用途浏览，投稿仍放稳定的资源类型目录：阅读的字体与背景放 `fonts`、`backgrounds`，外观的主题包放 `themes`，听书的 TTS 脚本放 `tts`。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物代码插件放在 `resources/pets/`。
+资源中心按用途浏览：阅读预设包放 `read-presets`，外观主题包放 `themes`，听书 TTS 脚本放 `tts`。字体和背景请打包进阅读预设，不再单独上架。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物代码插件放在 `resources/pets/`。
 
-## 字体例子
+## 阅读预设例子
 
-假设文件位于 `resources/fonts/example/font.ttf`，说明文件可以是 `resources/fonts/example/font.resource.json`：
+从阅读设置导出 ZIP，包含配置、所用图片和字体后，与说明文件放在同一目录：
 
 ```json
 {
   "schemaVersion": 1,
-  "id": "font.example.serif",
-  "name": "示例宋体",
+  "id": "read.preset.example",
+  "name": "示例预设",
   "author": "实际作者",
   "description": "简短说明适合的阅读场景。",
   "payload": {
-    "path": "resources/fonts/example/font.ttf",
-    "format": "ttf"
+    "path": "resources/read-presets/example/preset.zip",
+    "format": "zip"
   }
 }
 ```
 
-这只是说明格式，不是可以直接发布的真实字体。请填写真实署名，不要把贡献者自动写成原作者。`license` 改为可选；已有授权声明可以保留，没有信息时省略，不猜测许可名称。
+请确认包内素材的发布授权，附带字体等素材要求的许可证，并填写真实署名。`license` 为可选；没有许可信息时不要猜测。
 
 ## TTS 例子
 
@@ -57,7 +57,7 @@
 - 删除资源时删除对应说明和不再使用的载荷；内部历史由发布器保留，作者不编辑台账。
 - 不提交 `catalog.json`、分类 `index.json`、`state.json`、密钥、Cookie、账号配置或测试音频。
 
-投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。宠物还可填写 `previewSource`，提供 256×256 缩略图与 768×768 详情图，格式为透明 RGBA PNG，详见[宠物形象预览](docs/CATALOG_PROTOCOL.md#宠物形象预览)。
+投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。宠物和阅读预设还可填写 `previewSource`，提供 256×256 缩略图与 768×768 详情图，格式为 RGBA PNG，详见[预览规范](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。
 
 元数据只保留资源展示、识别、版本和安装所需的信息。校验日期、测试状态与验证过程放在投稿说明或本地记录中，不填写 `verification`，避免增加后续手动维护负担。
 
