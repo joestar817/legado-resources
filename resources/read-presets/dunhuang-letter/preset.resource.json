@@ -5,7 +5,7 @@
   "author": "阅读 NG",
   "description": "阅读预设包，包含背景图、字体、排版和浮窗配色。",
   "license": "包内字体遵循 SIL OFL 1.1",
-  "versionName": "1.0.0",
+  "versionName": "1.0.1",
   "payload": {
     "path": "resources/read-presets/dunhuang-letter/preset.zip",
     "format": "zip"
