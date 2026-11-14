@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "7c3ac5a1229e1a9eb9de622bd296ffc1a4e3b400",
+  "sourceCommit": "36edaa2506079de9282590f989b72c956ebf02a6",
   "type": "read_preset",
   "resources": [
     {
       "id": "read.preset.dunhuang_letter",
       "name": "敦煌绮笺",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:40:06.000Z",
       "payload": {
         "path": "resources/read-presets/dunhuang-letter/preset.zip",
         "format": "zip",
-        "size": 18599089,
-        "sha256": "847e2708c82f9b29c4f76f8b26cf0550dcd0c47b231eba94c1e33127859ab8c7"
+        "size": 18724580,
+        "sha256": "4480d6b5c3ccea57c5df8975b976c168f658766781eba2a02f4f73efaa469a8e"
       },
       "preview": {
         "thumbnail": {
@@ -34,20 +34,20 @@
       },
       "license": "包内字体遵循 SIL OFL 1.1",
       "description": "阅读预设包，包含背景图、字体、排版和浮窗配色。",
-      "versionName": "1.0.0"
+      "versionName": "1.0.1"
     },
     {
       "id": "read.preset.jianghu_letter",
       "name": "江湖驿书",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:40:06.000Z",
       "payload": {
         "path": "resources/read-presets/jianghu-letter/preset.zip",
         "format": "zip",
-        "size": 18436008,
-        "sha256": "54f7cd1d577929c69ed8de44f7357491a87be017b467530f56bd05e2853286bd"
+        "size": 18561334,
+        "sha256": "aecab0a0da0b7e46290fd03cb1e79f2903fc9c02129815e4b2a13ca4698613b3"
       },
       "preview": {
         "thumbnail": {
@@ -67,20 +67,20 @@
       },
       "license": "包内字体遵循 SIL OFL 1.1",
       "description": "阅读预设包，包含背景图、字体、排版和浮窗配色。",
-      "versionName": "1.0.0"
+      "versionName": "1.0.1"
     },
     {
       "id": "read.preset.starry_letter",
       "name": "星河秘笺",
       "author": "阅读 NG",
-      "versionCode": 1,
+      "versionCode": 2,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:40:06.000Z",
       "payload": {
         "path": "resources/read-presets/starry-letter/preset.zip",
         "format": "zip",
-        "size": 18306140,
-        "sha256": "df25f26dcacf024e6c8efdab7b54aa19526ec5a7f859a6400406303db491d56f"
+        "size": 18430527,
+        "sha256": "d0a2d61b7bb380abf6a1f93c631ca35cbcd603bfcbecb96e59fe7f4822a40338"
       },
       "preview": {
         "thumbnail": {
@@ -100,7 +100,7 @@
       },
       "license": "包内字体遵循 SIL OFL 1.1",
       "description": "阅读预设包，包含背景图、字体、排版和浮窗配色。",
-      "versionName": "1.0.0"
+      "versionName": "1.0.1"
     }
   ]
 }

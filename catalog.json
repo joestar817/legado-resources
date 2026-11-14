@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "7c3ac5a1229e1a9eb9de622bd296ffc1a4e3b400",
+  "sourceCommit": "36edaa2506079de9282590f989b72c956ebf02a6",
   "purposes": [
     {
       "id": "reading",
@@ -27,7 +27,7 @@
       "purpose": "reading",
       "index": "resources/read-presets/index.json",
       "count": 3,
-      "indexSha256": "089de615a078369cd3e87e48dcf800253dab6cde6c2831f542710cee59a8f23f"
+      "indexSha256": "10989d3f9669711494b3fa9333e8406ac7b3aa409acca3d7b58c9a0dd1ecc114"
     },
     {
       "id": "themes",

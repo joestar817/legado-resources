@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "7c3ac5a1229e1a9eb9de622bd296ffc1a4e3b400",
+  "sourceCommit": "36edaa2506079de9282590f989b72c956ebf02a6",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -94,27 +94,27 @@
     },
     "read.preset.dunhuang_letter": {
       "type": "read_preset",
-      "versionCode": 1,
-      "fingerprint": "860beaf62dd3ad3196f206c990ae27b40a225f8ab5f41b03721b5e99c23dbf5e",
+      "versionCode": 2,
+      "fingerprint": "ce8b6d2118c2bc258bd1a9d1441dc87723c986728ec10e211aeb1c7253e1fa96",
       "active": true,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z"
+      "updatedAt": "2026-11-14T09:40:06.000Z"
     },
     "read.preset.jianghu_letter": {
       "type": "read_preset",
-      "versionCode": 1,
-      "fingerprint": "ff56bfbc454ee1b12fc394941848dd8468590f59ac0b7fde22da17243b91fbdc",
+      "versionCode": 2,
+      "fingerprint": "6bafce17e7502d8adf5040dd2f4e0d1ffb96d65d7fd4c3c7534dd86ae4f0dde3",
       "active": true,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z"
+      "updatedAt": "2026-11-14T09:40:06.000Z"
     },
     "read.preset.starry_letter": {
       "type": "read_preset",
-      "versionCode": 1,
-      "fingerprint": "082b4fd7d7432cbdc5a5a7a420ca2df12575f06eca5f81768271791cdcff9a0b",
+      "versionCode": 2,
+      "fingerprint": "3272d03f262a376e4d2bce072efe2d29aa6bfcb70666959e6b606b953eb3d0fe",
       "active": true,
       "publishedAt": "2026-11-14T09:03:36.000Z",
-      "updatedAt": "2026-11-14T09:03:36.000Z"
+      "updatedAt": "2026-11-14T09:40:06.000Z"
     },
     "theme.example.warm-paper": {
       "type": "theme",
