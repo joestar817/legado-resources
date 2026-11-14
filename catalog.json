@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "223957c436aea9de3a983b85f40f7b90a5709514",
+  "sourceCommit": "7c3ac5a1229e1a9eb9de622bd296ffc1a4e3b400",
   "purposes": [
     {
       "id": "reading",
@@ -21,22 +21,13 @@
   ],
   "categories": [
     {
-      "id": "fonts",
-      "name": "字体",
-      "type": "font",
+      "id": "read-presets",
+      "name": "阅读预设",
+      "type": "read_preset",
       "purpose": "reading",
-      "index": "resources/fonts/index.json",
-      "count": 1,
-      "indexSha256": "8db18a7ac4bc5a7974717544908df62e6b4c4f92d7c959462641cdf02e1dc0c7"
-    },
-    {
-      "id": "backgrounds",
-      "name": "背景",
-      "type": "background",
-      "purpose": "reading",
-      "index": "resources/backgrounds/index.json",
-      "count": 1,
-      "indexSha256": "e59de52f7feace1c3c3dcafa62bf4f3102fc09e122cb0910f211245775df2741"
+      "index": "resources/read-presets/index.json",
+      "count": 3,
+      "indexSha256": "089de615a078369cd3e87e48dcf800253dab6cde6c2831f542710cee59a8f23f"
     },
     {
       "id": "themes",

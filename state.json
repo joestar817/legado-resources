@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "223957c436aea9de3a983b85f40f7b90a5709514",
+  "sourceCommit": "7c3ac5a1229e1a9eb9de622bd296ffc1a4e3b400",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
       "versionCode": 2,
       "fingerprint": "b9a855e4fcb90d788a58c82acba927c8b24c8c3817d033b0d68d6a8cb6d78e95",
-      "active": true,
+      "active": false,
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T19:37:33.000Z"
     },
@@ -38,7 +38,7 @@
       "type": "font",
       "versionCode": 1,
       "fingerprint": "23151bb1810dd8c8ba3b90c5b8122c1ea9a23d720f7b4eb8f019087e69db3180",
-      "active": true,
+      "active": false,
       "publishedAt": "2026-10-26T21:39:26.000Z",
       "updatedAt": "2026-10-26T21:39:26.000Z"
     },
@@ -91,6 +91,30 @@
       "publishedAt": "2026-11-04T23:42:05.000Z",
       "updatedAt": "2026-11-05T16:42:35.000Z",
       "pluginId": "gugugaga"
+    },
+    "read.preset.dunhuang_letter": {
+      "type": "read_preset",
+      "versionCode": 1,
+      "fingerprint": "860beaf62dd3ad3196f206c990ae27b40a225f8ab5f41b03721b5e99c23dbf5e",
+      "active": true,
+      "publishedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:03:36.000Z"
+    },
+    "read.preset.jianghu_letter": {
+      "type": "read_preset",
+      "versionCode": 1,
+      "fingerprint": "ff56bfbc454ee1b12fc394941848dd8468590f59ac0b7fde22da17243b91fbdc",
+      "active": true,
+      "publishedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:03:36.000Z"
+    },
+    "read.preset.starry_letter": {
+      "type": "read_preset",
+      "versionCode": 1,
+      "fingerprint": "082b4fd7d7432cbdc5a5a7a420ca2df12575f06eca5f81768271791cdcff9a0b",
+      "active": true,
+      "publishedAt": "2026-11-14T09:03:36.000Z",
+      "updatedAt": "2026-11-14T09:03:36.000Z"
     },
     "theme.example.warm-paper": {
       "type": "theme",
