@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "5fdc71964c907a50bbf8bc0fe10aafa4572d3faf",
+  "sourceCommit": "889b77c387608116b63e339e61898476e1888309",
   "purposes": [
     {
       "id": "reading",
@@ -49,12 +49,12 @@
     },
     {
       "id": "tts",
-      "name": "TTS 脚本",
+      "name": "朗读引擎",
       "type": "tts",
       "purpose": "listening",
       "index": "resources/tts/index.json",
-      "count": 6,
-      "indexSha256": "469eabc6070f6a44a4460c9063b7c0be589280bdcd58e68eea5d6fc713cf0040"
+      "count": 7,
+      "indexSha256": "2da1258ad9ca777823109aa7461f48c17e7f5e1402a573202667f9406eb2cbc1"
     },
     {
       "id": "pets",

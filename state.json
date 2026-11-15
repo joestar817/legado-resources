@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "5fdc71964c907a50bbf8bc0fe10aafa4572d3faf",
+  "sourceCommit": "889b77c387608116b63e339e61898476e1888309",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -173,6 +173,15 @@
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T10:52:23.000Z",
       "engineId": "ng_resource_example_http_template"
+    },
+    "tts.microsoft-offline": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "efd6fb2bb089e02df57c6275ee9f4a86d6e9e15ab78a2acc4f5a295b3bdf4710",
+      "active": true,
+      "publishedAt": "2026-11-15T21:20:20.000Z",
+      "updatedAt": "2026-11-15T21:20:20.000Z",
+      "engineId": "__legado_microsoft_offline_bundle__"
     },
     "tts.mimo_v25_tts": {
       "type": "tts",
