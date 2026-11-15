@@ -50,6 +50,48 @@
       }
     },
     {
+      "id": "tts.mimo_v25_tts",
+      "name": "Xiaomi MiMo V2.5 TTS",
+      "author": "Legado",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "payload": {
+        "path": "resources/tts/bundled/mimo_v25_tts.js",
+        "format": "js",
+        "size": 8844,
+        "sha256": "f3863f5e0fc08939a56eb18ae9a35341953f1e2f1a6fea194c589f3d03f43355",
+        "engineId": "mimo_v25_tts"
+      },
+      "description": "小米 MiMo V2.5 在线语音脚本，使用前需配置 MiMo API Key。",
+      "versionName": "1.0.2",
+      "tags": [
+        "在线",
+        "需 API Key"
+      ]
+    },
+    {
+      "id": "tts.mossland_tts",
+      "name": "Mossland",
+      "author": "Legado NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "payload": {
+        "path": "resources/tts/bundled/mossland_tts.js",
+        "format": "js",
+        "size": 340799,
+        "sha256": "60e3be5873c56081a9e780d88c9fa4c44eb6a49bef876dffb8eedfee5cdcc5c9",
+        "engineId": "mossland_moss_tts"
+      },
+      "description": "Mossland 在线语音脚本，使用前需配置 Mossland API Key。",
+      "versionName": "1.3.0",
+      "tags": [
+        "在线",
+        "需 API Key"
+      ]
+    },
+    {
       "id": "tts.next_edge_proxy",
       "name": "Next Edge TTS",
       "author": "Legado",
@@ -68,6 +110,27 @@
       "tags": [
         "在线",
         "第三方中转"
+      ]
+    },
+    {
+      "id": "tts.stepaudio_25_tts",
+      "name": "阶跃星辰 StepAudio 2.5 TTS",
+      "author": "Legado NG local adapter",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "payload": {
+        "path": "resources/tts/bundled/stepaudio_25_tts.js",
+        "format": "js",
+        "size": 8808,
+        "sha256": "e9a68464e5a782715503a878cee3850f701ec75889da24e36080c7297654e2fd",
+        "engineId": "stepfun_stepaudio_2_5_tts_v2_manual"
+      },
+      "description": "阶跃星辰 StepAudio 2.5 在线语音脚本，使用前需配置 Step Plan API Key。",
+      "versionName": "1.0.7",
+      "tags": [
+        "在线",
+        "需 API Key"
       ]
     }
   ]

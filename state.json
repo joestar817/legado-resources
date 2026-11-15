@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "1f37298cecff83e4dc1caf94f29eb17524fcaba9",
+  "sourceCommit": "5fdc71964c907a50bbf8bc0fe10aafa4572d3faf",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -174,6 +174,24 @@
       "updatedAt": "2026-10-26T10:52:23.000Z",
       "engineId": "ng_resource_example_http_template"
     },
+    "tts.mimo_v25_tts": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "738caa1992189f66cb1266b6842c2deb2089420450f0281290e897c80e811c0e",
+      "active": true,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "engineId": "mimo_v25_tts"
+    },
+    "tts.mossland_tts": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "d7befdce17fed45fc057552233af68fbedfb053f8dd131538d4022d0e5e45b57",
+      "active": true,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "engineId": "mossland_moss_tts"
+    },
     "tts.next_edge_proxy": {
       "type": "tts",
       "versionCode": 1,
@@ -182,6 +200,15 @@
       "publishedAt": "2026-11-15T05:23:01.000Z",
       "updatedAt": "2026-11-15T05:23:01.000Z",
       "engineId": "next_edge_proxy"
+    },
+    "tts.stepaudio_25_tts": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "7458d9c00bf7010d1bfe0f77d9e21620403cc1ea979aeb09233087512b7869a8",
+      "active": true,
+      "publishedAt": "2026-11-15T07:49:34.000Z",
+      "updatedAt": "2026-11-15T07:49:34.000Z",
+      "engineId": "stepfun_stepaudio_2_5_tts_v2_manual"
     }
   }
 }
