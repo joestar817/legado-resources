@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "bf75370a22d6077c7fd9520cfc545cd15bc73b60",
+  "sourceCommit": "3f7f83583a4c35618564300d3194a7c7585767d4",
   "purposes": [
     {
       "id": "reading",
@@ -35,8 +35,8 @@
       "type": "theme",
       "purpose": "appearance",
       "index": "resources/themes/index.json",
-      "count": 6,
-      "indexSha256": "7c45536c67aac1aded1215b59cb4daef91df829ac2dfc0e36077a18fd579b0ef"
+      "count": 7,
+      "indexSha256": "912fa8a6ddfbb14a2074017ac1ce7d349d8cbfcf85212f47c0e51a9d164893ca"
     },
     {
       "id": "widget-skins",

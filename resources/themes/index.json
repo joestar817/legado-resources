@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "bf75370a22d6077c7fd9520cfc545cd15bc73b60",
+  "sourceCommit": "3f7f83583a4c35618564300d3194a7c7585767d4",
   "type": "theme",
   "resources": [
     {
@@ -78,6 +78,27 @@
       },
       "description": "原阅读 NG 内置主题「竹影之韵」的改版，青绿底纹上疏落的竹叶与竹影相映。",
       "versionName": "1.0.0"
+    },
+    {
+      "id": "ng.theme.claude_and_bluefish",
+      "name": "Claude与大肥鱼",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T04:39:11.000Z",
+      "updatedAt": "2026-11-15T04:39:11.000Z",
+      "payload": {
+        "path": "resources/themes/claude-and-bluefish/claude-and-bluefish.zip",
+        "format": "zip",
+        "size": 19042695,
+        "sha256": "e8d166da53cd386b6db14f9033f4c5ac488319e587f8187ff72dc9e3529448bd"
+      },
+      "description": "白天在窗边读书小憩，夜里在月光下讲故事。",
+      "versionName": "1.0.0",
+      "requirements": {
+        "capabilities": [
+          "theme.background.center_crop.1"
+        ]
+      }
     },
     {
       "id": "ng.theme.storybook_house",
