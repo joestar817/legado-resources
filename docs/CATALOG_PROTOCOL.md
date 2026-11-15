@@ -26,7 +26,7 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 
 目录保持 `schemaVersion: 1`，增加可选的用途展示信息：根级 `purposes` 是按展示顺序排列的 `{ id, name }` 列表；声明用途时，各分类必须通过 `purpose` 引用其中一项。当前用途为 `reading`（阅读）、`appearance`（外观）、`listening`（听书）与 `pets`（宠物）。同一用途可包含多个资源类型，没有已接入类型的用途只保留入口，不生成虚假分类或资源。
 
-当前上架映射为 `read_preset → reading`、`theme → appearance`、`tts → listening`、`pet → pets`。`font/background` 类型仅保留以校验历史台账，当前目录不再分发。生成器拒绝未知、重复、缺失或与类型不符的用途。
+当前上架映射为 `read_preset → reading`、`theme/widget_skin → appearance`、`tts → listening`、`pet → pets`。`font/background` 类型仅保留以校验历史台账，当前目录不再分发。生成器拒绝未知、重复、缺失或与类型不符的用途。
 
 用途、显示名称与分类顺序只影响浏览，不改变目录分类 ID、资源 ID、TTS 引擎身份、载荷路径、内容版本或发布时间。资源目录仍由可安装类型划分；用途不是一种新的安装器或代码插件协议。
 
@@ -138,6 +138,14 @@ NG 独立保存来源仓库、资源 ID、已安装版本、载荷摘要、来�
 阅读预设下载后加入全局预设列表，不自动切换当前样式；新版本作为新预设加入，保留已安装版本和个人修改。其他资源入库也不自动切换或启用。下载失败、更新不兼容、远端删除均保留现有安装。
 
 NG 资源中心已实现目录与单文件安装消费；日期在详情页按设备时区显示，缺失或非法日期显示“—”，不会以当前时间兜底。
+
+## 首页组件皮肤
+
+`widget-skins` 分类对应 `widget_skin` 类型，要求客户端具备 `home.widget.skin.1`。每个 ZIP 从根目录读取 `manifest.json`，包含 `schemaVersion: 1` 和宿主支持的 `renderer`。绘本书屋使用 `storybook` 和资源 ID `ng.home_skin.storybook`，夜灯书桌使用 `night` 和资源 ID `ng.home_skin.night_desk`。
+
+绘本书屋提供 `calendar`、`leaves`、`listening-small`、`listening-large`、`reading`、`updates`。夜灯书桌提供 `lamp`、`desk`、`leaves`、`wood`。素材统一为 `artwork/<名称>.webp`。可选的 `preview.png` 为 768 × 768，供安装后离线查看。
+
+App 校验 ZIP 大小、文件列表和素材后入库，用下载摘要标识已安装版本。切换皮肤在首页确认，卸载后缺少素材的组件显示同尺寸的基础玻璃。资源 ZIP 不含脚本或可执行代码。
 
 ## 宠物与阅读预设的预览
 

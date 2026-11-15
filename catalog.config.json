@@ -32,6 +32,12 @@
       "purpose": "appearance"
     },
     {
+      "id": "widget-skins",
+      "name": "组件皮肤",
+      "type": "widget_skin",
+      "purpose": "appearance"
+    },
+    {
       "id": "tts",
       "name": "TTS 脚本",
       "type": "tts",

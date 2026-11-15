@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { readPetPlugin } from './pet-plugins.mjs';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
-const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset', tts: 'tts', themes: 'theme', pets: 'pet' });
-const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', read_preset: 'reading', theme: 'appearance', tts: 'listening', pet: 'pets' });
+const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset', tts: 'tts', themes: 'theme', 'widget-skins': 'widget_skin', pets: 'pet' });
+const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', read_preset: 'reading', theme: 'appearance', widget_skin: 'appearance', tts: 'listening', pet: 'pets' });
 const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  read_preset: ['zip'], tts: ['js'], theme: ['ngtheme', 'zip'], pet: ['ngpet', 'zip'],
+  read_preset: ['zip'], tts: ['js'], theme: ['ngtheme', 'zip'], widget_skin: ['zip'], pet: ['ngpet', 'zip'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -405,6 +405,10 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       const pet = category.type === 'pet' ? await readPetPlugin(filename) : null;
       const required = requirements(meta.requirements);
       if (pet?.apiVersion === 2 && !required?.capabilities?.includes('pet.api.2')) fail('Pet ZIP requires the pet.api.2 host capability');
+      if (category.type === 'widget_skin') {
+        if (required?.capabilities?.length !== 1 || required.capabilities[0] !== 'home.widget.skin.1') fail('Widget skin ZIP requires the home.widget.skin.1 host capability');
+        if (file.size > 8 * 1024 * 1024) fail('Widget skin ZIP exceeds the 8 MiB limit');
+      }
       if (pet && meta.payload.pluginId !== pet.id) fail('Pet plugin identity mismatch');
       if (!pet && meta.payload.pluginId !== undefined) fail('Unexpected pluginId');
       if (pet && seenPluginIds.has(pet.id)) fail('Duplicate pet plugin identity');

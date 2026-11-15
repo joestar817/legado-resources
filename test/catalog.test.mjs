@@ -130,6 +130,41 @@ async function makeSymlink(t, target, link, type) {
   }
 }
 
+test('widget skins publish under Appearance with the same stable identity on update', async (t) => {
+  const { root } = await fixture(t);
+  await putJson(root, 'catalog.config.json', {
+    schemaVersion: 1,
+    purposes: [
+      { id: 'reading', name: '阅读' }, { id: 'appearance', name: '外观' }, { id: 'listening', name: '听书' },
+    ],
+    categories: [{ id: 'widget-skins', name: '组件皮肤', type: 'widget_skin', purpose: 'appearance' }],
+  });
+  const payload = 'resources/widget-skins/night-desk/night-desk.zip';
+  const id = 'ng.home_skin.night_desk';
+  const requirements = { capabilities: ['home.widget.skin.1'] };
+  await put(root, payload, 'skin content v1');
+  const metadataPath = 'resources/widget-skins/night-desk/night-desk.resource.json';
+  const metadata = {
+    schemaVersion: 1, id, name: '夜灯书桌', author: '阅读 NG',
+    payload: { path: payload, format: 'zip' }, requirements,
+  };
+  await putJson(root, metadataPath, { ...metadata, requirements: undefined });
+  await assert.rejects(() => build(root), /home\.widget\.skin\.1/);
+  await putJson(root, metadataPath, metadata);
+  const first = await build(root);
+  const category = first.catalog.categories.find(({ id }) => id === 'widget-skins');
+  assert.equal(category.purpose, 'appearance');
+  const item = resource(first, category.id, id);
+  assert.deepEqual(item.requirements, requirements);
+  assert.equal(item.versionCode, 1);
+  assert.equal(item.preview, undefined);
+  await put(root, payload, 'skin content v2');
+  const next = await build(root, first.state, SOURCE_B);
+  assert.equal(resource(next, category.id, id).versionCode, 2);
+  await put(root, payload, Buffer.alloc(8 * 1024 * 1024 + 1));
+  await assert.rejects(() => build(root), /8 MiB/);
+});
+
 test('empty configured categories are valid and retain category routing', async (t) => {
   const { root } = await fixture(t);
   const result = await build(root);

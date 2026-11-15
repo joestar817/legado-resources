@@ -6,6 +6,7 @@
 |---|---|---|
 | 阅读 | 阅读预设包 | `read-presets` |
 | 外观 | 主题包 | `themes` |
+| 外观 | 组件皮肤 | `widget-skins` |
 | 听书 | TTS 脚本 | `tts` |
 | 宠物 | 编译宠物插件 | `pets` |
 
@@ -18,6 +19,7 @@ resources/
 ├── read-presets/
 ├── tts/
 ├── themes/
+├── widget-skins/
 └── pets/
 ```
 
@@ -31,6 +33,7 @@ resources/
 | `resources/fonts/`、`resources/backgrounds/` | 保留的历史资源，不再加入目录 |
 | `resources/tts/` | 听书下的 TTS 脚本，当前为接口模板示例 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
+| `resources/widget-skins/` | 首页组件皮肤 ZIP 与资源说明 |
 | `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
 | `sdk/pet/` | 提供给作者的版本化宠物开发 SDK |
 | `tools/` | 索引生成与发布工具 |
@@ -80,7 +83,9 @@ python3 -B test/font-preview.test.py
 
 生成目录包括总目录 `catalog.json`、各分类的 `index.json`、内部版本台账 `state.json`，以及 `previews/` 下按图片 SHA256 命名的字体与宠物预览 PNG。开发者不手改这些文件，不把它们提交到 `main`；每项字体的源目录仍只需字体文件与元数据。
 
-`preview` 是索引中的机器字段，不能写进投稿元数据。宠物和阅读预设可通过 `previewSource` 提供预览图，详情见[目录协议](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。仅更换预览不会增加安装版本，也不修改资源的发布时间或内容更新时间。预览校验失败会停止本次发布，保留上次可用目录。
+`preview` 是索引中的机器字段，不能写进投稿元数据。宠物和阅读预设可通过 `previewSource` 提供预览图，详见[目录协议](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。仅更换目录预览不会增加安装版本，也不修改资源的发布时间或内容更新时间。预览校验失败会停止本次发布，保留上次可用目录。
+
+组件皮肤 ZIP 提供清单、插图和安装后的预览图，所需客户端能力为 `home.widget.skin.1`。首页「组件皮肤」负责本地导入、预览、应用和删除。资源中心提供线上下载和更新，「去使用」回到首页预选对应皮肤。
 
 新资源版本为 1；安装内容变化才递增。改介绍、移动源文件或重复运行不升版。删除后保留台账，重新加入同 ID 不重置版本。生成失败保留上次目录；旧任务不能覆盖已发布的新来源。目录分支丢失时普通任务会停止，不会自动重建为版本 1；只有首次初始化才使用 `bootstrap`。详见 [目录协议](docs/CATALOG_PROTOCOL.md)。
 

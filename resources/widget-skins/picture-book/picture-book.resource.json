@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.home_skin.storybook",
+  "name": "绘本书屋",
+  "author": "阅读 NG",
+  "description": "乳白纸面、叶饰和绘本插图。适用于首页的今日书讯、阅读足迹、听书小窗和阅读日历。",
+  "versionName": "1.0.0",
+  "tags": [
+    "首页",
+    "组件皮肤"
+  ],
+  "requirements": {
+    "capabilities": [
+      "home.widget.skin.1"
+    ]
+  },
+  "payload": {
+    "path": "resources/widget-skins/picture-book/picture-book.zip",
+    "format": "zip"
+  }
+}
