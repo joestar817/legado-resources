@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "889b77c387608116b63e339e61898476e1888309",
+  "sourceCommit": "83111a5edcacf45b1458a2e36b4ce6753389dc54",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -169,7 +169,7 @@
       "type": "tts",
       "versionCode": 1,
       "fingerprint": "5d1ea5d4cf81ce048a8f29b6dcd67634b177c77289bee71f3ed576ba05e784d1",
-      "active": true,
+      "active": false,
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T10:52:23.000Z",
       "engineId": "ng_resource_example_http_template"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "889b77c387608116b63e339e61898476e1888309",
+  "sourceCommit": "83111a5edcacf45b1458a2e36b4ce6753389dc54",
   "purposes": [
     {
       "id": "reading",
@@ -53,8 +53,8 @@
       "type": "tts",
       "purpose": "listening",
       "index": "resources/tts/index.json",
-      "count": 7,
-      "indexSha256": "2da1258ad9ca777823109aa7461f48c17e7f5e1402a573202667f9406eb2cbc1"
+      "count": 6,
+      "indexSha256": "d083e193ccff207d554df445b6afb9fb9252ec5ab9602beaf63b71d0301f37e6"
     },
     {
       "id": "pets",
