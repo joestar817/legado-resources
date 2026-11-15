@@ -141,7 +141,7 @@ NG 资源中心已实现目录与单文件安装消费；日期在详情页按�
 
 ## 首页组件皮肤
 
-`widget-skins` 分类对应 `widget_skin` 类型，要求客户端具备 `home.widget.skin.1`。每个 ZIP 从根目录读取 `manifest.json`，包含 `schemaVersion: 1` 和宿主支持的 `renderer`。绘本书屋使用 `storybook` 和资源 ID `ng.home_skin.storybook`，夜灯书桌使用 `night` 和资源 ID `ng.home_skin.night_desk`。
+`widget-skins` 分类对应 `widget_skin` 类型，要求客户端具备 `home.widget.skin.1`。每个 ZIP 从根目录读取 `manifest.json`，包含 `schemaVersion: 1` 和宿主支持的 `renderer`。绘本书屋使用 `storybook` 和资源 ID `ng.home_skin.storybook`，夜灯书桌使用 `night` 和资源 ID `ng.home_skin.night_desk`。蓝色大肥鱼使用 `blue_fish` 和资源 ID `ng.home_skin.blue_fish`，还须声明 `home.widget.skin.blue_fish.1`，让仅支持旧渲染器的客户端在下载前提示不兼容。
 
 绘本书屋提供 `calendar`、`leaves`、`listening-small`、`listening-large`、`reading`、`updates`。夜灯书桌提供 `lamp`、`desk`、`leaves`、`wood`。素材统一为 `artwork/<名称>.webp`。可选的 `preview.png` 为 768 × 768，供安装后离线查看。
 

@@ -165,6 +165,35 @@ test('widget skins publish under Appearance with the same stable identity on upd
   await assert.rejects(() => build(root), /8 MiB/);
 });
 
+test('blue fish skin requires its renderer capability without changing existing skins', async (t) => {
+  const { root } = await fixture(t);
+  await putJson(root, 'catalog.config.json', {
+    schemaVersion: 1,
+    purposes: [
+      { id: 'reading', name: '阅读' }, { id: 'appearance', name: '外观' }, { id: 'listening', name: '听书' },
+    ],
+    categories: [{ id: 'widget-skins', name: '组件皮肤', type: 'widget_skin', purpose: 'appearance' }],
+  });
+  const payload = 'resources/widget-skins/blue-fish/blue-fish.zip';
+  const metadataPath = 'resources/widget-skins/blue-fish/blue-fish.resource.json';
+  const metadata = {
+    schemaVersion: 1, id: 'ng.home_skin.blue_fish', name: '蓝色大肥鱼', author: '阅读 NG',
+    payload: { path: payload, format: 'zip' },
+  };
+  await put(root, payload, 'blue fish skin');
+  for (const capabilities of [[], ['home.widget.skin.1'], ['home.widget.skin.blue_fish.1'],
+    ['home.widget.skin.1', 'home.widget.skin.blue_fish.1', 'unknown']]) {
+    await putJson(root, metadataPath, { ...metadata, requirements: { capabilities } });
+    await assert.rejects(() => build(root), /home\.widget\.skin\.blue_fish\.1/);
+  }
+  const capabilities = ['home.widget.skin.1', 'home.widget.skin.blue_fish.1'];
+  await putJson(root, metadataPath, { ...metadata, requirements: { capabilities } });
+  const result = await build(root);
+  assert.deepEqual(resource(result, 'widget-skins', metadata.id).requirements.capabilities, capabilities);
+  await putJson(root, metadataPath, { ...metadata, id: 'ng.home_skin.storybook', requirements: { capabilities } });
+  await assert.rejects(() => build(root), /home\.widget\.skin\.1/);
+});
+
 test('empty configured categories are valid and retain category routing', async (t) => {
   const { root } = await fixture(t);
   const result = await build(root);

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.home_skin.blue_fish",
+  "name": "蓝色大肥鱼",
+  "author": "阅读 NG",
+  "description": "浅蓝海浪与 Q 版蓝色大肥鱼插画，适用于首页的今日书讯、阅读足迹、听书小窗和阅读日历。",
+  "versionName": "1.0.0",
+  "tags": [
+    "首页",
+    "组件皮肤"
+  ],
+  "requirements": {
+    "capabilities": [
+      "home.widget.skin.1",
+      "home.widget.skin.blue_fish.1"
+    ]
+  },
+  "payload": {
+    "path": "resources/widget-skins/blue-fish/blue-fish.zip",
+    "format": "zip"
+  }
+}

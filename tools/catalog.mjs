@@ -406,7 +406,13 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       const required = requirements(meta.requirements);
       if (pet?.apiVersion === 2 && !required?.capabilities?.includes('pet.api.2')) fail('Pet ZIP requires the pet.api.2 host capability');
       if (category.type === 'widget_skin') {
-        if (required?.capabilities?.length !== 1 || required.capabilities[0] !== 'home.widget.skin.1') fail('Widget skin ZIP requires the home.widget.skin.1 host capability');
+        const expected = id === 'ng.home_skin.blue_fish'
+          ? ['home.widget.skin.1', 'home.widget.skin.blue_fish.1']
+          : ['home.widget.skin.1'];
+        if (required?.capabilities?.length !== expected.length ||
+            !expected.every(capability => required.capabilities.includes(capability))) {
+          fail(`Widget skin ZIP requires the ${expected.join(', ')} host capability`);
+        }
         if (file.size > 8 * 1024 * 1024) fail('Widget skin ZIP exceeds the 8 MiB limit');
       }
       if (pet && meta.payload.pluginId !== pet.id) fail('Pet plugin identity mismatch');
