@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "ng.theme.claude_and_bluefish",
+  "name": "Claude与大肥鱼",
+  "author": "阅读 NG",
+  "description": "白天在窗边读书小憩，夜里在月光下讲故事。",
+  "versionName": "1.0.0",
+  "payload": {
+    "path": "resources/themes/claude-and-bluefish/claude-and-bluefish.zip",
+    "format": "zip"
+  },
+  "requirements": {
+    "capabilities": [
+      "theme.background.center_crop.1"
+    ]
+  }
+}
