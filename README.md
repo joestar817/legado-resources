@@ -31,7 +31,7 @@ resources/
 |---|---|
 | `resources/read-presets/` | 阅读预设 ZIP、资源说明与预览图 |
 | `resources/fonts/`、`resources/backgrounds/` | 保留的历史资源，不再加入目录 |
-| `resources/tts/` | 听书下的 TTS 脚本，当前为接口模板示例 |
+| `resources/tts/` | 听书下的在线 TTS 脚本与接口模板 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
 | `resources/widget-skins/` | 首页组件皮肤 ZIP 与资源说明 |
 | `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
@@ -42,6 +42,7 @@ resources/
 资源与示例：
 
 - [敦煌绮笺](resources/read-presets/dunhuang-letter/preset.resource.json)、[江湖驿书](resources/read-presets/jianghu-letter/preset.resource.json)和[星河秘笺](resources/read-presets/starry-letter/preset.resource.json)：包含背景、字体及阅读样式的预设包。
+- [微软翻译](resources/tts/bundled/microsoft_translator.resource.json)、[Next Edge TTS](resources/tts/bundled/next_edge_proxy.resource.json)：在线朗读脚本；后者通过 LibreTTS 第三方中转。
 - [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
 

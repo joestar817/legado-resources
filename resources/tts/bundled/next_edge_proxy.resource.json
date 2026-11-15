@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.next_edge_proxy",
+  "description": "通过 LibreTTS 中转使用 Edge 语音，服务可用性取决于中转方。",
+  "tags": [
+    "在线",
+    "第三方中转"
+  ],
+  "payload": {
+    "path": "resources/tts/bundled/next_edge_proxy.js",
+    "format": "js"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.builtin_microsoft_translator",
+  "description": "微软翻译在线语音，包含普通话、方言与多语言发音人。",
+  "tags": [
+    "在线",
+    "中文"
+  ],
+  "payload": {
+    "path": "resources/tts/bundled/microsoft_translator.js",
+    "format": "js"
+  }
+}

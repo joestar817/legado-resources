@@ -12,3 +12,4 @@
 *.webp binary
 *.zip binary
 *.ngtheme binary
+resources/tts/**/*.js -text whitespace=cr-at-eol
