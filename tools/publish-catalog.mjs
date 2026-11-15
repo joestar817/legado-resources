@@ -229,7 +229,8 @@ export async function publishCatalog({
     }
     const snapshotRoot = path.join(scratch, 'source');
     await materializeSource(git, root, sourceCommit, snapshotRoot);
-    const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, sourceTime: sourceTimestamp(git, root, sourceCommit), previousState });
+    const generated = await buildCatalog({ root: snapshotRoot, sourceCommit, sourceTime: sourceTimestamp(git, root, sourceCommit), previousState,
+      releaseCacheDirectory: path.join(root, '.local', 'release-assets') });
     const output = path.join(scratch, 'output');
     await writeCatalog(await attachFontPreviews(generated, { root: snapshotRoot }), output);
     // publishRoot already contains .git. Copy each generated entry to an absent

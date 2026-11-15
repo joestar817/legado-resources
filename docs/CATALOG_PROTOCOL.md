@@ -64,10 +64,15 @@ NG 应先固定一个 `catalog` 提交，从该提交读取根目录、分类索
 | `payload.path`、`format` | 带 `resources/<分类>/` 前缀的仓库相对路径、载荷格式 |
 | `payload.size`、`sha256` | 实际内容字节数及 SHA-256 |
 | `payload.engineId` | TTS 从脚本 `@uuid` 提取的原生引擎身份 |
+| `payload.release` | 离线 TTS ZIP 可选的 `{tag, asset}`，仅指向本仓库固定版本 Release 附件；下载后仍强制校验 `size` 与 `sha256` |
 | `payload.pluginId` | 宠物清单中的稳定插件身份，与资源说明一致 |
 | `requirements` | 可选的 `minAppVersionCode` 与 `capabilities` |
 | `description`、`changelog`、`tags` | 可选展示信息 |
 | `preview` | 字体、宠物或阅读预设的缩略图与详情图，仅生成器输出，投稿不填写 |
+
+离线 TTS 使用 `type: "tts"`、`format: "zip"` 和 `tts.offline.microsoft.1` 能力标识，原生引擎身份固定为 `__legado_microsoft_offline_bundle__`。ZIP 上限 512 MiB，其余资源保持客户端既有限额。`payload.release` 存在时使用 `https://github.com/joestar817/legado-resources/releases/download/<tag>/<asset>`，标签与附件名只允许字母、数字、点、下划线和连字符，不允许路径或 URL；无此字段时继续使用固定源提交的文件。旧客户端通过格式及能力检查拒绝不支持的离线资源。
+
+同一离线资源更新仍保留资源 ID 和引擎身份；客户端用已提交组件清单与声音 ID 的指纹记录安装基线。来源更新不包含用户语速、音量、角色绑定等个人设置；本地另行导入不同整合包时需要覆盖确认。下载失败或取消不改已装包，已提交包与来源收据之间的中断通过安装日志恢复。
 
 同 ID 的类型、TTS 引擎身份和宠物插件身份须保持稳定。文件名／路径仅定位载荷，不能当作资源身份。索引格式版本、机器修订、作者版本和 App 版本分别有自己的语义。
 

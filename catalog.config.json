@@ -39,7 +39,7 @@
     },
     {
       "id": "tts",
-      "name": "TTS 脚本",
+      "name": "朗读引擎",
       "type": "tts",
       "purpose": "listening"
     },

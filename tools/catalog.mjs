@@ -5,6 +5,7 @@ import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
 import { readPetPlugin } from './pet-plugins.mjs';
+import { OFFLINE_TTS_CAPABILITY, OFFLINE_TTS_ENGINE, readOfflineTts, releaseDescriptor, releasePayload } from './offline-tts.mjs';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
 const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset', tts: 'tts', themes: 'theme', 'widget-skins': 'widget_skin', pets: 'pet' });
@@ -13,7 +14,7 @@ const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  read_preset: ['zip'], tts: ['js'], theme: ['ngtheme', 'zip'], widget_skin: ['zip'], pet: ['ngpet', 'zip'],
+  read_preset: ['zip'], tts: ['js', 'zip'], theme: ['ngtheme', 'zip'], widget_skin: ['zip'], pet: ['ngpet', 'zip'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -268,7 +269,7 @@ export function checkState(value) {
     if (typeof record.active !== 'boolean') fail(`Invalid historical active state for ${id}`);
     result[id] = { type: record.type, versionCode: record.versionCode, fingerprint: hash(record.fingerprint, `${id} fingerprint`), active: record.active, ...recordDates(record, id) };
     if (record.type === 'tts') {
-      const engineId = identifier(record.engineId, `${id} historical engine ID`);
+      const engineId = record.engineId === OFFLINE_TTS_ENGINE ? OFFLINE_TTS_ENGINE : identifier(record.engineId, `${id} historical engine ID`);
       if (engineIds.has(engineId)) fail(`Duplicate historical TTS engine ID ${engineId}`);
       engineIds.add(engineId);
       result[id].engineId = engineId;
@@ -340,7 +341,7 @@ async function sourcePreview(root, category, source, files) {
 }
 
 /** Read resources without evaluating code. Omit sourceTime only for validation, never publication. */
-export async function buildCatalog({ root, sourceCommit, sourceTime, previousState = null }) {
+export async function buildCatalog({ root, sourceCommit, sourceTime, previousState = null, releaseCacheDirectory }) {
   if (typeof root !== 'string' || !root) fail('root is required');
   await ordinary(path.resolve(root), 'directory');
   root = await fs.realpath(path.resolve(root));
@@ -393,17 +394,27 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       foldedIds.set(id.toLowerCase(), id);
       seenIds.add(id);
       if (seenIds.size > MAX_RESOURCES) fail('Too many resources');
-      fields(meta.payload, ['path', 'format', 'pluginId'], `${id}.payload`);
+      fields(meta.payload, ['path', 'format', 'pluginId', 'release'], `${id}.payload`);
       const relative = relativePath(meta.payload.path, category.id);
       const collisionKey = relative.toLowerCase();
       if (seenPayloads.has(collisionKey)) fail(`Payload path used by multiple resources: ${relative}`);
       seenPayloads.add(collisionKey);
       const format = text(meta.payload.format, 'payload.format', 16);
       if (!FORMATS[category.type].includes(format) || path.posix.extname(relative).toLowerCase() !== `.${format}`) fail(`Payload format/extension mismatch for ${id}`);
-      const filename = await safePayload(root, relative);
-      const file = await payloadDigest(filename, category.type === 'tts');
+      const offline = category.type === 'tts' && format === 'zip';
+      if (meta.payload.release && !offline) fail('Release assets are only supported for offline TTS ZIPs');
+      const release = meta.payload.release === undefined ? null : releaseDescriptor(meta.payload.release);
+      const filename = release
+        ? await releasePayload(releaseCacheDirectory ?? path.join(root, '.local', 'release-assets'), release)
+        : await safePayload(root, relative);
+      const file = await payloadDigest(filename, category.type === 'tts' && !offline);
+      if (release && (file.size !== release.size || file.sha256 !== release.sha256)) fail('Release asset changed during catalog validation');
+      if (offline) file.metadata = await readOfflineTts(filename);
       const pet = category.type === 'pet' ? await readPetPlugin(filename) : null;
       const required = requirements(meta.requirements);
+      if (offline && (required?.capabilities?.length !== 1 || required.capabilities[0] !== OFFLINE_TTS_CAPABILITY)) {
+        fail(`Offline TTS requires the ${OFFLINE_TTS_CAPABILITY} host capability`);
+      }
       if (pet?.apiVersion === 2 && !required?.capabilities?.includes('pet.api.2')) fail('Pet ZIP requires the pet.api.2 host capability');
       if (category.type === 'widget_skin') {
         const expected = id === 'ng.home_skin.blue_fish'
@@ -427,6 +438,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
         seenEngineIds.add(header.uuid);
       }
       const payload = { path: relative, format, size: file.size, sha256: file.sha256 };
+      if (release) payload.release = { tag: release.tag, asset: release.asset };
       if (header) payload.engineId = header.uuid;
       if (pet) payload.pluginId = pet.id;
       const fingerprint = digest(JSON.stringify({ type: category.type, format, sha256: file.sha256, ...(header ? { engineId: header.uuid } : {}), ...(pet ? { pluginId: pet.id } : {}) }));

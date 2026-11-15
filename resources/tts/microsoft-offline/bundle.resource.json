@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.microsoft-offline",
+  "name": "微软中文离线语音",
+  "author": "Microsoft（语音与引擎） / 阅读 NG（整合）",
+  "description": "云希、晓晓两位普通话发音人。下载后可离线朗读，需要 Android 8.0 及以上的 ARM64 运行环境。在朗读设置中选择微软离线语音即可使用。",
+  "payload": {
+    "path": "resources/tts/microsoft-offline/microsoft-offline-zh-cn.zip",
+    "format": "zip",
+    "release": {
+      "tag": "tts-microsoft-offline-1.0.2",
+      "asset": "microsoft-offline-zh-cn-1.0.2.zip",
+      "size": 133633284,
+      "sha256": "d05ceec818f4604f15648e301595674a621839c5d6dd9cc73902bab4a447bb60"
+    }
+  },
+  "requirements": {
+    "capabilities": ["tts.offline.microsoft.1"]
+  },
+  "changelog": "收录云希、晓晓，支持直接覆盖更新并保留仍有效的声音绑定和个人参数。",
+  "tags": ["离线", "普通话", "云希", "晓晓"]
+}

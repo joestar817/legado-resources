@@ -7,10 +7,10 @@
 | 阅读 | 阅读预设包 | `read-presets` |
 | 外观 | 主题包 | `themes` |
 | 外观 | 组件皮肤 | `widget-skins` |
-| 听书 | TTS 脚本 | `tts` |
+| 听书 | 朗读引擎（在线脚本、离线语音） | `tts` |
 | 宠物 | 编译宠物插件 | `pets` |
 
-阅读预设包可包含背景、字体、排版和浮窗配色，下载后加入阅读预设列表，由用户选择使用。独立字体和背景不再提供在线分发；历史文件保留，不影响本地已有资源。动态场景、本地 TTS 引擎等类型需接入对应适配器后再上架。
+阅读预设包可包含背景、字体、排版和浮窗配色，下载后加入阅读预设列表，由用户选择使用。独立字体和背景不再提供在线分发；历史文件保留，不影响本地已有资源。离线语音以标准 ZIP 整合包分发，动态场景等类型需接入对应适配器后再上架。
 
 资源中心的安装包放在 `resources/` 下，供作者下载的工具包按版本放在 `sdk/` 下。
 
@@ -31,7 +31,7 @@ resources/
 |---|---|
 | `resources/read-presets/` | 阅读预设 ZIP、资源说明与预览图 |
 | `resources/fonts/`、`resources/backgrounds/` | 保留的历史资源，不再加入目录 |
-| `resources/tts/` | 听书下的在线 TTS 脚本与接口模板 |
+| `resources/tts/` | 听书下的在线 TTS 脚本、离线语音整合包说明与接口模板 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
 | `resources/widget-skins/` | 首页组件皮肤 ZIP 与资源说明 |
 | `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
@@ -43,6 +43,7 @@ resources/
 
 - [敦煌绮笺](resources/read-presets/dunhuang-letter/preset.resource.json)、[江湖驿书](resources/read-presets/jianghu-letter/preset.resource.json)和[星河秘笺](resources/read-presets/starry-letter/preset.resource.json)：包含背景、字体及阅读样式的预设包。
 - [微软翻译](resources/tts/bundled/microsoft_translator.resource.json)、[Next Edge TTS](resources/tts/bundled/next_edge_proxy.resource.json)：在线朗读脚本；后者通过 LibreTTS 第三方中转。
+- [微软中文离线语音](resources/tts/microsoft-offline/bundle.resource.json)：云希、晓晓两位发音人，需要 Android 8.0 及以上的 ARM64 运行环境。资源中心下载后在朗读设置中选择；更新可直接覆盖，无需先删包。
 - [MiMo V2.5](resources/tts/bundled/mimo_v25_tts.resource.json)、[StepAudio 2.5](resources/tts/bundled/stepaudio_25_tts.resource.json)、[Mossland](resources/tts/bundled/mossland_tts.resource.json)：在线朗读脚本，使用前需要配置各自的 API Key。
 - [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。

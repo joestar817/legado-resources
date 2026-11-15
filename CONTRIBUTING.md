@@ -39,6 +39,14 @@
 
 脚本头部应有 `// @uuid`、`// @name`、`// @author`；可附 `// @version` 和 `// @description`。工具静态读取这些注释，不执行 JS。说明中显式填写的 `name`、`author`、`versionName` 可覆盖相应展示值；避免重复维护没有必要的字段。
 
+## 离线语音整合包
+
+微软离线语音使用标准 ZIP，归入 `tts`，`payload.format` 为 `zip`，并声明 `requirements.capabilities: ["tts.offline.microsoft.1"]`。参考 [云希、晓晓整合包说明](resources/tts/microsoft-offline/bundle.resource.json)。包内必须是完整的 `ng-tts-package` bundle，含引擎、模型、中文发音人和运行所需文件；不发布个人账号配置或签名私钥。
+
+大包上传到本仓库固定版本的 Release，资源说明中填写 `payload.release` 的 `tag`、`asset`、实际 `size` 和 `sha256`。`payload.path` 仍保留分类内稳定路径作为资源逻辑标识，此时无需将 ZIP 提交到 Git。生成器只从 `joestar817/legado-resources` 的指定 Release 下载，校验字节数、SHA-256 与包清单后生成索引；不接受任意 URL。可将完整 ZIP 放在 `.local/release-assets/<sha256>.zip` 供本地校验，缓存同样必须通过摘要校验。
+
+更新时新建版本标签和附件，不覆盖原附件；再修改资源说明。目录修订号按 ZIP 内容自动增长，与包内修订号分开维护。先上传附件、再提交说明，附件不可用或摘要不符时目录发布会失败，已发布目录不变。
+
 ## 宠物插件
 
 作者可下载[宠物开发 SDK 2.0.0](sdk/pet/2.0.0/pet-sdk-2.0.0.zip)，解压后按包内说明从独立工程构建自己的宠物。SDK 归档与用户安装的角色包分别发布，资源中心“宠物”列表只收录角色包。
