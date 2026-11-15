@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "887423d5f39b8260883eec4f4b662f75a6adc23f",
+  "sourceCommit": "bf75370a22d6077c7fd9520cfc545cd15bc73b60",
   "purposes": [
     {
       "id": "reading",
@@ -44,8 +44,8 @@
       "type": "widget_skin",
       "purpose": "appearance",
       "index": "resources/widget-skins/index.json",
-      "count": 2,
-      "indexSha256": "eb540890b2d8aa661607723cfbe2f164e654a481486825337c6677048a0981d9"
+      "count": 3,
+      "indexSha256": "971920a4f319121da865d3ecd8d2797b9232b27a4ba4610292de06885fdbe076"
     },
     {
       "id": "tts",

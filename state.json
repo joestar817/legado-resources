@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "887423d5f39b8260883eec4f4b662f75a6adc23f",
+  "sourceCommit": "bf75370a22d6077c7fd9520cfc545cd15bc73b60",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -41,6 +41,14 @@
       "active": false,
       "publishedAt": "2026-10-26T21:39:26.000Z",
       "updatedAt": "2026-10-26T21:39:26.000Z"
+    },
+    "ng.home_skin.blue_fish": {
+      "type": "widget_skin",
+      "versionCode": 1,
+      "fingerprint": "9013d839d1d80cc5c8a22cb4601b377752f112112fc5016d31aa1f6c40dbd78b",
+      "active": true,
+      "publishedAt": "2026-11-15T04:16:03.000Z",
+      "updatedAt": "2026-11-15T04:16:03.000Z"
     },
     "ng.home_skin.night_desk": {
       "type": "widget_skin",
