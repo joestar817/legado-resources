@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.mossland_tts",
+  "description": "Mossland 在线语音脚本，使用前需配置 Mossland API Key。",
+  "tags": [
+    "在线",
+    "需 API Key"
+  ],
+  "payload": {
+    "path": "resources/tts/bundled/mossland_tts.js",
+    "format": "js"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.stepaudio_25_tts",
+  "description": "阶跃星辰 StepAudio 2.5 在线语音脚本，使用前需配置 Step Plan API Key。",
+  "tags": [
+    "在线",
+    "需 API Key"
+  ],
+  "payload": {
+    "path": "resources/tts/bundled/stepaudio_25_tts.js",
+    "format": "js"
+  }
+}

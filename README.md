@@ -43,6 +43,7 @@ resources/
 
 - [敦煌绮笺](resources/read-presets/dunhuang-letter/preset.resource.json)、[江湖驿书](resources/read-presets/jianghu-letter/preset.resource.json)和[星河秘笺](resources/read-presets/starry-letter/preset.resource.json)：包含背景、字体及阅读样式的预设包。
 - [微软翻译](resources/tts/bundled/microsoft_translator.resource.json)、[Next Edge TTS](resources/tts/bundled/next_edge_proxy.resource.json)：在线朗读脚本；后者通过 LibreTTS 第三方中转。
+- [MiMo V2.5](resources/tts/bundled/mimo_v25_tts.resource.json)、[StepAudio 2.5](resources/tts/bundled/stepaudio_25_tts.resource.json)、[Mossland](resources/tts/bundled/mossland_tts.resource.json)：在线朗读脚本，使用前需要配置各自的 API Key。
 - [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
 

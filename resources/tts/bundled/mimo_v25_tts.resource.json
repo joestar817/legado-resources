@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "tts.mimo_v25_tts",
+  "description": "小米 MiMo V2.5 在线语音脚本，使用前需配置 MiMo API Key。",
+  "tags": [
+    "在线",
+    "需 API Key"
+  ],
+  "payload": {
+    "path": "resources/tts/bundled/mimo_v25_tts.js",
+    "format": "js"
+  }
+}
