@@ -23,7 +23,7 @@ resources/
 └── pets/
 ```
 
-当前包含三款阅读预设、咕嘎和蓝色大肥鱼，以及 TTS 和主题资源，同时提供目录工具、回归测试和 GitHub Actions。TTS 示例是默认禁用、需要自行配置服务的接口模板。云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
+当前包含三款阅读预设、咕嘎和蓝色大肥鱼，以及 TTS 和主题资源，同时提供目录工具、回归测试和 GitHub Actions。HTTP TTS 接口模板仅供开发参考，不在资源中心上架。云端执行记录见 [Actions](https://github.com/joestar817/legado-resources/actions)。
 
 ## 目录
 
@@ -45,7 +45,7 @@ resources/
 - [微软翻译](resources/tts/bundled/microsoft_translator.resource.json)、[Next Edge TTS](resources/tts/bundled/next_edge_proxy.resource.json)：在线朗读脚本；后者通过 LibreTTS 第三方中转。
 - [微软中文离线语音](resources/tts/microsoft-offline/bundle.resource.json)：云希、晓晓两位发音人，需要 Android 8.0 及以上的 ARM64 运行环境。资源中心下载后在朗读设置中选择；更新可直接覆盖，无需先删包。
 - [MiMo V2.5](resources/tts/bundled/mimo_v25_tts.resource.json)、[StepAudio 2.5](resources/tts/bundled/stepaudio_25_tts.resource.json)、[Mossland](resources/tts/bundled/mossland_tts.resource.json)：在线朗读脚本，使用前需要配置各自的 API Key。
-- [HTTP TTS 模板](resources/tts/http-template-example/README.md)：展示脚本接口，不绑定在线服务。
+- [HTTP TTS 模板](resources/tts/http-template-example/README.md)：仅供开发参考，未上架资源中心。
 - [暖纸 NG 主题](resources/themes/warm-paper-example/README.md)：包含日夜配色的原生主题包。
 
 工具回归使用隔离临时夹具，资产检查只读取上述资源与示例，不依赖未提交的本地 TTS 文件。目录检查通过不代表资源已经在 NG 实机验收。
