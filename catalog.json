@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "36edaa2506079de9282590f989b72c956ebf02a6",
+  "sourceCommit": "887423d5f39b8260883eec4f4b662f75a6adc23f",
   "purposes": [
     {
       "id": "reading",
@@ -37,6 +37,15 @@
       "index": "resources/themes/index.json",
       "count": 6,
       "indexSha256": "7c45536c67aac1aded1215b59cb4daef91df829ac2dfc0e36077a18fd579b0ef"
+    },
+    {
+      "id": "widget-skins",
+      "name": "组件皮肤",
+      "type": "widget_skin",
+      "purpose": "appearance",
+      "index": "resources/widget-skins/index.json",
+      "count": 2,
+      "indexSha256": "eb540890b2d8aa661607723cfbe2f164e654a481486825337c6677048a0981d9"
     },
     {
       "id": "tts",

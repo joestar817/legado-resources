@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "887423d5f39b8260883eec4f4b662f75a6adc23f",
+  "type": "widget_skin",
+  "resources": [
+    {
+      "id": "ng.home_skin.night_desk",
+      "name": "夜灯书桌",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T00:50:53.000Z",
+      "updatedAt": "2026-11-15T00:50:53.000Z",
+      "payload": {
+        "path": "resources/widget-skins/night-desk/night-desk.zip",
+        "format": "zip",
+        "size": 753985,
+        "sha256": "79eac78a2d04a58a52211e9847f558439aee79ae50f56c1d52d932217c4175de"
+      },
+      "description": "深蓝卡片、木纹和暖黄桌灯。适用于首页的今日书讯、阅读足迹、听书小窗和阅读日历。",
+      "versionName": "1.0.0",
+      "requirements": {
+        "capabilities": [
+          "home.widget.skin.1"
+        ]
+      },
+      "tags": [
+        "首页",
+        "组件皮肤"
+      ]
+    },
+    {
+      "id": "ng.home_skin.storybook",
+      "name": "绘本书屋",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T00:50:53.000Z",
+      "updatedAt": "2026-11-15T00:50:53.000Z",
+      "payload": {
+        "path": "resources/widget-skins/picture-book/picture-book.zip",
+        "format": "zip",
+        "size": 1705768,
+        "sha256": "c72f8db6f1080169b93bc9713a75ed14447da1079783b2940aea377e93787b18"
+      },
+      "description": "乳白纸面、叶饰和绘本插图。适用于首页的今日书讯、阅读足迹、听书小窗和阅读日历。",
+      "versionName": "1.0.0",
+      "requirements": {
+        "capabilities": [
+          "home.widget.skin.1"
+        ]
+      },
+      "tags": [
+        "首页",
+        "组件皮肤"
+      ]
+    }
+  ]
+}
