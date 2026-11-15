@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "3f7f83583a4c35618564300d3194a7c7585767d4",
+  "sourceCommit": "1f37298cecff83e4dc1caf94f29eb17524fcaba9",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -156,6 +156,15 @@
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T10:52:23.000Z"
     },
+    "tts.builtin_microsoft_translator": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "359c2c2fa40102cd30d1e14d49eaf21c0161ef52214f39957596450474412f4e",
+      "active": true,
+      "publishedAt": "2026-11-15T05:23:01.000Z",
+      "updatedAt": "2026-11-15T05:23:01.000Z",
+      "engineId": "builtin_microsoft_translator"
+    },
     "tts.example.http-template": {
       "type": "tts",
       "versionCode": 1,
@@ -164,6 +173,15 @@
       "publishedAt": "2026-10-26T10:52:23.000Z",
       "updatedAt": "2026-10-26T10:52:23.000Z",
       "engineId": "ng_resource_example_http_template"
+    },
+    "tts.next_edge_proxy": {
+      "type": "tts",
+      "versionCode": 1,
+      "fingerprint": "5741278c9f9071f8e0fa3b533f776ac8ff2a947f6b060e0c799f54b9af7efc1b",
+      "active": true,
+      "publishedAt": "2026-11-15T05:23:01.000Z",
+      "updatedAt": "2026-11-15T05:23:01.000Z",
+      "engineId": "next_edge_proxy"
     }
   }
 }

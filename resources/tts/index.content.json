@@ -3,6 +3,27 @@
   "type": "tts",
   "resources": [
     {
+      "id": "tts.builtin_microsoft_translator",
+      "name": "微软翻译",
+      "author": "Legado",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T05:23:01.000Z",
+      "updatedAt": "2026-11-15T05:23:01.000Z",
+      "payload": {
+        "path": "resources/tts/bundled/microsoft_translator.js",
+        "format": "js",
+        "size": 69580,
+        "sha256": "c3a239e03132368bc98a9d4371c2a404c51424ee48da1bc7eac25f07dfcce542",
+        "engineId": "builtin_microsoft_translator"
+      },
+      "description": "微软翻译在线语音，包含普通话、方言与多语言发音人。",
+      "versionName": "1.0.1",
+      "tags": [
+        "在线",
+        "中文"
+      ]
+    },
+    {
       "id": "tts.example.http-template",
       "name": "HTTP TTS 接口模板",
       "author": "阅读 NG 示例",
@@ -27,6 +48,27 @@
         "status": "template_only",
         "note": "文件结构与目录校验；NG 实机导入与使用未验收。"
       }
+    },
+    {
+      "id": "tts.next_edge_proxy",
+      "name": "Next Edge TTS",
+      "author": "Legado",
+      "versionCode": 1,
+      "publishedAt": "2026-11-15T05:23:01.000Z",
+      "updatedAt": "2026-11-15T05:23:01.000Z",
+      "payload": {
+        "path": "resources/tts/bundled/next_edge_proxy.js",
+        "format": "js",
+        "size": 21840,
+        "sha256": "c06cba7670feb23eb4ea90bc961ebe80f82feeabd749e4af996f29426abcee0c",
+        "engineId": "next_edge_proxy"
+      },
+      "description": "通过 LibreTTS 中转使用 Edge 语音，服务可用性取决于中转方。",
+      "versionName": "1.0.11",
+      "tags": [
+        "在线",
+        "第三方中转"
+      ]
     }
   ]
 }
