@@ -5,8 +5,9 @@ import { inflateRawSync } from 'node:zlib';
 const safePath = name => name && !name.includes('\\') && !/[\x00-\x1f:]/.test(name) && name.split('/').every(p => p && p !== '.' && p !== '..');
 function need(value, message) { if (!value) throw new Error(`Pet plugin: ${message}`); }
 
-/** Read only metadata; never evaluate plugin code or extract paths from the archive. */
-export async function readPetPlugin(filename) {
+/** Inspect the archive in memory without loading DEX or extracting files. */
+export async function readCompiledArchive(filename, requireEntry = need) {
+  const need = requireEntry;
   const stat = await fs.stat(filename);
   need(stat.size > 0 && stat.size <= 64 * 1024 * 1024, 'package size invalid');
   const zip = await fs.readFile(filename);
@@ -48,6 +49,12 @@ export async function readPetPlugin(filename) {
     return decoded;
   }
   need(data('classes.dex', 16 * 1024 * 1024).subarray(0, 4).toString() === 'dex\n', 'missing compiled DEX');
+  return { entries, data };
+}
+
+/** Read only metadata; never evaluate plugin code or extract paths from the archive. */
+export async function readPetPlugin(filename) {
+  const { entries, data } = await readCompiledArchive(filename);
   const format = extname(filename).toLowerCase();
   need(format === '.ngpet' || format === '.zip', 'unsupported package extension');
   const legacy = format === '.ngpet';

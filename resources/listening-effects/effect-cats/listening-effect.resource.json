@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "listening.effect.cats",
+  "name": "好奇猫咪",
+  "author": "阅读 NG",
+  "versionName": "1.1",
+  "description": "两只小猫在栅栏后探头，树叶和光影随风晃动。",
+  "payload": {
+    "path": "resources/listening-effects/effect-cats/effect.cats-2-listening_effect.zip",
+    "format": "zip"
+  },
+  "requirements": {
+    "minAppVersionCode": 17866,
+    "capabilities": [
+      "listening.effect.1"
+    ]
+  },
+  "previewSource": {
+    "thumbnail": "resources/listening-effects/effect-cats/thumbnail.png",
+    "detail": "resources/listening-effects/effect-cats/detail.png"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "listening.effect.rain-night",
+  "name": "雨夜",
+  "author": "阅读 NG",
+  "versionName": "1.1",
+  "description": "林间雨夜，屋檐下的暖光映着雨幕。",
+  "payload": {
+    "path": "resources/listening-effects/effect-rain-night/effect.rain_night-2-listening_effect.zip",
+    "format": "zip"
+  },
+  "requirements": {
+    "minAppVersionCode": 17866,
+    "capabilities": [
+      "listening.effect.1"
+    ]
+  },
+  "previewSource": {
+    "thumbnail": "resources/listening-effects/effect-rain-night/thumbnail.png",
+    "detail": "resources/listening-effects/effect-rain-night/detail.png"
+  }
+}

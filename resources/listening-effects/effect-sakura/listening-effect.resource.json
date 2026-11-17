@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "listening.effect.sakura",
+  "name": "湖畔樱花",
+  "author": "阅读 NG",
+  "versionName": "1.1",
+  "description": "樱花随风飘落，湖面泛起涟漪。",
+  "payload": {
+    "path": "resources/listening-effects/effect-sakura/effect.sakura-2-listening_effect.zip",
+    "format": "zip"
+  },
+  "requirements": {
+    "minAppVersionCode": 17866,
+    "capabilities": [
+      "listening.effect.1"
+    ]
+  },
+  "previewSource": {
+    "thumbnail": "resources/listening-effects/effect-sakura/thumbnail.png",
+    "detail": "resources/listening-effects/effect-sakura/detail.png"
+  }
+}

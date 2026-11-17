@@ -44,6 +44,12 @@
       "purpose": "listening"
     },
     {
+      "id": "listening-effects",
+      "name": "听书动效",
+      "type": "listening_effect",
+      "purpose": "listening"
+    },
+    {
       "id": "pets",
       "name": "宠物插件",
       "type": "pet",

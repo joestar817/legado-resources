@@ -4,17 +4,20 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { fileURLToPath } from 'node:url';
-import { readPetPlugin } from './pet-plugins.mjs';
+import { readCompiledArchive, readPetPlugin } from './pet-plugins.mjs';
 import { OFFLINE_TTS_CAPABILITY, OFFLINE_TTS_ENGINE, readOfflineTts, releaseDescriptor, releasePayload } from './offline-tts.mjs';
 import { attachFontPreviews, readPreviewFiles, validatePreviewFiles } from './font-previews.mjs';
 
-const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset', tts: 'tts', themes: 'theme', 'widget-skins': 'widget_skin', pets: 'pet' });
-const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', read_preset: 'reading', theme: 'appearance', widget_skin: 'appearance', tts: 'listening', pet: 'pets' });
+const TYPES = Object.freeze({ fonts: 'font', backgrounds: 'background', 'read-presets': 'read_preset',
+  tts: 'tts', 'listening-effects': 'listening_effect', themes: 'theme', 'widget-skins': 'widget_skin', pets: 'pet' });
+const PURPOSE_BY_TYPE = Object.freeze({ font: 'reading', background: 'reading', read_preset: 'reading',
+  theme: 'appearance', widget_skin: 'appearance', tts: 'listening', listening_effect: 'listening', pet: 'pets' });
+const LISTENING_EFFECT_CAPABILITY = 'listening.effect.1';
 const PURPOSE_IDS = new Set([...Object.values(PURPOSE_BY_TYPE), 'pets']);
 const RESOURCE_ROOT = 'resources';
 const FORMATS = Object.freeze({
   font: ['ttf', 'otf'], background: ['png', 'jpg', 'jpeg', 'webp'],
-  read_preset: ['zip'], tts: ['js', 'zip'], theme: ['ngtheme', 'zip'], widget_skin: ['zip'], pet: ['ngpet', 'zip'],
+  read_preset: ['zip'], tts: ['js', 'zip'], listening_effect: ['zip'], theme: ['ngtheme', 'zip'], widget_skin: ['zip'], pet: ['ngpet', 'zip'],
 });
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,159}$/;
 const COMMIT = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
@@ -318,7 +321,9 @@ export function initializeCatalogDates(history) {
 /** Preview images are display metadata and are excluded from installation fingerprints. */
 async function sourcePreview(root, category, source, files) {
   if (source === undefined) return undefined;
-  if (!['pet', 'read_preset'].includes(category.type)) fail('previewSource is supported only for pets and reading presets');
+  if (!['pet', 'read_preset', 'listening_effect'].includes(category.type)) {
+    fail('previewSource is supported only for pets, reading presets and listening effects');
+  }
   fields(source, ['thumbnail', 'detail'], 'previewSource');
   const preview = {};
   for (const [kind, width, height] of [['thumbnail', 256, 256], ['detail', 768, 768]]) {
@@ -338,6 +343,29 @@ async function sourcePreview(root, category, source, files) {
   const images = Object.fromEntries(Object.values(preview).map(asset => [asset.path, files[asset.path]]));
   validatePreviewFiles({ resource: { type: category.type, resources: [{ preview }] } }, images);
   return preview;
+}
+
+async function validateListeningEffect(filename, required) {
+  const need = (condition, message) => { if (!condition) fail(`Listening effect: ${message}`); };
+  need(required?.capabilities?.length === 1 && required.capabilities[0] === LISTENING_EFFECT_CAPABILITY,
+    `requires the ${LISTENING_EFFECT_CAPABILITY} host capability`);
+  const { entries, data } = await readCompiledArchive(filename, need);
+  const manifest = JSON.parse(data('manifest.json', MAX_JSON_BYTES));
+  const theme = manifest?.theme;
+  const effect = theme?.effect;
+  need(manifest?.format === 'reading-ng-listening-effect' && manifest.version === 2 &&
+    effect?.apiVersion === 1 && Array.isArray(effect.targets) && effect.targets.length === 1 &&
+    effect.targets[0] === 'player', 'expected a standalone player package');
+  need(typeof theme.id === 'string' && ID.test(theme.id) &&
+    Number.isSafeInteger(theme.publication?.versionCode) && theme.publication.versionCode > 0, 'invalid package identity');
+  for (const asset of [effect.preview, manifest.lightBackgroundAsset, manifest.darkBackgroundAsset]) {
+    need(typeof asset === 'string' && asset.startsWith('assets/') && entries.get(asset)?.size > 0,
+      'missing declared preview or fallback asset');
+  }
+  need([...entries.keys()].every(name => !name.endsWith('.so')) &&
+    !manifest.lightDrawerImageAsset && !manifest.darkDrawerImageAsset && !manifest.selectedCoverAlbumRef &&
+    !manifest.coverAlbums?.length && !theme.drawerProfile && !theme.coverProfile && !theme.ownedCoverAlbumIds?.length,
+    'unexpected App theme assets');
 }
 
 /** Read resources without evaluating code. Omit sourceTime only for validation, never publication. */
@@ -412,6 +440,7 @@ export async function buildCatalog({ root, sourceCommit, sourceTime, previousSta
       if (offline) file.metadata = await readOfflineTts(filename);
       const pet = category.type === 'pet' ? await readPetPlugin(filename) : null;
       const required = requirements(meta.requirements);
+      if (category.type === 'listening_effect') await validateListeningEffect(filename, required);
       if (offline && (required?.capabilities?.length !== 1 || required.capabilities[0] !== OFFLINE_TTS_CAPABILITY)) {
         fail(`Offline TTS requires the ${OFFLINE_TTS_CAPABILITY} host capability`);
       }

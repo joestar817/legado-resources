@@ -2,7 +2,7 @@
 
 将资源放入 `resources/` 下的对应分类，并在旁边添加以 `.resource.json` 结尾的 UTF-8 JSON 说明。一个说明对应一个载荷文件；资源可放分类子目录，不需要修改总索引。`payload.path` 从仓库根目录计算，必须带 `resources/<分类>/` 前缀。
 
-资源中心按用途浏览：阅读预设包放 `read-presets`，外观主题包放 `themes`，听书 TTS 脚本放 `tts`。字体和背景请打包进阅读预设，不再单独上架。用途由受信 `catalog.config.json` 统一维护，投稿元数据不重复填写 `purpose`。宠物代码插件放在 `resources/pets/`。
+资源中心按用途浏览。阅读预设包放 `read-presets`，外观主题包放 `themes`，朗读引擎放 `tts`，听书动效包放 `listening-effects`。字体和背景请打包进阅读预设。用途由 `catalog.config.json` 维护，宠物插件放在 `resources/pets/`。
 
 ## 阅读预设例子
 
@@ -47,6 +47,10 @@
 
 更新时新建版本标签和附件，不覆盖原附件；再修改资源说明。目录修订号按 ZIP 内容自动增长，与包内修订号分开维护。先上传附件、再提交说明，附件不可用或摘要不符时目录发布会失败，已发布目录不变。
 
+## 听书动效包
+
+提交作者 SDK 输出的 `*-listening_effect.zip`，在资源说明中声明 `payload.format: "zip"` 和 `requirements.capabilities: ["listening.effect.1"]`。一个作者工程可以生成主题和听书动效两份 ZIP，各包包含本用途所需的代码和素材。听书动效使用独立的资源 ID 和安装记录，清单格式为 `reading-ng-listening-effect`，目标为 `["player"]`。
+
 ## 宠物插件
 
 作者可下载[宠物开发 SDK 2.0.0](sdk/pet/2.0.0/pet-sdk-2.0.0.zip)，解压后按包内说明从独立工程构建自己的宠物。SDK 归档与用户安装的角色包分别发布，资源中心“宠物”列表只收录角色包。
@@ -65,7 +69,7 @@
 - 删除资源时删除对应说明和不再使用的载荷；内部历史由发布器保留，作者不编辑台账。
 - 不提交 `catalog.json`、分类 `index.json`、`state.json`、密钥、Cookie、账号配置或测试音频。
 
-投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。宠物和阅读预设还可填写 `previewSource`，提供 256×256 缩略图与 768×768 详情图，格式为 RGBA PNG，详见[预览规范](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。
+投稿可填写的可选说明字段为 `license`、`description`、`versionName`、`changelog`、`tags`、`requirements`。`requirements` 可填写 `minAppVersionCode` 与 `capabilities`。宠物、阅读预设和听书动效还可填写 `previewSource`，提供 256×256 缩略图与 768×768 详情图，格式为 RGBA PNG，详见[预览规范](docs/CATALOG_PROTOCOL.md#方形预览)。
 
 元数据只保留资源展示、识别、版本和安装所需的信息。校验日期、测试状态与验证过程放在投稿说明或本地记录中，不填写 `verification`，避免增加后续手动维护负担。
 

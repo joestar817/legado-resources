@@ -8,9 +8,10 @@
 | 外观 | 主题包 | `themes` |
 | 外观 | 组件皮肤 | `widget-skins` |
 | 听书 | 朗读引擎（在线脚本、离线语音） | `tts` |
+| 听书 | 听书动效 | `listening-effects` |
 | 宠物 | 编译宠物插件 | `pets` |
 
-阅读预设包可包含背景、字体、排版和浮窗配色，下载后加入阅读预设列表，由用户选择使用。独立字体和背景不再提供在线分发；历史文件保留，不影响本地已有资源。离线语音以标准 ZIP 整合包分发，动态场景等类型需接入对应适配器后再上架。
+阅读预设包可包含背景、字体、排版和浮窗配色，下载后加入阅读预设列表，由用户选择使用。独立字体和背景不再提供在线分发；历史文件保留，不影响本地已有资源。离线语音以标准 ZIP 整合包分发。听书动效使用独立 ZIP，从播放器的「播放动效」中选用。
 
 资源中心的安装包放在 `resources/` 下，供作者下载的工具包按版本放在 `sdk/` 下。
 
@@ -18,6 +19,7 @@
 resources/
 ├── read-presets/
 ├── tts/
+├── listening-effects/
 ├── themes/
 ├── widget-skins/
 └── pets/
@@ -32,6 +34,7 @@ resources/
 | `resources/read-presets/` | 阅读预设 ZIP、资源说明与预览图 |
 | `resources/fonts/`、`resources/backgrounds/` | 保留的历史资源，不再加入目录 |
 | `resources/tts/` | 听书下的在线 TTS 脚本、离线语音整合包说明与接口模板 |
+| `resources/listening-effects/` | 独立的听书动效 ZIP、资源说明和目录预览图 |
 | `resources/themes/` | 外观下的 NG 主题包或对应导入器支持的 ZIP |
 | `resources/widget-skins/` | 首页组件皮肤 ZIP 与资源说明 |
 | `resources/pets/` | 含 DEX 和清单的宠物 ZIP 插件 |
@@ -86,7 +89,7 @@ python3 -B test/font-preview.test.py
 
 生成目录包括总目录 `catalog.json`、各分类的 `index.json`、内部版本台账 `state.json`，以及 `previews/` 下按图片 SHA256 命名的字体与宠物预览 PNG。开发者不手改这些文件，不把它们提交到 `main`；每项字体的源目录仍只需字体文件与元数据。
 
-`preview` 是索引中的机器字段，不能写进投稿元数据。宠物和阅读预设可通过 `previewSource` 提供预览图，详见[目录协议](docs/CATALOG_PROTOCOL.md#宠物与阅读预设的预览)。仅更换目录预览不会增加安装版本，也不修改资源的发布时间或内容更新时间。预览校验失败会停止本次发布，保留上次可用目录。
+`preview` 是索引中的机器字段，不能写进投稿元数据。宠物、阅读预设和听书动效可通过 `previewSource` 提供预览图，详见[目录协议](docs/CATALOG_PROTOCOL.md#方形预览)。仅更换目录预览不会增加安装版本，也不修改资源的发布时间或内容更新时间。预览校验失败会停止本次发布，保留上次可用目录。
 
 组件皮肤 ZIP 提供清单、插图和安装后的预览图，所需客户端能力为 `home.widget.skin.1`。首页「组件皮肤」负责本地导入、预览、应用和删除。资源中心提供线上下载和更新，「去使用」回到首页预选对应皮肤。
 

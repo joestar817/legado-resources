@@ -152,10 +152,14 @@ NG 资源中心已实现目录与单文件安装消费；日期在详情页按�
 
 App 校验 ZIP 大小、文件列表和素材后入库，用下载摘要标识已安装版本。切换皮肤在首页确认，卸载后缺少素材的组件显示同尺寸的基础玻璃。资源 ZIP 不含脚本或可执行代码。
 
-## 宠物与阅读预设的预览
+## 听书动效
 
-宠物与阅读预设可在资源说明中添加 `previewSource`，分别提供 `thumbnail` 和 `detail` 两个仓库路径。两张图均为 8-bit RGBA PNG，尺寸分别为 256×256 和 768×768，每张最多 1 MiB。图片路径必须位于同一资源分类目录，PNG 只含 IHDR、IDAT 和 IEND 块。
+`listening-effects` 分类对应 `listening_effect` 类型和 `listening` 用途，要求客户端具备 `listening.effect.1`。每个 ZIP 的根清单使用 `format: "reading-ng-listening-effect"`、`version: 2`，效果声明使用 `apiVersion: 1` 和 `targets: ["player"]`。每包自带 DEX、静态预览和日夜备用背景。主题和听书动效各有独立的资源 ID、载荷路径和安装库。
 
-生成器静态读取图片并验证完整性，在 catalog 分支生成 previews/<sha256>.png。公开索引采用与字体一致的 preview.thumbnail / preview.detail 结构，包含路径、尺寸、大小和 SHA-256。客户端按目录提交和图片摘要加载，可以在下载插件之前显示角色形象。
+## 方形预览
 
-预览源路径和图像字节属于展示信息，变更它们会刷新目录预览，宠物的安装版本、首次日期和内容更新时间按插件 ZIP 的指纹计算。字体预览仍由固定渲染器生成，尺寸仍为 256×256 和 960×420。
+宠物、阅读预设和听书动效可在资源说明中添加 `previewSource`，分别提供 `thumbnail` 和 `detail` 两个仓库路径。两张图均为 8-bit RGBA PNG，尺寸分别为 256×256 和 768×768，每张最多 1 MiB。图片路径必须位于同一资源分类目录，PNG 只含 IHDR、IDAT 和 IEND 块。
+
+生成器静态读取图片并验证完整性，在 catalog 分支生成 previews/<sha256>.png。公开索引采用与字体一致的 preview.thumbnail / preview.detail 结构，包含路径、尺寸、大小和 SHA-256。客户端按目录提交和图片摘要加载，在下载资源之前显示预览。
+
+预览源路径和图像字节属于展示信息，变更它们会刷新目录预览。安装版本、首次日期和内容更新时间按资源载荷的指纹计算。字体预览由固定渲染器生成，尺寸为 256×256 和 960×420。
