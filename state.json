@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "83111a5edcacf45b1458a2e36b4ce6753389dc54",
+  "sourceCommit": "6aa5c2d8ea92b7040a90c4e183e1f62b2f4410f0",
   "resources": {
     "background.example.warm-paper": {
       "type": "background",
@@ -41,6 +41,30 @@
       "active": false,
       "publishedAt": "2026-10-26T21:39:26.000Z",
       "updatedAt": "2026-10-26T21:39:26.000Z"
+    },
+    "listening.effect.cats": {
+      "type": "listening_effect",
+      "versionCode": 1,
+      "fingerprint": "dfe2d6c0057d1c334a873d89fcccb342a34974365bbec1036641bbdb59637fcd",
+      "active": true,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z"
+    },
+    "listening.effect.rain-night": {
+      "type": "listening_effect",
+      "versionCode": 1,
+      "fingerprint": "41e8810d65147dcd79b6d01f797c8cb7009280eea47c5c9a60576f819b15246b",
+      "active": true,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z"
+    },
+    "listening.effect.sakura": {
+      "type": "listening_effect",
+      "versionCode": 1,
+      "fingerprint": "a03014fa223aa206272c0c7f7bb611dff0ed5302d8a85ef421a5a292a13659bc",
+      "active": true,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z"
     },
     "ng.home_skin.blue_fish": {
       "type": "widget_skin",

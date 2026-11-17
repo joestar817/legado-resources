@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "sourceCommit": "83111a5edcacf45b1458a2e36b4ce6753389dc54",
+  "sourceCommit": "6aa5c2d8ea92b7040a90c4e183e1f62b2f4410f0",
   "purposes": [
     {
       "id": "reading",
@@ -55,6 +55,15 @@
       "index": "resources/tts/index.json",
       "count": 6,
       "indexSha256": "d083e193ccff207d554df445b6afb9fb9252ec5ab9602beaf63b71d0301f37e6"
+    },
+    {
+      "id": "listening-effects",
+      "name": "听书动效",
+      "type": "listening_effect",
+      "purpose": "listening",
+      "index": "resources/listening-effects/index.json",
+      "count": 3,
+      "indexSha256": "cbc723390dfd91b93261d92418728b02faf3fe1681aa2a5129247dce99bf0d5c"
     },
     {
       "id": "pets",

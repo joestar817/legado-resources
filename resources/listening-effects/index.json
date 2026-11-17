@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "6aa5c2d8ea92b7040a90c4e183e1f62b2f4410f0",
+  "type": "listening_effect",
+  "resources": [
+    {
+      "id": "listening.effect.cats",
+      "name": "好奇猫咪",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z",
+      "payload": {
+        "path": "resources/listening-effects/effect-cats/effect.cats-2-listening_effect.zip",
+        "format": "zip",
+        "size": 5012670,
+        "sha256": "ee6ad22416c71fd24ce4a81fdf45766beec0d209c677528b85b95c74af7e87a3"
+      },
+      "preview": {
+        "thumbnail": {
+          "path": "previews/7726983b15b69e45bcdfd276c0ac31b489643da4181e2591e1c87e6f67cc5841.png",
+          "size": 87123,
+          "sha256": "7726983b15b69e45bcdfd276c0ac31b489643da4181e2591e1c87e6f67cc5841",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/4494dcda622ebb33d401b9ae68bde901c040b4378ab467920d483b6fb32a45c1.png",
+          "size": 394320,
+          "sha256": "4494dcda622ebb33d401b9ae68bde901c040b4378ab467920d483b6fb32a45c1",
+          "width": 768,
+          "height": 768
+        }
+      },
+      "description": "两只小猫在栅栏后探头，树叶和光影随风晃动。",
+      "versionName": "1.1",
+      "requirements": {
+        "minAppVersionCode": 17866,
+        "capabilities": [
+          "listening.effect.1"
+        ]
+      }
+    },
+    {
+      "id": "listening.effect.rain-night",
+      "name": "雨夜",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z",
+      "payload": {
+        "path": "resources/listening-effects/effect-rain-night/effect.rain_night-2-listening_effect.zip",
+        "format": "zip",
+        "size": 2502107,
+        "sha256": "4ff69ce70e21bfc39492fb9232fbc623fb55e152179d24f68422626bb15cb125"
+      },
+      "preview": {
+        "thumbnail": {
+          "path": "previews/8f7f97d55796bf2a8e3034474654057a94857f400c76cb3e5a30f440eba58c37.png",
+          "size": 149642,
+          "sha256": "8f7f97d55796bf2a8e3034474654057a94857f400c76cb3e5a30f440eba58c37",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/b25634c60bf5c411df45144b384b17638daca9dbee194c8a6e142fe1677f5e79.png",
+          "size": 832346,
+          "sha256": "b25634c60bf5c411df45144b384b17638daca9dbee194c8a6e142fe1677f5e79",
+          "width": 768,
+          "height": 768
+        }
+      },
+      "description": "林间雨夜，屋檐下的暖光映着雨幕。",
+      "versionName": "1.1",
+      "requirements": {
+        "minAppVersionCode": 17866,
+        "capabilities": [
+          "listening.effect.1"
+        ]
+      }
+    },
+    {
+      "id": "listening.effect.sakura",
+      "name": "湖畔樱花",
+      "author": "阅读 NG",
+      "versionCode": 1,
+      "publishedAt": "2026-11-17T06:40:20.000Z",
+      "updatedAt": "2026-11-17T06:40:20.000Z",
+      "payload": {
+        "path": "resources/listening-effects/effect-sakura/effect.sakura-2-listening_effect.zip",
+        "format": "zip",
+        "size": 2326660,
+        "sha256": "5e16e4b2f3f8d5287704679a819c44542e0600e6e4931f63ef043bc32c569859"
+      },
+      "preview": {
+        "thumbnail": {
+          "path": "previews/dcd630b9a5474957fd1c153bb85e6e7edffceef52c90edb5ef6f19c13b81ae88.png",
+          "size": 156214,
+          "sha256": "dcd630b9a5474957fd1c153bb85e6e7edffceef52c90edb5ef6f19c13b81ae88",
+          "width": 256,
+          "height": 256
+        },
+        "detail": {
+          "path": "previews/1795168c470c225e3c85c0cc674311f2e69fb7bbae1fb62090b5c73737545948.png",
+          "size": 825791,
+          "sha256": "1795168c470c225e3c85c0cc674311f2e69fb7bbae1fb62090b5c73737545948",
+          "width": 768,
+          "height": 768
+        }
+      },
+      "description": "樱花随风飘落，湖面泛起涟漪。",
+      "versionName": "1.1",
+      "requirements": {
+        "minAppVersionCode": 17866,
+        "capabilities": [
+          "listening.effect.1"
+        ]
+      }
+    }
+  ]
+}
